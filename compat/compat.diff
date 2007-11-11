@@ -1,0 +1,277 @@
+--- mac80211/tx.c.old2	2007-11-09 13:14:28.000000000 -0500
++++ mac80211/tx.c	2007-11-09 15:40:09.000000000 -0500
+@@ -18,7 +18,9 @@
+ #include <linux/etherdevice.h>
+ #include <linux/bitmap.h>
+ #include <linux/rcupdate.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/ieee80211_radiotap.h>
+ #include <net/cfg80211.h>
+ #include <net/mac80211.h>
+--- mac80211/util.c.old2	2007-11-09 13:14:57.000000000 -0500
++++ mac80211/util.c	2007-11-09 15:41:40.000000000 -0500
+@@ -20,7 +20,9 @@
+ #include <linux/if_arp.h>
+ #include <linux/wireless.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ 
+ #include "ieee80211_i.h"
+--- mac80211/ieee80211.c.old2	2007-11-07 12:42:38.000000000 -0500
++++ mac80211/ieee80211.c	2007-11-09 13:18:58.000000000 -0500
+@@ -21,7 +21,9 @@
+ #include <linux/wireless.h>
+ #include <linux/rtnetlink.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ 
+ #include "ieee80211_i.h"
+@@ -400,7 +402,9 @@
+ void ieee80211_if_setup(struct net_device *dev)
+ {
+ 	ether_setup(dev);
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	dev->header_ops = &ieee80211_header_ops;
++#endif
+ 	dev->hard_start_xmit = ieee80211_subif_start_xmit;
+ 	dev->wireless_handlers = &ieee80211_iw_handler_def;
+ 	dev->set_multicast_list = ieee80211_set_multicast_list;
+@@ -987,7 +991,9 @@
+ 	mdev->open = ieee80211_master_open;
+ 	mdev->stop = ieee80211_master_stop;
+ 	mdev->type = ARPHRD_IEEE80211;
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	mdev->header_ops = &ieee80211_header_ops;
++#endif
+ 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
+ 
+ 	sdata->type = IEEE80211_IF_TYPE_AP;
+--- wireless/sysfs.c.old	2007-11-06 16:05:57.000000000 -0500
++++ wireless/sysfs.c	2007-11-06 16:07:17.000000000 -0500
+@@ -52,6 +52,7 @@
+ 	cfg80211_dev_free(rdev);
+ }
+ 
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #ifdef CONFIG_HOTPLUG
+ static int wiphy_uevent(struct device *dev, struct kobj_uevent_env *env)
+ {
+@@ -59,15 +60,18 @@
+ 	return 0;
+ }
+ #endif
++#endif
+ 
+ struct class ieee80211_class = {
+ 	.name = "ieee80211",
+ 	.owner = THIS_MODULE,
+ 	.dev_release = wiphy_dev_release,
+ 	.dev_attrs = ieee80211_dev_attrs,
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #ifdef CONFIG_HOTPLUG
+ 	.dev_uevent = wiphy_uevent,
+ #endif
++#endif
+ };
+ 
+ int wiphy_sysfs_init(void)
+--- wireless/core.c.old	2007-11-05 18:10:07.000000000 -0500
++++ wireless/core.c	2007-11-09 18:16:57.000000000 -0500
+@@ -16,6 +16,7 @@
+ #include <net/genetlink.h>
+ #include <net/cfg80211.h>
+ #include <net/wireless.h>
++#include <net/compat.h>
+ #include "nl80211.h"
+ #include "core.h"
+ #include "sysfs.h"
+--- include/linux/bitops.h.old	2007-11-05 18:44:25.000000000 -0500
++++ include/linux/bitops.h	2007-11-05 18:55:18.000000000 -0500
+@@ -1,12 +1,15 @@
+ #ifndef _LINUX_BITOPS_H
+ #define _LINUX_BITOPS_H
+ #include <asm/types.h>
++#include <linux/version.h>
+ 
+ #ifdef	__KERNEL__
+ #define BIT(nr)			(1UL << (nr))
+ #define BIT_MASK(nr)		(1UL << ((nr) % BITS_PER_LONG))
+ #define BIT_WORD(nr)		((nr) / BITS_PER_LONG)
++#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23))
+ #define BITS_TO_LONGS(nr)	DIV_ROUND_UP(nr, BITS_PER_LONG)
++#endif
+ #define BITS_PER_BYTE		8
+ #endif
+ 
+--- include/net/mac80211.h.old2	2007-11-07 12:40:46.000000000 -0500
++++ include/net/mac80211.h	2007-11-07 12:42:12.000000000 -0500
+@@ -21,6 +21,7 @@
+ #include <linux/ieee80211.h>
+ #include <net/wireless.h>
+ #include <net/cfg80211.h>
++#include <net/compat.h>
+ 
+ /**
+  * DOC: Introduction
+--- drivers/ssb/main.c.old	2007-11-09 17:34:12.000000000 -0500
++++ drivers/ssb/main.c	2007-11-09 17:54:47.000000000 -0500
+@@ -321,6 +321,27 @@
+ 	return 0;
+ }
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
++static int ssb_device_uevent(struct device *dev, char **envp,
++	int num_envp, char *buffer, int buffer_size)
++{
++	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
++	int cur_index = 0, cur_len = 0;
++
++	if (!dev)
++		return -ENODEV;
++
++	return add_uevent_var(envp,
++			num_envp,
++			&cur_index,
++			buffer,
++			buffer_size,
++			&cur_len,
++			"MODALIAS=ssb:v%04Xid%04Xrev%02X",
++			ssb_dev->id.vendor, ssb_dev->id.coreid,
++			ssb_dev->id.revision);
++}
++#else
+ static int ssb_device_uevent(struct device *dev, struct kobj_uevent_env *env)
+ {
+ 	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
+@@ -333,6 +354,7 @@
+ 			     ssb_dev->id.vendor, ssb_dev->id.coreid,
+ 			     ssb_dev->id.revision);
+ }
++#endif
+ 
+ static struct bus_type ssb_bustype = {
+ 	.name		= "ssb",
+--- drivers/ath5k/Makefile.old	2007-11-09 18:39:10.000000000 -0500
++++ drivers/ath5k/Makefile	2007-11-09 18:38:02.000000000 -0500
+@@ -1,2 +1,2 @@
+ ath5k-objs		= base.o hw.o regdom.o initvals.o phy.o
+-obj-$(CONFIG_ATH5K)	+= ath5k.o
++obj-m	+= ath5k.o
+--- drivers/b43/Makefile.old	2007-11-09 18:40:03.000000000 -0500
++++ drivers/b43/Makefile	2007-11-09 18:02:24.000000000 -0500
+@@ -17,4 +17,5 @@
+ b43-$(CONFIG_B43_DMA)		+= dma.o
+ b43-$(CONFIG_B43_PIO)		+= pio.o
+ 
+-obj-$(CONFIG_B43)		+= b43.o
++#obj-$(CONFIG_B43)		+= b43.o
++obj-n		+= b43.o
+--- drivers/ssb/Makefile.old	2007-11-09 18:39:32.000000000 -0500
++++ drivers/ssb/Makefile	2007-11-09 18:42:55.000000000 -0500
+@@ -15,4 +15,4 @@
+ # Not strictly a part of SSB, but kept here for convenience
+ ssb-$(CONFIG_SSB_PCIHOST)		+= b43_pci_bridge.o
+ 
+-obj-$(CONFIG_SSB)			+= ssb.o
++obj-m					+= ssb.o
+--- include/linux/ssb/ssb.h.old	2007-11-09 18:46:01.000000000 -0500
++++ include/linux/ssb/ssb.h	2007-11-09 18:46:08.000000000 -0500
+@@ -9,6 +9,7 @@
+ #include <linux/mod_devicetable.h>
+ 
+ #include <linux/ssb/ssb_regs.h>
++#include <net/compat.h>
+ 
+ 
+ struct pcmcia_device;
+--- wireless/Makefile.old	2007-11-09 22:00:28.000000000 -0500
++++ wireless/Makefile	2007-11-09 22:01:03.000000000 -0500
+@@ -1,5 +1,5 @@
+ obj-$(CONFIG_WIRELESS_EXT) += wext.o
+-obj-$(CONFIG_CFG80211) += cfg80211.o
++obj-m += cfg80211.o
+ 
+ cfg80211-y += core.o sysfs.o radiotap.o
+-cfg80211-$(CONFIG_NL80211) += nl80211.o
++cfg80211-n += nl80211.o
+--- mac80211/cfg.c.old	2007-11-10 15:00:10.000000000 -0500
++++ mac80211/cfg.c	2007-11-10 15:00:21.000000000 -0500
+@@ -8,8 +8,11 @@
+ 
+ #include <linux/nl80211.h>
+ #include <linux/rtnetlink.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
++#include <net/compat.h>
+ #include "ieee80211_i.h"
+ #include "cfg.h"
+ 
+--- wireless/nl80211.c.old	2007-11-10 15:34:05.000000000 -0500
++++ wireless/nl80211.c	2007-11-10 15:34:29.000000000 -0500
+@@ -16,6 +16,7 @@
+ #include <linux/netlink.h>
+ #include <net/genetlink.h>
+ #include <net/cfg80211.h>
++#include <net/compat.h>
+ #include "core.h"
+ #include "nl80211.h"
+ 
+--- drivers/iwlwifi/Makefile.old	2007-11-10 16:27:33.000000000 -0500
++++ drivers/iwlwifi/Makefile	2007-11-10 16:28:06.000000000 -0500
+@@ -1,5 +1,5 @@
+-obj-$(CONFIG_IWL3945)	+= iwl3945.o
++obj-m			+= iwl3945.o
+ iwl3945-objs		= iwl3945-base.o iwl-3945.o iwl-3945-rs.o
+ 
+-obj-$(CONFIG_IWL4965)	+= iwl4965.o
++obj-n			+= iwl4965.o
+ iwl4965-objs		= iwl4965-base.o iwl-4965.o iwl-4965-rs.o
+--- drivers/iwlwifi/iwl-3945-rs.c.old	2007-11-10 17:10:24.000000000 -0500
++++ drivers/iwlwifi/iwl-3945-rs.c	2007-11-10 17:11:58.000000000 -0500
+@@ -37,7 +37,7 @@
+ 
+ #include <linux/workqueue.h>
+ 
+-#include "../net/mac80211/ieee80211_rate.h"
++#include "../mac80211/ieee80211_rate.h"
+ 
+ #include "iwl-3945.h"
+ 
+--- mac80211/Makefile.old	2007-11-10 17:52:07.000000000 -0500
++++ mac80211/Makefile	2007-11-10 17:52:38.000000000 -0500
+@@ -1,9 +1,9 @@
+-obj-$(CONFIG_MAC80211) += mac80211.o
++obj-m += mac80211.o
+ 
+ mac80211-objs-$(CONFIG_MAC80211_LEDS) += ieee80211_led.o
+ mac80211-objs-$(CONFIG_MAC80211_DEBUGFS) += debugfs.o debugfs_sta.o debugfs_netdev.o debugfs_key.o
+ mac80211-objs-$(CONFIG_NET_SCHED) += wme.o
+-mac80211-objs-$(CONFIG_MAC80211_RCSIMPLE) += rc80211_simple.o
++mac80211-objs-y += rc80211_simple.o
+ 
+ mac80211-objs := \
+ 	ieee80211.o \
+@@ -24,4 +24,5 @@
+ 	key.o \
+ 	util.o \
+ 	event.o \
++	compat.o \
+ 	$(mac80211-objs-y)
+--- drivers/zd1211rw-mac80211/Makefile.old	2007-11-10 21:12:38.000000000 -0500
++++ drivers/zd1211rw-mac80211/Makefile	2007-11-10 21:12:59.000000000 -0500
+@@ -1,4 +1,4 @@
+-obj-$(CONFIG_ZD1211RW_MAC80211) += zd1211rw-mac80211.o
++obj-m += zd1211rw-mac80211.o
+ 
+ zd1211rw-mac80211-objs := zd_chip.o zd_mac.o \
+ 		zd_rf_al2230.o zd_rf_rf2959.o \

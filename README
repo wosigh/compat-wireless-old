@@ -1,0 +1,154 @@
+
+Linux Wireless compatibility package
+=====================================
+
+This is a Linux wireless compatibility package which provides the latest
+Linux wireless subsystem enhancements for kernels 2.6.22 and above. We provide
+compatibility support since 2.6.22 as that is when mac80211 was introduced
+onto the stock kernel. This adds mac80211 and mac80211 drivers as we go on testing
+them.
+
+Where to get the latest
+-----------------------
+
+This package lets you build your own 'latest', all you need is a local git repository
+checkout of wireless-2.6.git. However since not many users are expected to keep
+the git repository updated we provide hourly snapshots against the latest at:
+
+http://linuxwireless.org/download/compat-wireless-2.6/
+
+Building, and installing
+------------------------
+
+Build: build the latest linux wireless subsystem
+
+	make
+
+Install:
+
+We use the updates/ directory so your distribution's drivers are left intact.
+
+	sudo make install
+
+Uninstall:
+
+This nukes our changes to updates/ so you can go back to using your
+distribution's supported drivers.
+
+	sudo make uninstall
+
+Load:
+
+This unloads your old mac80211 and wireless drivers and loads the new
+shiny ones. For example if ipw3945 and its proprietary daemon are found
+it'll be stopped and the module unloaded and then iwl3945 will be loaded.
+
+	sudo make load
+
+Drivers
+-------
+
+We'll add more as we go...
+
+Driver			2.6.22	2.6.23
+ath5k			OK	?
+b43 + ssb		?	?
+iwl3945			OK	?
+iwl4965			?	?
+zd1211rw-mac80211	OK	?
+
+Known issues
+------------
+
+* Strange wireless device names:
+
+On Ubuntu and Fedora you may end up with strange network device names,
+for example, wlan0_rename. This is a known issue and will be worked on.
+
+* nl80211:
+
+More compatibility work is needed to add nl80211
+
+* b43:
+
+We still need to iron out some compat stuff for b43
+
+* MadWifi:
+
+If MadWifi is present the build system will detect this and only recommend
+what to do. At the present time ath_pci is being picked up over ath5k if both
+are present. What the build system currently suggests is to just rename 
+ath_pci.ko to ath_pci.ko.ignore and then running depmod -ae. This is not
+required with ipw3945 and iwl3945.
+
+Why?
+----
+
+For users or developers stuck on older kernels that want to help test or 
+patch wireless work. Additionally if you're on a recent kernel this lets
+you get the latest and greatest wireless-2.6 git work without much effort.
+This may mean new drivers for some users. Last but not least we hope this
+will encourage vendors and developers to post patches upstream first
+rather than forking or maintaining their own mac80211 releases with
+their own patches for their own drivers.
+
+Bugs
+-----
+
+If you've found a bug please report it to our linux-wireless mailing list:
+
+linux-wireless@vger.kernel.org
+
+Report the bug because you are working with the latest and greatest.
+If your bug is compatibility-related then we should still try to fix
+it within the compat.[ch] work.
+
+License
+-------
+
+This work is a subset of the Linux kernel as such we keep the kernel's
+Copyright practice. Some files have their own copyright and in those
+cases the license is mentioned in the file. All additional work made
+to building this package is licensed under the GPLv2.
+
+Developers
+----------
+
+Please try adding new drivers, test them and if they work enable them. You
+can then send patches. Compatibility work goes into compat/compat.[ch]. If
+using those files do not suffice additional actual code changes can go into
+compat/compat.diff.
+
+scripts/admin-clean.sh		- Cleans the compat-wireless-2.6 tree
+scripts/admin-update.sh		- Updates compat-wireless-2.6 with your git tree
+scripts/admin-refresh.sh	- Does the above two
+
+To add new drivers:
+
+1. Add directory to scripts/admin-update.sh $DRIVERS variable
+2. Add new compat-wireless-2.6/ dir to obj-y on the local Makefile
+3. Update compat patch:
+
+	cp drivers/foo/Makefile drivers/Makefile.old
+	# edit drivers/foo/Makefile and make necessary changes to enable module
+	diff -u drivers/foo/Makefile.old drivers/foo/Makefile >> \
+		compat/compat.diff
+	# Append to compat/compat.[ch] any new changes needed 
+	# to support the driver, please be specific about the reasons 
+	# for your additions
+
+4. Refresh and test:
+	./scripts/admin-refresh.sh
+5. Send patches of the work
+
+Patches
+-------
+
+Please send patches against:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/mcgrof/compat-wireless-2.6.git
+
+To: Luis R. Rodriguez <mcgrof@winlab.rutgers.edu>
+CC: linux-wireless@vger.kernel.org
+Subject: [PATCH] compat-2.6: add driver foo
+
