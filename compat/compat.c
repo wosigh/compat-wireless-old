@@ -141,6 +141,59 @@ int eth_header_cache(struct neighbour *neigh, struct hh_cache *hh)
 }
 EXPORT_SYMBOL(eth_header_cache);
 
+/* 2.6.22 and 2.6.23 have eth_header() defined as extern in include/linux/etherdevice.h
+ * and actually defined in net/ethernet/eth.c but 2.6.24 exports it. Lets export it here */
+
+/**
+ * eth_header - create the Ethernet header
+ * @skb:	buffer to alter
+ * @dev:	source device
+ * @type:	Ethernet type field
+ * @daddr: destination address (NULL leave destination address)
+ * @saddr: source address (NULL use device source address)
+ * @len:   packet length (<= skb->len)
+ *
+ *
+ * Set the protocol type. For a packet of type ETH_P_802_3 we put the length
+ * in here instead. It is up to the 802.2 layer to carry protocol information.
+ */
+int eth_header(struct sk_buff *skb, struct net_device *dev, unsigned short type,
+	       void *daddr, void *saddr, unsigned len)
+{
+	struct ethhdr *eth = (struct ethhdr *)skb_push(skb, ETH_HLEN);
+
+	if (type != ETH_P_802_3)
+		eth->h_proto = htons(type);
+	else
+		eth->h_proto = htons(len);
+
+	/*
+	 *      Set the source hardware address.
+	 */
+
+	if (!saddr)
+		saddr = dev->dev_addr;
+	memcpy(eth->h_source, saddr, dev->addr_len);
+
+	if (daddr) {
+		memcpy(eth->h_dest, daddr, dev->addr_len);
+		return ETH_HLEN;
+	}
+
+	/*
+	 *      Anyway, the loopback-device should never use this function...
+	 */
+
+	if (dev->flags & (IFF_LOOPBACK | IFF_NOARP)) {
+		memset(eth->h_dest, 0, dev->addr_len);
+		return ETH_HLEN;
+	}
+
+	return -ETH_HLEN;
+}
+
+EXPORT_SYMBOL(eth_header);
+
 /* 2.6.22 and 2.6.23 have eth_rebuild_header defined as extern in include/linux/etherdevice.h
  * and actually defined in net/ethernet/eth.c but 2.6.24 exports it. Lets export it here */
 
