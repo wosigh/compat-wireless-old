@@ -156,15 +156,19 @@ To add new drivers:
 2. Add new compat-wireless-2.6/ dir to obj-y on the local Makefile
 3. Update compat patch:
 
-	cp drivers/foo/Makefile drivers/Makefile.old
+	cd ..
+	cp -a compat-wireless-2.6/ compat-wireless-2.6.old
+	cp compat-wireless-2.6/drivers/foo/Makefile compat-wireless-2.6/.old/drivers/Makefile.old
 	# edit drivers/foo/Makefile and make necessary changes to enable module
-	diff -u drivers/foo/Makefile.old drivers/foo/Makefile >> \
+	diff -u compat-wireless-2.6.old/drivers/foo/Makefile.old \
+		compat-wireless-2.6/drivers/foo/Makefile >> \
 		compat/compat.diff
 	# Append to compat/compat.[ch] any new changes needed 
 	# to support the driver, please be specific about the reasons 
 	# for your additions
 
 4. Refresh and test:
+	cd compat-wireless-2.6/
 	./scripts/admin-refresh.sh
 5. Send patches of the work
 
