@@ -5,28 +5,36 @@
 #include <linux/netdevice.h>
 #include <linux/genetlink.h>
 #include <net/neighbour.h>
+#include <linux/version.h>
 
-/* XXX: move this stuff to our own .config stuff, would be nice to see our own
- * make menuconfig stuff */
+/* So all *.[ch] can pick up the options as if defined 
+ * by the kernel's .config. */
 
+/* XXX: See if we can do something better about this and config.mk */
+#define CONFIG_MAC80211			1
 #define CONFIG_MAC80211_RCSIMPLE	1
-
-//#define CONFIG_B43_RFKILL		1
-//#define CONFIG_B43_LEDS		1
-//#define CONFIG_B43_PCMCIA		1
-//#define CONFIG_B43_DEBUG		1
+#define CONFIG_CFG80211			1
+#undef CONFIG_NL80211			
+#define CONFIG_ATH5K			1
+#define CONFIG_IWL3945			1
+#define CONFIG_IWL4965			1
+#define CONFIG_ZD1211RW_MAC80211	1
+/*
+#define CONFIG_B43
+#define CONFIG_B43_RFKILL		1
+#define CONFIG_B43_LEDS			1
+#define CONFIG_B43_PCMCIA		1
+#define CONFIG_B43_DEBUG		1
 #define CONFIG_B43_DMA			1
 #define CONFIG_B43_PIO			1
-
+#define CONFIG_SSB			1
 #define CONFIG_SSB_PCIHOST		1
 #define CONFIG_SSB_PCMCIAHOST		1
 #define CONFIG_SSB_DRIVER_MIPS		1
 #define CONFIG_SSB_DRIVER_EXTIF		1
 #define CONFIG_SSB_DRIVER_PCICORE	1
 #define CONFIG_SSB_PCIHOST		1
-
-//#define CONFIG_IWL4965		1
-#define CONFIG_IWL3945			1
+*/
 
 /* Compat work for 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))

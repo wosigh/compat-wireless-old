@@ -15,12 +15,10 @@ if [ -f $IPW3945D ]; then
 	fi
 fi
 
-grep ath_pci /proc/modules
-if [ ! $? ]; then
-	for i in $MADWIFI_MODULES; do
-		echo Unloading $i...
-		modprobe -r --ignore-remove $i
-	done
+grep ath_pci /proc/modules 2>&1 > /dev/null
+if [ $?  -eq 0 ]; then
+	echo "MadWifi driver is loaded, going to try to unload it..."
+	./scripts/madwifi-unload
 fi
 
 for i in $MODULES; do

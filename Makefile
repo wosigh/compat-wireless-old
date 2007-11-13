@@ -10,19 +10,19 @@ MADWIFI=$(shell modprobe -l ath_pci)
 
 ifneq ($(KERNELRELEASE),)
 
+-include $(src)/config.mk
+
 # This is a hack! But hey.. it works, got any better ideas, send a patch ;)
 NOSTDINC_FLAGS := -I$(PWD)/include/ $(CFLAGS)
 
-obj-y := wireless/ mac80211/  \
-	drivers/ath5k/ \
-	drivers/iwlwifi/ \
-	drivers/zd1211rw-mac80211/ \
-#	drivers/b43/ drivers/ssb/ \
-# b43 needs a bit more compat work
+obj-y := net/wireless/ net/mac80211/  \
+	drivers/net/wireless/ath5k/ \
+	drivers/net/wireless/iwlwifi/ \
+	drivers/net/wireless/zd1211rw-mac80211/ \
+	drivers/net/wireless/b43/ drivers/ssb/ \
 
 else
-PWD :=	$(shell pwd)
-export PWD
+export PWD :=	$(shell pwd)
 
 all: modules
 
@@ -33,15 +33,24 @@ clean:
 	$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean
 
 install:
+	@# Previous versions of compat installed stuff into different
+	@# directories lets make sure we remove that suff for now.
+	@rm -rf $(KLIB)/$(KMODDIR)/wireless/
+	@rm -rf $(KLIB)/$(KMODDIR)/mac80211/
+	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ath5k/
+	@rm -rf $(KLIB)/$(KMODDIR)/drivers/iwlwifi/
+	@rm -rf $(KLIB)/$(KMODDIR)/drivers/b43/
+	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ssb/
 	@$(MAKE) -C $(KLIB_BUILD) M=$(PWD) $(KMODDIR_ARG) $(KMODPATH_ARG) \
 		modules_install
 	@if [ ! -z $(MADWIFI) ]; then \
 		echo ;\
-		echo -n "Note: madwifi detected, rename the module "  ;\
-		echo "to keep it out of our way, example:" ;\
-		echo "   sudo mv $(MADWIFI) $(MADWIFI).ignore" ;\
-		echo "   depmod -ae" ;\
+		echo -n "Note: madwifi detected, we're going to disable it. "  ;\
+		echo "If you would like to enable it later you can run:"  ;\
+		echo -e "\tsudo ./scripts/athenable madwifi"  ;\
 		echo ;\
+		echo Running scripts/athenable ath5k...;\
+		./scripts/athenable ath5k ;\
 	fi
 	@depmod -ae
 	@echo
@@ -61,15 +70,17 @@ install:
 	@echo 
 
 uninstall:
-	@rm -rf $(KLIB)/$(KMODDIR)/mac80211/
-	@rm -rf $(KLIB)/$(KMODDIR)/wireless/
-	@rm -rf $(KLIB)/$(KMODDIR)/drivers/
+	@# New location, matches upstream
+	@rm -rf $(KLIB)/$(KMODDIR)/net/mac80211/
+	@rm -rf $(KLIB)/$(KMODDIR)/net/wireless/
+	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ssb/
+	@rm -rf $(KLIB)/$(KMODDIR)/drivers/net/wireless/
 	@depmod -ae
 	@echo
 	@echo "Your old wireless subsystem modules were left intact:"
 	@echo 
 	@modprobe -l mac80211
-	@# It is on 2.6.22 and 2.6.23 though
+	@# rc80211_simple is a module on 2.6.22 and 2.6.23 though
 	@modprobe -l rc80211_simple
 	@modprobe -l cfg80211
 	@modprobe -l ath5k

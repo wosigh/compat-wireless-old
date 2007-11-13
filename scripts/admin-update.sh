@@ -20,7 +20,10 @@ DRIVERS="$DRIVERS drivers/ssb drivers/net/wireless/b43"
 DRIVERS="$DRIVERS drivers/net/wireless/iwlwifi"
 DRIVERS="$DRIVERS drivers/net/wireless/zd1211rw-mac80211"
 
-mkdir -p include/linux include/net/ mac80211/ wireless/
+mkdir -p include/linux/ include/net/ \
+	net/mac80211/ net/wireless/ \
+	drivers/ssb/ \
+	drivers/net/wireless/
 
 # include/linux
 DIR="include/linux"
@@ -41,22 +44,24 @@ done
 # net/wireless and net/mac80211
 for i in $NET_DIRS; do
 	echo "Copying $GIT_TREE/net/$i/*.[ch]"
-	cp $GIT_TREE/net/$i/*.[ch] $i/
-	cp $GIT_TREE/net/$i/Makefile $i/
+	cp $GIT_TREE/net/$i/*.[ch] net/$i/
+	cp $GIT_TREE/net/$i/Makefile net/$i/
+	rm -f net/$i/*.mod.c
 done
 
 # drivers
 for i in $DRIVERS; do
-	mkdir -p drivers/${i##*/}
-	cp $GIT_TREE/$i/*.[ch] drivers/${i##*/}/
-	cp $GIT_TREE/$i/Makefile drivers/${i##*/}/
+	mkdir -p $i
+	cp $GIT_TREE/$i/*.[ch] $i/
+	cp $GIT_TREE/$i/Makefile $i/
+	rm -f net/$i/*.mod.c
 done
 
 # Compat stuff
-cp compat/compat.c mac80211/
+cp compat/compat.c net/mac80211/
 cp compat/compat.h include/net/
 
-patch -p0 < compat/compat.diff
+patch -p1 < compat/compat.diff
 DIR="$PWD"
 cd $GIT_TREE && git-describe > $DIR/git-describe && cd $DIR
 echo "Updated ${GIT_TREE##*/}, git-describe says:"
