@@ -66,3 +66,8 @@ DIR="$PWD"
 cd $GIT_TREE && git-describe > $DIR/git-describe && cd $DIR
 echo "Updated ${GIT_TREE##*/}, git-describe says:"
 cat git-describe
+if [ -d ./.git ]; then
+	git-describe > compat-release
+fi
+echo "This is compat-release:"
+cat compat-release
