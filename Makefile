@@ -41,6 +41,7 @@ install:
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/iwlwifi/
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/b43/
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ssb/
+	@rm -rf $(KLIB)/$(KMODDIR)/drivers/zd1211rw-mac80211/
 	@$(MAKE) -C $(KLIB_BUILD) M=$(PWD) $(KMODDIR_ARG) $(KMODPATH_ARG) \
 		modules_install
 	@if [ ! -z $(MADWIFI) ]; then \
