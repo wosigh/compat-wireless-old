@@ -28,19 +28,6 @@
  #include <net/ieee80211_radiotap.h>
  #include <net/cfg80211.h>
  #include <net/mac80211.h>
---- a/net/mac80211/cfg.c	2007-11-10 15:00:10.000000000 -0500
-+++ b/net/mac80211/cfg.c	2007-11-10 15:00:21.000000000 -0500
-@@ -8,8 +8,10 @@
- 
- #include <linux/nl80211.h>
- #include <linux/rtnetlink.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- #include "ieee80211_i.h"
- #include "cfg.h"
- 
 --- a/net/mac80211/util.c	2007-11-09 13:14:57.000000000 -0500
 +++ b/net/mac80211/util.c	2007-11-09 15:41:40.000000000 -0500
 @@ -20,7 +20,9 @@
@@ -180,3 +167,15 @@
  
  static struct bus_type ssb_bustype = {
  	.name		= "ssb",
+--- a/net/mac80211/cfg.c	2007-11-13 17:02:24.000000000 -0500
++++ b/net/mac80211/cfg.c	2007-11-13 17:02:39.000000000 -0500
+@@ -8,7 +8,9 @@
+ 
+ #include <linux/nl80211.h>
+ #include <linux/rtnetlink.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ #include "ieee80211_i.h"
+ #include "cfg.h"
