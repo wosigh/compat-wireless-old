@@ -1,4 +1,7 @@
 #!/bin/sh
+# Copyright 2006	Kel Modderman <kelrin@tpg.com.au>
+# 
+# Taken from madwifi scripts. This unloads madwifi
 
 : ${PATTERN='\(ath_.*\|wlan_.*\|wlan\)$'}
 : ${MAX_TRIES=10}

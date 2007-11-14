@@ -1,4 +1,6 @@
 #!/bin/bash
+# 
+# Copyright 2007	Luis R. Rodriguez <mcgrof@winlab.rutgers.edu>
 #
 # Use this to update compat-wireless-2.6 to the lates wireless-2.6.git tree you have.
 #

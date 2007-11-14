@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright 2007	Luis R. Rodriguez <mcgrof@winlab.rutgers.edu>
+#
 # Makes sure either ath5k or MadWifi are ready to be used. This allows
 # us to choose any driver without blacklisting each other.
 

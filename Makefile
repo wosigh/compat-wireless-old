@@ -68,6 +68,10 @@ install:
 	@# This needs testing before we add it
 	@#modprobe -l iwl4965
 	@modprobe -l zd1211rw-mac80211
+	@install scripts/madwifi-unload	/usr/sbin/
+	@# This is to allow switching between drivers without blacklisting
+	@install scripts/athenable	/usr/sbin/
+	@install scripts/athload	/usr/sbin/
 	@echo 
 
 uninstall:

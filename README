@@ -96,11 +96,11 @@ disable the MadWifi driver without blacklisting it which could cause issues
 with users later. If you would like to enable MadWifi at a later time and
 disable ath5k you can run:
 
-	sudo ./scripts/athenable madwifi
+	sudo athload madwifi
 
 To revert back to ath5k you can run:
 
-	sudo ./scripts/athenable ath5k
+	sudo athload ath5k
 
 Why?
 ----
