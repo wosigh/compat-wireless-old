@@ -81,6 +81,7 @@ uninstall:
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ssb/
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/net/wireless/
 	@depmod -ae
+	@./scripts/athenable madwifi
 	@echo
 	@echo "Your old wireless subsystem modules were left intact:"
 	@echo 
