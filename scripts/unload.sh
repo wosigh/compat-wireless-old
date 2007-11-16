@@ -4,6 +4,8 @@
 # which is no longer on recent kernels (its internal)
 OLD_MODULES="zd1211rw rc80211_simple"
 MODULES="$OLD_MODULES"
+MODULES="$MODULES adm8211"
+MODULES="$MODULES b43 b43legacy"
 MODULES="$MODULES iwl3945 iwl4965"
 MODULES="$MODULES ath5k zd1211rw-mac80211"
 MODULES="$MODULES p54pci p54usb p54common"
