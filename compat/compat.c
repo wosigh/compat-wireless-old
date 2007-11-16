@@ -16,6 +16,7 @@
 #include <linux/rtnetlink.h>
 #include <linux/audit.h>
 #include <linux/workqueue.h>
+#include <linux/pci.h>
 #include <net/arp.h>
 #include <net/compat.h>
 
@@ -377,6 +378,31 @@ void __dev_set_rx_mode(struct net_device *dev)
 	if (dev->set_multicast_list)
 		dev->set_multicast_list(dev);
 }
+
+#ifdef PCI_DISABLE_MWI
+int pci_try_set_mwi(struct pci_dev *dev)
+{
+	return 0;
+}
+EXPORT_SYMBOL(pci_try_set_mwi);
+#else
+/**
+ * pci_try_set_mwi - enables memory-write-invalidate PCI transaction
+ * @dev: the PCI device for which MWI is enabled
+ *
+ * Enables the Memory-Write-Invalidate transaction in %PCI_COMMAND.
+ * Callers are not required to check the return value.
+ *
+ * RETURNS: An appropriate -ERRNO error value on error, or zero for success.
+ */
+int pci_try_set_mwi(struct pci_dev *dev)
+{
+	int rc = pci_set_mwi(dev);
+	return rc;
+}
+EXPORT_SYMBOL(pci_try_set_mwi);
+#endif
+
 
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)) */
 

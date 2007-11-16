@@ -19,22 +19,27 @@
 #define CONFIG_IWL3945			1
 #define CONFIG_IWL4965			1
 #define CONFIG_ZD1211RW_MAC80211	1
-/*
+#if 1
 #define CONFIG_B43
-#define CONFIG_B43_RFKILL		1
-#define CONFIG_B43_LEDS			1
+//#define CONFIG_B43_RFKILL		1
+//#define CONFIG_B43_LEDS			1
 #define CONFIG_B43_PCMCIA		1
-#define CONFIG_B43_DEBUG		1
+//#define CONFIG_B43_DEBUG		1
 #define CONFIG_B43_DMA			1
 #define CONFIG_B43_PIO			1
+
 #define CONFIG_SSB			1
 #define CONFIG_SSB_PCIHOST		1
 #define CONFIG_SSB_PCMCIAHOST		1
-#define CONFIG_SSB_DRIVER_MIPS		1
-#define CONFIG_SSB_DRIVER_EXTIF		1
+#undef CONFIG_SSB_DRIVER_MIPS
+//#define CONFIG_SSB_DRIVER_EXTIF		1
 #define CONFIG_SSB_DRIVER_PCICORE	1
 #define CONFIG_SSB_PCIHOST		1
-*/
+/* For mips */
+#undef CONFIG_SSB_PCICORE_HOSTMODE
+#endif
+
+#define CONFIG_RT2X00_LIB_FIRMWARE	1
 
 /* Compat work for 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
@@ -139,6 +144,23 @@ struct genl_multicast_group
 	char                    name[GENL_NAMSIZ];
 	u32                     id;
 };
+
+/* Added as of 2.6.23 */
+int pci_try_set_mwi(struct pci_dev *dev);
+
+/* Added as of 2.6.23 */
+#ifdef CONFIG_PM_SLEEP
+/*
+ * Tell the freezer that the current task should be frozen by it
+ */
+static inline void set_freezable(void)
+{
+	current->flags &= ~PF_NOFREEZE;
+}
+
+#else
+static inline void set_freezable(void) {}
+#endif
 
 #endif
 

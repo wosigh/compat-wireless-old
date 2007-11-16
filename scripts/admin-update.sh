@@ -9,7 +9,8 @@
 # We assume you have it on your ~/devel/wireless-2.6/ directory. If you do,
 # just run this script from the compat-wireless-2.6 directory.
 
-INCLUDE_LINUX="ieee80211.h nl80211.h wireless.h pci_ids.h bitops.h"
+INCLUDE_LINUX="ieee80211.h nl80211.h wireless.h"
+INCLUDE_LINUX="$INCLUDE_LINUX pci_ids.h bitops.h eeprom_93cx6.h"
 
 INCLUDE_NET="cfg80211.h ieee80211_radiotap.h iw_handler.h"
 INCLUDE_NET="$INCLUDE_NET mac80211.h wext.h wireless.h"
@@ -17,10 +18,26 @@ INCLUDE_NET="$INCLUDE_NET mac80211.h wext.h wireless.h"
 NET_DIRS="wireless mac80211"
 GIT_TREE="/home/$USER/devel/wireless-2.6"
 
+# Drivers that have their own directory
 DRIVERS="drivers/net/wireless/ath5k"
-DRIVERS="$DRIVERS drivers/ssb drivers/net/wireless/b43"
+DRIVERS="$DRIVERS drivers/ssb"
+DRIVERS="$DRIVERS drivers/net/wireless/b43"
+DRIVERS="$DRIVERS drivers/net/wireless/b43legacy"
 DRIVERS="$DRIVERS drivers/net/wireless/iwlwifi"
+DRIVERS="$DRIVERS drivers/net/wireless/rt2x00"
 DRIVERS="$DRIVERS drivers/net/wireless/zd1211rw-mac80211"
+DRIVERS="$DRIVERS drivers/net/wireless/libertas"
+
+# Drivers that belong the the wireless directory
+DRIVER_FILES="rtl818x.h"
+DRIVER_FILES="$DRIVER_FILES rtl8180.h rtl8180_rtl8225.h"
+DRIVER_FILES="$DRIVER_FILES rtl8180_dev.c rtl8180_rtl8225.c"
+DRIVER_FILES="$DRIVER_FILES rtl8187.h rtl8187_rtl8225.h"
+DRIVER_FILES="$DRIVER_FILES rtl8187_dev.c rtl8187_rtl8225.c"
+DRIVER_FILES="$DRIVER_FILES adm8211.c  adm8211.h"
+DRIVER_FILES="$DRIVER_FILES p54.h p54common.h p54common.c net2280.h"
+DRIVER_FILES="$DRIVER_FILES p54pci.h p54pci.c"
+DRIVER_FILES="$DRIVER_FILES p54usb.h p54usb.c"
 
 mkdir -p include/linux/ include/net/ \
 	net/mac80211/ net/wireless/ \
@@ -51,13 +68,26 @@ for i in $NET_DIRS; do
 	rm -f net/$i/*.mod.c
 done
 
-# drivers
+# Drivers in their own directory
 for i in $DRIVERS; do
 	mkdir -p $i
 	cp $GIT_TREE/$i/*.[ch] $i/
 	cp $GIT_TREE/$i/Makefile $i/
-	rm -f net/$i/*.mod.c
+	rm -f $i/*.mod.c
 done
+
+# Misc
+mkdir -p drivers/misc/
+cp $GIT_TREE/drivers/misc/eeprom_93cx6.c drivers/misc/
+cp $GIT_TREE/drivers/misc/Makefile drivers/misc/
+
+DIR="drivers/net/wireless"
+# Drivers part of the wireless directory
+for i in $DRIVER_FILES; do
+	cp $GIT_TREE/$DIR/$i $DIR/
+done
+# Top level wireless driver Makefile
+cp $GIT_TREE/$DIR/Makefile $DIR
 
 # Compat stuff
 cp compat/compat.c net/mac80211/

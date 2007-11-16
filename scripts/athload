@@ -3,6 +3,8 @@
 #
 # Loads ath5k or madwifi
 
+. /usr/lib/compat-wireless/modlib.sh
+
 if [[ $UID -ne 0 ]]; then
 	echo "Run with root privileges"
 	exit
@@ -13,7 +15,7 @@ USAGE="Usage: $0 [ ath5k | madwifi ]"
 
 # Default behavior: unload MadWifi and load ath5k
 if [ $# -eq 0 ]; then
-	./scripts/athenable ath5k
+	athenable ath5k
 	exit
 elif [ $# -ne 1 ]; then
 		echo "$USAGE"
@@ -22,8 +24,8 @@ fi
 
 MODULE=$1
 if [ "$MODULE" == "ath5k" ]; then
-	./scripts/madwifi-unload
-	./scripts/athenable ath5k
+	madwifi-unload
+	athenable ath5k
 	modprobe ath5k
 	CHECK=`modprobe -l ath5k`
 	if [ ! -z $CHECK ]; then
@@ -35,10 +37,10 @@ elif [ "$MODULE" == "madwifi" ]; then
 		echo "ath5k currently loaded, going to try to unload the module..."
 		modprobe -r --ignore-remove ath5k
 	fi
-	./scripts/athenable madwifi
+	athenable madwifi
 	# MadWifi may be loaded, but it doesn't mean devices
 	# currently available were picked up
-	./scripts/madwifi-unload 2>&1 > /dev/null
+	madwifi-unload 2>&1 > /dev/null
 	modprobe ath_pci
 	CHECK=`modprobe -l ath_pci`
 	if [ ! -z $CHECK ]; then
