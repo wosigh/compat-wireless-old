@@ -14,6 +14,7 @@ ifneq ($(KERNELRELEASE),)
 
 # This is a hack! But hey.. it works, got any better ideas, send a patch ;)
 NOSTDINC_FLAGS := -I$(PWD)/include/ $(CFLAGS)
+NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/compat/compat.h $(CFLAGS
 
 obj-y := net/wireless/ net/mac80211/  \
 	drivers/ssb/ \

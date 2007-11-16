@@ -1,6 +1,7 @@
 #ifndef LINUX_26_COMPAT_H
 #define LINUX_26_COMPAT_H
 
+#include <linux/autoconf.h>
 #include <linux/kernel.h>
 #include <linux/netdevice.h>
 #include <linux/genetlink.h>
