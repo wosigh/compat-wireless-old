@@ -2,7 +2,7 @@
 
 # The old stack drivers and the mac80211 rc80211_simple modules 
 # which is no longer on recent kernels (its internal)
-OLD_MODULES="zd1211rw rc80211_simple"
+OLD_MODULES="zd1211rw bcm43xx rc80211_simple"
 MODULES="$OLD_MODULES"
 MODULES="$MODULES adm8211"
 MODULES="$MODULES b43 b43legacy"

@@ -510,44 +510,6 @@
  obj-$(CONFIG_LIBERTAS)		+= libertas/
  
  rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o
---- a/drivers/net/wireless/libertas/dev.h	2007-11-15 20:19:33.000000000 -0500
-+++ b/drivers/net/wireless/libertas/dev.h	2007-11-15 20:27:51.000000000 -0500
-@@ -11,6 +11,7 @@
- #include <linux/ethtool.h>
- #include <linux/debugfs.h>
- #include <net/ieee80211.h>
-+#include <net/compat.h>
- 
- #include "defs.h"
- #include "scan.h"
---- a/drivers/net/wireless/libertas/ethtool.c	2007-11-15 20:41:59.000000000 -0500
-+++ b/drivers/net/wireless/libertas/ethtool.c	2007-11-15 20:44:28.000000000 -0500
-@@ -143,6 +143,7 @@
- 	lbs_deb_enter(LBS_DEB_ETHTOOL);
- }
- 
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- static int libertas_ethtool_get_sset_count(struct net_device * dev, int sset)
- {
- 	switch (sset) {
-@@ -152,6 +153,7 @@
- 		return -EOPNOTSUPP;
- 	}
- }
-+#endif
- 
- static void libertas_ethtool_get_strings (struct net_device * dev,
- 					  u32 stringset,
-@@ -177,7 +179,9 @@
- 	.get_drvinfo = libertas_ethtool_get_drvinfo,
- 	.get_eeprom =  libertas_ethtool_get_eeprom,
- 	.get_eeprom_len = libertas_ethtool_get_eeprom_len,
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	.get_sset_count = libertas_ethtool_get_sset_count,
-+#endif
- 	.get_ethtool_stats = libertas_ethtool_get_stats,
- 	.get_strings = libertas_ethtool_get_strings,
- };
 --- a/drivers/misc/Makefile	2007-11-15 22:15:29.000000000 -0500
 +++ b/drivers/misc/Makefile	2007-11-15 22:15:45.000000000 -0500
 @@ -3,17 +3,4 @@
@@ -568,3 +530,41 @@
 -obj-$(CONFIG_THINKPAD_ACPI)	+= thinkpad_acpi.o
 -obj-$(CONFIG_FUJITSU_LAPTOP)	+= fujitsu-laptop.o
  obj-$(CONFIG_EEPROM_93CX6)	+= eeprom_93cx6.o
+--- a/drivers/net/wireless/libertas/dev.h	2007-11-15 20:19:33.000000000 -0500
++++ b/drivers/net/wireless/libertas/dev.h	2007-11-15 20:27:51.000000000 -0500
+@@ -11,6 +11,7 @@
+ #include <linux/ethtool.h>
+ #include <linux/debugfs.h>
+ #include <net/ieee80211.h>
++#include <net/compat.h>
+ 
+ #include "defs.h"
+ #include "scan.h"
+--- a/drivers/net/wireless/libertas/ethtool.c	2007-11-16 19:05:35.000000000 -0500
++++ b/drivers/net/wireless/libertas/ethtool.c	2007-11-16 19:06:41.000000000 -0500
+@@ -143,6 +143,7 @@
+ 	lbs_deb_enter(LBS_DEB_ETHTOOL);
+ }
+ 
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ static int lbs_ethtool_get_sset_count(struct net_device * dev, int sset)
+ {
+ 	switch (sset) {
+@@ -152,6 +153,7 @@
+ 		return -EOPNOTSUPP;
+ 	}
+ }
++#endif
+ 
+ static void lbs_ethtool_get_strings(struct net_device *dev,
+ 					  u32 stringset,
+@@ -177,7 +179,9 @@
+ 	.get_drvinfo = lbs_ethtool_get_drvinfo,
+ 	.get_eeprom =  lbs_ethtool_get_eeprom,
+ 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	.get_sset_count = lbs_ethtool_get_sset_count,
++#endif
+ 	.get_ethtool_stats = lbs_ethtool_get_stats,
+ 	.get_strings = lbs_ethtool_get_strings,
+ };
