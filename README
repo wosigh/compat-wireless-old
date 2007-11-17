@@ -21,7 +21,7 @@ Documenation
 
 This package is also documented online.
 
-http://linuxwireless.org/en/users/download
+http://linuxwireless.org/en/users/Download
 
 Where to get the latest
 -----------------------
@@ -63,13 +63,24 @@ it'll be stopped and the module unloaded and then iwl3945 will be loaded.
 Drivers
 -------
 
-We'll add more as we go...
-
 Driver			2.6.22	2.6.23
+adm8211			?	?
 ath5k			OK	?
-b43 + ssb		?	?
+b43			OK	?
+b43legacy		?	?
 iwl3945			OK	?
 iwl4965			?	?
+libertas_cs (Libertas)	?	?
+ub8xxx      (Libertas)	?	?
+p54pci			OK	?
+p54usb			?	?
+rt2400pci (rt2x00)	?	?
+rt2500pci (rt2x00)	OK	?
+rt2500usb (rt2x00)	?	?
+rt61pci	  (rt2x00)	?	?
+rt73usb	  (rt2x00)	?	?
+rtl8180	(Realtek)	OK	?
+rtl8187	(Realtek)	?	?
 zd1211rw-mac80211	OK	?
 
 Known issues
@@ -86,7 +97,15 @@ More compatibility work is needed to add nl80211
 
 * b43:
 
-We still need to iron out some compatibility issues in order to enable b43.
+b43 and b43legacy now loads. Since there was an old softmac broadcom driver 
+we provide a load script for this driver. To load the new generation 
+drivers (b43 and b43legacy) you can run:
+
+	sudo b43load b43
+
+To revert back to ath5k you can run:
+
+	sudo b43load bcm43xx
 
 * MadWifi:
 
@@ -101,6 +120,13 @@ disable ath5k you can run:
 To revert back to ath5k you can run:
 
 	sudo athload ath5k
+
+* Firmare:
+
+If your driver needs firmware please be sure to check the driver page
+for that driver here:
+
+http://linuxwireless.org/en/users/Drivers
 
 Why?
 ----
