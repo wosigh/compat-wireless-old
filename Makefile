@@ -44,14 +44,23 @@ install:
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/zd1211rw-mac80211/
 	@$(MAKE) -C $(KLIB_BUILD) M=$(PWD) $(KMODDIR_ARG) $(KMODPATH_ARG) \
 		modules_install
+	@# All the scripts we can use
+	@mkdir -p /usr/lib/compat-wireless/
+	@install scripts/modlib.sh	/usr/lib/compat-wireless/
+	@install scripts/madwifi-unload	/usr/sbin/
+	@# This is to allow switching between drivers without blacklisting
+	@install scripts/athenable	/usr/sbin/
+	@install scripts/b43enable	/usr/sbin/
+	@install scripts/athload	/usr/sbin/
+	@install scripts/b43load	/usr/sbin/
 	@if [ ! -z $(MADWIFI) ]; then \
 		echo ;\
 		echo -n "Note: madwifi detected, we're going to disable it. "  ;\
 		echo "If you would like to enable it later you can run:"  ;\
-		echo "    sudo ./scripts/athenable madwifi"  ;\
+		echo "    sudo athenable madwifi"  ;\
 		echo ;\
-		echo Running scripts/athenable ath5k...;\
-		./scripts/athenable ath5k ;\
+		echo Running athenable ath5k...;\
+		/usr/sbin/athenable ath5k ;\
 	fi
 	@depmod -ae
 	@echo
@@ -68,15 +77,6 @@ install:
 	@# This needs testing before we add it
 	@#modprobe -l iwl4965
 	@modprobe -l zd1211rw-mac80211
-	@# All the scripts we can use
-	@mkdir -p /usr/lib/compat-wireless/
-	@install scripts/modlib.sh	/usr/lib/compat-wireless/
-	@install scripts/madwifi-unload	/usr/sbin/
-	@# This is to allow switching between drivers without blacklisting
-	@install scripts/athenable	/usr/sbin/
-	@install scripts/b43enable	/usr/sbin/
-	@install scripts/athload	/usr/sbin/
-	@install scripts/b43load	/usr/sbin/
 	@echo 
 	@echo Now run: make load
 	@echo
