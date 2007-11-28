@@ -1,5 +1,6 @@
 #!/bin/bash
-MODULES="p54pci p54usb"
+MODULES="ipw2100 ipw2200 libertas_cs ub8xxx"
+MODULES="$MODULES p54pci p54usb"
 MODULES="$MODULES adm8211"
 MODULES="$MODULES zd1211rw-mac80211 rtl8180 rtl8187"
 MODULES="$MODULES p54pci p54usb iwl3945 zd1211rw-mac80211 rtl8180 rtl8187"

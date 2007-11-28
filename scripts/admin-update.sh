@@ -15,7 +15,7 @@ INCLUDE_LINUX="$INCLUDE_LINUX pci_ids.h bitops.h eeprom_93cx6.h"
 INCLUDE_NET="cfg80211.h ieee80211_radiotap.h iw_handler.h"
 INCLUDE_NET="$INCLUDE_NET mac80211.h wext.h wireless.h"
 
-NET_DIRS="wireless mac80211"
+NET_DIRS="wireless mac80211 ieee80211"
 GIT_TREE="/home/$USER/devel/wireless-2.6"
 
 # Drivers that have their own directory
@@ -38,9 +38,11 @@ DRIVER_FILES="$DRIVER_FILES adm8211.c  adm8211.h"
 DRIVER_FILES="$DRIVER_FILES p54.h p54common.h p54common.c net2280.h"
 DRIVER_FILES="$DRIVER_FILES p54pci.h p54pci.c"
 DRIVER_FILES="$DRIVER_FILES p54usb.h p54usb.c"
+DRIVER_FILES="$DRIVER_FILES ipw2100.h ipw2100.c"
+DRIVER_FILES="$DRIVER_FILES ipw2200.h ipw2200.c"
 
 mkdir -p include/linux/ include/net/ \
-	net/mac80211/ net/wireless/ \
+	net/mac80211/ net/wireless/ net/ieee80211/ \
 	drivers/ssb/ \
 	drivers/net/wireless/
 

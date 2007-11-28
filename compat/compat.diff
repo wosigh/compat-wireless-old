@@ -28,50 +28,6 @@
  #include <net/ieee80211_radiotap.h>
  #include <net/cfg80211.h>
  #include <net/mac80211.h>
---- a/net/mac80211/util.c	2007-11-09 13:14:57.000000000 -0500
-+++ b/net/mac80211/util.c	2007-11-09 15:41:40.000000000 -0500
-@@ -20,7 +20,9 @@
- #include <linux/if_arp.h>
- #include <linux/wireless.h>
- #include <linux/bitmap.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- 
- #include "ieee80211_i.h"
---- a/net/mac80211/ieee80211.c	2007-11-07 12:42:38.000000000 -0500
-+++ b/net/mac80211/ieee80211.c	2007-11-09 13:18:58.000000000 -0500
-@@ -21,7 +21,9 @@
- #include <linux/wireless.h>
- #include <linux/rtnetlink.h>
- #include <linux/bitmap.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- 
- #include "ieee80211_i.h"
-@@ -400,7 +402,9 @@
- void ieee80211_if_setup(struct net_device *dev)
- {
- 	ether_setup(dev);
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	dev->header_ops = &ieee80211_header_ops;
-+#endif
- 	dev->hard_start_xmit = ieee80211_subif_start_xmit;
- 	dev->wireless_handlers = &ieee80211_iw_handler_def;
- 	dev->set_multicast_list = ieee80211_set_multicast_list;
-@@ -987,7 +991,9 @@
- 	mdev->open = ieee80211_master_open;
- 	mdev->stop = ieee80211_master_stop;
- 	mdev->type = ARPHRD_IEEE80211;
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	mdev->header_ops = &ieee80211_header_ops;
-+#endif
- 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
- 
- 	sdata->type = IEEE80211_IF_TYPE_AP;
 --- a/net/wireless/sysfs.c	2007-11-06 16:05:57.000000000 -0500
 +++ b/net/wireless/sysfs.c	2007-11-06 16:07:17.000000000 -0500
 @@ -52,6 +52,7 @@
@@ -455,61 +411,6 @@
  
  	return 0;
  
---- a/drivers/net/wireless/Makefile	2007-11-15 20:36:34.000000000 -0500
-+++ b/drivers/net/wireless/Makefile	2007-11-15 20:37:26.000000000 -0500
-@@ -2,52 +2,10 @@
- # Makefile for the Linux Wireless network device drivers.
- #
- 
--obj-$(CONFIG_IPW2100) += ipw2100.o
--
--obj-$(CONFIG_IPW2200) += ipw2200.o
--
--obj-$(CONFIG_STRIP) += strip.o
--obj-$(CONFIG_ARLAN) += arlan.o 
--
--arlan-objs := arlan-main.o arlan-proc.o
--
--# Obsolete cards
--obj-$(CONFIG_WAVELAN)		+= wavelan.o
--obj-$(CONFIG_PCMCIA_NETWAVE)	+= netwave_cs.o
--obj-$(CONFIG_PCMCIA_WAVELAN)	+= wavelan_cs.o
--
--obj-$(CONFIG_HERMES)		+= orinoco.o hermes.o
--obj-$(CONFIG_PCMCIA_HERMES)	+= orinoco_cs.o
--obj-$(CONFIG_APPLE_AIRPORT)	+= airport.o
--obj-$(CONFIG_PLX_HERMES)	+= orinoco_plx.o
--obj-$(CONFIG_PCI_HERMES)	+= orinoco_pci.o
--obj-$(CONFIG_TMD_HERMES)	+= orinoco_tmd.o
--obj-$(CONFIG_NORTEL_HERMES)	+= orinoco_nortel.o
--obj-$(CONFIG_PCMCIA_SPECTRUM)	+= spectrum_cs.o
--
--obj-$(CONFIG_AIRO)		+= airo.o
--obj-$(CONFIG_AIRO_CS)		+= airo_cs.o airo.o
--
--obj-$(CONFIG_ATMEL)             += atmel.o
--obj-$(CONFIG_PCI_ATMEL)         += atmel_pci.o 
--obj-$(CONFIG_PCMCIA_ATMEL)      += atmel_cs.o
--
--obj-$(CONFIG_USB_ATMEL)	        += at76_usb.o
--
--obj-$(CONFIG_PRISM54)		+= prism54/
--
--obj-$(CONFIG_HOSTAP)		+= hostap/
--obj-$(CONFIG_BCM43XX)		+= bcm43xx/
- obj-$(CONFIG_B43)		+= b43/
- obj-$(CONFIG_B43LEGACY)		+= b43legacy/
--obj-$(CONFIG_ZD1211RW)		+= zd1211rw/
- obj-$(CONFIG_ZD1211RW_MAC80211)	+= zd1211rw-mac80211/
- 
--# 16-bit wireless PCMCIA client drivers
--obj-$(CONFIG_PCMCIA_RAYCS)	+= ray_cs.o
--obj-$(CONFIG_PCMCIA_WL3501)	+= wl3501_cs.o
--
--obj-$(CONFIG_USB_ZD1201)	+= zd1201.o
- obj-$(CONFIG_LIBERTAS)		+= libertas/
- 
- rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o
 --- a/drivers/misc/Makefile	2007-11-15 22:15:29.000000000 -0500
 +++ b/drivers/misc/Makefile	2007-11-15 22:15:45.000000000 -0500
 @@ -3,17 +3,4 @@
@@ -568,3 +469,117 @@
  	.get_ethtool_stats = lbs_ethtool_get_stats,
  	.get_strings = lbs_ethtool_get_strings,
  };
+--- a/net/mac80211/util.c	2007-11-27 18:13:44.000000000 -0500
++++ b/net/mac80211/util.c	2007-11-27 18:13:45.000000000 -0500
+@@ -20,7 +20,9 @@
+ #include <linux/if_arp.h>
+ #include <linux/wireless.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ #include <net/rtnetlink.h>
+ 
+--- a/net/mac80211/ieee80211.c	2007-11-27 18:14:16.000000000 -0500
++++ b/net/mac80211/ieee80211.c	2007-11-27 18:14:16.000000000 -0500
+@@ -21,7 +21,9 @@
+ #include <linux/wireless.h>
+ #include <linux/rtnetlink.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ 
+ #include "ieee80211_i.h"
+@@ -423,7 +425,9 @@
+ void ieee80211_if_setup(struct net_device *dev)
+ {
+ 	ether_setup(dev);
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	dev->header_ops = &ieee80211_header_ops;
++#endif
+ 	dev->hard_start_xmit = ieee80211_subif_start_xmit;
+ 	dev->wireless_handlers = &ieee80211_iw_handler_def;
+ 	dev->set_multicast_list = ieee80211_set_multicast_list;
+@@ -1010,7 +1014,9 @@
+ 	mdev->open = ieee80211_master_open;
+ 	mdev->stop = ieee80211_master_stop;
+ 	mdev->type = ARPHRD_IEEE80211;
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	mdev->header_ops = &ieee80211_header_ops;
++#endif
+ 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
+ 
+ 	sdata->type = IEEE80211_IF_TYPE_AP;
+--- a/net/ieee80211/Makefile	2007-11-27 20:00:21.000000000 -0500
++++ b/net/ieee80211/Makefile	2007-11-27 19:58:36.000000000 -0500
+@@ -10,4 +10,3 @@
+ 	ieee80211_wx.o \
+ 	ieee80211_geo.o
+ 
+-obj-$(CONFIG_IEEE80211_SOFTMAC) += softmac/
+--- a/net/ieee80211/ieee80211_module.c	2007-11-27 19:55:49.000000000 -0500
++++ b/net/ieee80211/ieee80211_module.c	2007-11-27 19:56:25.000000000 -0500
+@@ -47,7 +47,9 @@
+ #include <linux/wireless.h>
+ #include <linux/etherdevice.h>
+ #include <asm/uaccess.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/arp.h>
+ 
+ #include <net/ieee80211.h>
+--- a/drivers/net/wireless/Makefile	2007-11-27 21:27:30.000000000 -0500
++++ b/drivers/net/wireless/Makefile	2007-11-27 21:27:13.000000000 -0500
+@@ -6,48 +6,10 @@
+ 
+ obj-$(CONFIG_IPW2200) += ipw2200.o
+ 
+-obj-$(CONFIG_STRIP) += strip.o
+-obj-$(CONFIG_ARLAN) += arlan.o 
+-
+-arlan-objs := arlan-main.o arlan-proc.o
+-
+-# Obsolete cards
+-obj-$(CONFIG_WAVELAN)		+= wavelan.o
+-obj-$(CONFIG_PCMCIA_NETWAVE)	+= netwave_cs.o
+-obj-$(CONFIG_PCMCIA_WAVELAN)	+= wavelan_cs.o
+-
+-obj-$(CONFIG_HERMES)		+= orinoco.o hermes.o
+-obj-$(CONFIG_PCMCIA_HERMES)	+= orinoco_cs.o
+-obj-$(CONFIG_APPLE_AIRPORT)	+= airport.o
+-obj-$(CONFIG_PLX_HERMES)	+= orinoco_plx.o
+-obj-$(CONFIG_PCI_HERMES)	+= orinoco_pci.o
+-obj-$(CONFIG_TMD_HERMES)	+= orinoco_tmd.o
+-obj-$(CONFIG_NORTEL_HERMES)	+= orinoco_nortel.o
+-obj-$(CONFIG_PCMCIA_SPECTRUM)	+= spectrum_cs.o
+-
+-obj-$(CONFIG_AIRO)		+= airo.o
+-obj-$(CONFIG_AIRO_CS)		+= airo_cs.o airo.o
+-
+-obj-$(CONFIG_ATMEL)             += atmel.o
+-obj-$(CONFIG_PCI_ATMEL)         += atmel_pci.o 
+-obj-$(CONFIG_PCMCIA_ATMEL)      += atmel_cs.o
+-
+-obj-$(CONFIG_USB_ATMEL)	        += at76_usb.o
+-
+-obj-$(CONFIG_PRISM54)		+= prism54/
+-
+-obj-$(CONFIG_HOSTAP)		+= hostap/
+-obj-$(CONFIG_BCM43XX)		+= bcm43xx/
+ obj-$(CONFIG_B43)		+= b43/
+ obj-$(CONFIG_B43LEGACY)		+= b43legacy/
+-obj-$(CONFIG_ZD1211RW)		+= zd1211rw/
+ obj-$(CONFIG_ZD1211RW_MAC80211)	+= zd1211rw-mac80211/
+ 
+-# 16-bit wireless PCMCIA client drivers
+-obj-$(CONFIG_PCMCIA_RAYCS)	+= ray_cs.o
+-obj-$(CONFIG_PCMCIA_WL3501)	+= wl3501_cs.o
+-
+-obj-$(CONFIG_USB_ZD1201)	+= zd1201.o
+ obj-$(CONFIG_LIBERTAS)		+= libertas/
+ 
+ rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o

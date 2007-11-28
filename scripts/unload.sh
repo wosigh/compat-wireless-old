@@ -2,14 +2,16 @@
 
 # The old stack drivers and the mac80211 rc80211_simple modules 
 # which is no longer on recent kernels (its internal)
-OLD_MODULES="zd1211rw bcm43xx rc80211_simple"
+OLD_MODULES="rc80211_simple zd1211rw bcm43xx"
 MODULES="$OLD_MODULES"
+MODULES="$MODULES ieee80211softmac ieee80211_crypt ieee80211"
+MODULES="$MODULES ipw2100 ipw2200"
+MODULES="$MODULES libertas libertas_cs ub8xxx"
 MODULES="$MODULES adm8211"
 MODULES="$MODULES b43 b43legacy"
 MODULES="$MODULES iwl3945 iwl4965"
 MODULES="$MODULES ath5k zd1211rw-mac80211"
 MODULES="$MODULES p54pci p54usb p54common"
-MODULES="$MODULES libertas libertas_cs usb8xxx"
 MODULES="$MODULES rt2400pci rt2500pci rt61pci"
 MODULES="$MODULES rt2500usb rt73usb"
 MODULES="$MODULES rt2x00usb rt2x00lib"

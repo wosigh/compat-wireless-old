@@ -7,6 +7,7 @@
 #include <linux/genetlink.h>
 #include <net/neighbour.h>
 #include <linux/version.h>
+#include <linux/scatterlist.h>
 
 /* So all *.[ch] can pick up the options as if defined 
  * by the kernel's .config. */
@@ -28,6 +29,11 @@
 //#define CONFIG_B43_DEBUG		1
 #define CONFIG_B43_DMA			1
 #define CONFIG_B43_PIO			1
+#define CONFIG_B43LEGACY_PCI_AUTOSELECT	1
+#define CONFIG_B43LEGACY_PCICORE_AUTOSELECT	1
+#define CONFIG_B43LEGACY_DMA		1
+#define CONFIG_B43LEGACY_PIO		1
+#define CONFIG_B43LEGACY_DMA_AND_PIO_MODE	1
 
 #define CONFIG_SSB			1
 #define CONFIG_SSB_PCIHOST		1
@@ -41,6 +47,13 @@
 #endif
 
 #define CONFIG_RT2X00_LIB_FIRMWARE	1
+
+#define CONFIG_IEEE80211		1
+#define CONFIG_IEEE80211_CRYPT_CCMP	1
+#define CONFIG_IEEE80211_CRYPT_TKIP	1
+#define CONFIG_IEEE80211_CRYPT_WEP	1
+/* Die old softmac, die ! Bleed! */
+#undef CONFIG_IEEE80211_SOFTMAC
 
 /* Compat work for 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
@@ -96,6 +109,42 @@ struct header_ops {
 		struct net_device *dev,
 		unsigned char *haddr);
 };
+
+/* net/ieee80211/ieee80211_crypt_tkip uses sg_init_table. This was added on 
+ * 2.6.24. CONFIG_DEBUG_SG was added in 2.6.24 as well, so lets just ignore
+ * the debug stuff. Note that adding this required changes to the struct
+ * scatterlist on include/asm/scatterlist*, so the right way to port this
+ * is to simply ignore the new structure changes and zero the scatterlist
+ * array. We lave the kdoc intact for reference.
+ */
+
+/**
+ * sg_mark_end - Mark the end of the scatterlist
+ * @sg:          SG entryScatterlist
+ *
+ * Description:
+ *   Marks the passed in sg entry as the termination point for the sg
+ *   table. A call to sg_next() on this entry will return NULL.
+ *
+ **/
+static inline void sg_mark_end(struct scatterlist *sg)
+{
+}
+
+/**
+ * sg_init_table - Initialize SG table
+ * @sgl:           The SG table
+ * @nents:         Number of entries in table
+ *
+ * Notes:
+ *   If this is part of a chained sg table, sg_mark_end() should be
+ *   used only on the last table part.
+ *
+ **/
+static inline void sg_init_table(struct scatterlist *sgl, unsigned int nents)
+{
+	memset(sgl, 0, sizeof(*sgl) * nents);
+}
 
 #endif
 

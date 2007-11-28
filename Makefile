@@ -16,7 +16,7 @@ ifneq ($(KERNELRELEASE),)
 NOSTDINC_FLAGS := -I$(PWD)/include/ $(CFLAGS)
 NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/compat/compat.h $(CFLAGS)
 
-obj-y := net/wireless/ net/mac80211/  \
+obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
 	drivers/ssb/ \
 	drivers/misc/ \
 	drivers/net/wireless/
@@ -67,15 +67,32 @@ install:
 	@echo "Currently detected wireless subsystem modules:"
 	@echo 
 	@modprobe -l mac80211
+	@# rc80211_simple is a module only on 2.6.22 and 2.6.23
+	@modprobe -l cfg80211
+	@modprobe -l adm8211
+	@modprobe -l ath5k
+	@modprobe -l b43
+	@modprobe -l b43legacy
+	@modprobe -l ssb
+	@modprobe -l iwl3945
+	@modprobe -l iwl4965
+	@modprobe -l ipw2100
+	@modprobe -l ipw2200
+	@modprobe -l ieee80211
+	@modprobe -l ieee80211_crypt
+	@modprobe -l libertas_cs
+	@modprobe -l ub8xxx
+	@modprobe -l p54pci
+	@modprobe -l p54usb
+	@modprobe -l rt2400pci
+	@modprobe -l rt2500pci
+	@modprobe -l rt2500usb
+	@modprobe -l rt61pci
+	@modprobe -l rt73usb
+	@modprobe -l rtl8180
+	@modprobe -l rtl8187
 	@# rc80211_simple is no longer a module
 	@#modprobe -l rc80211_simple
-	@modprobe -l cfg80211
-	@modprobe -l ath5k
-	@modprobe -l ssb
-	@modprobe -l b43
-	@modprobe -l iwl3945
-	@# This needs testing before we add it
-	@#modprobe -l iwl4965
 	@modprobe -l zd1211rw-mac80211
 	@echo 
 	@echo Now run: make load
@@ -87,8 +104,12 @@ uninstall:
 	@# New location, matches upstream
 	@rm -rf $(KLIB)/$(KMODDIR)/net/mac80211/
 	@rm -rf $(KLIB)/$(KMODDIR)/net/wireless/
+	@rm -rf $(KLIB)/$(KMODDIR)/net/ieee80211/
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ssb/
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/net/wireless/
+	@# Lets only remove the stuff we are sure we are providing
+	@# on the misc directory.
+	@rm -f $(KLIB)/$(KMODDIR)/drivers/misc/eeprom_93cx6.ko
 	@depmod -ae
 	@/usr/sbin/athenable madwifi
 	@/usr/sbin/b43enable bcm43xx
@@ -96,20 +117,38 @@ uninstall:
 	@echo "Your old wireless subsystem modules were left intact:"
 	@echo 
 	@modprobe -l mac80211
-	@# rc80211_simple is a module on 2.6.22 and 2.6.23 though
-	@modprobe -l rc80211_simple
 	@modprobe -l cfg80211
+	@# rc80211_simple is a module on 2.6.22 and 2.6.23 though
+	@modprobe -l adm8211
 	@modprobe -l ath5k
-	@modprobe -l ssb
 	@modprobe -l b43
 	@modprobe -l b43legacy
+	@modprobe -l ssb
+	@modprobe -l rc80211_simple
 	@modprobe -l iwl3945
 	@modprobe -l iwl4965
-	@modprobe -l ipw3945
-	@modprobe -l ath_pci
-	@modprobe -l ath_hal
+	@modprobe -l ipw2100
+	@modprobe -l ipw2200
+	@modprobe -l ieee80211
+	@modprobe -l ieee80211_crypt
+	@modprobe -l libertas_cs
+	@modprobe -l mac80211
+	@modprobe -l ub8xxx
+	@modprobe -l p54pci
+	@modprobe -l p54usb
+	@modprobe -l rt2400pci
+	@modprobe -l rt2500pci
+	@modprobe -l rt2500usb
+	@modprobe -l rt61pci
+	@modprobe -l rt73usb
+	@modprobe -l rtl8180
+	@modprobe -l rtl8187
+	@# rc80211_simple is no longer a module
+	@#modprobe -l rc80211_simple
 	@modprobe -l zd1211rw-mac80211
-	@modprobe -l bcm43xx
+	@# Old kernels have ieee80211softmac, this will be removed soon :)
+	@modprobe -l ieee80211softmac
+	@
 	@echo 
 
 unload:
