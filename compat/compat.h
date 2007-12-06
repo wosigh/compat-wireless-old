@@ -9,52 +9,6 @@
 #include <linux/version.h>
 #include <linux/scatterlist.h>
 
-/* So all *.[ch] can pick up the options as if defined 
- * by the kernel's .config. */
-
-/* XXX: See if we can do something better about this and config.mk */
-#define CONFIG_MAC80211			1
-#define CONFIG_MAC80211_RCSIMPLE	1
-#define CONFIG_CFG80211			1
-#undef CONFIG_NL80211			
-#define CONFIG_ATH5K			1
-#define CONFIG_IWL3945			1
-#define CONFIG_IWL4965			1
-#define CONFIG_ZD1211RW_MAC80211	1
-#if 1
-#define CONFIG_B43
-//#define CONFIG_B43_RFKILL		1
-//#define CONFIG_B43_LEDS			1
-#define CONFIG_B43_PCMCIA		1
-//#define CONFIG_B43_DEBUG		1
-#define CONFIG_B43_DMA			1
-#define CONFIG_B43_PIO			1
-#define CONFIG_B43LEGACY_PCI_AUTOSELECT	1
-#define CONFIG_B43LEGACY_PCICORE_AUTOSELECT	1
-#define CONFIG_B43LEGACY_DMA		1
-#define CONFIG_B43LEGACY_PIO		1
-#define CONFIG_B43LEGACY_DMA_AND_PIO_MODE	1
-
-#define CONFIG_SSB			1
-#define CONFIG_SSB_PCIHOST		1
-#define CONFIG_SSB_PCMCIAHOST		1
-#undef CONFIG_SSB_DRIVER_MIPS
-//#define CONFIG_SSB_DRIVER_EXTIF		1
-#define CONFIG_SSB_DRIVER_PCICORE	1
-#define CONFIG_SSB_PCIHOST		1
-/* For mips */
-#undef CONFIG_SSB_PCICORE_HOSTMODE
-#endif
-
-#define CONFIG_RT2X00_LIB_FIRMWARE	1
-
-#define CONFIG_IEEE80211		1
-#define CONFIG_IEEE80211_CRYPT_CCMP	1
-#define CONFIG_IEEE80211_CRYPT_TKIP	1
-#define CONFIG_IEEE80211_CRYPT_WEP	1
-/* Die old softmac, die ! Bleed! */
-#undef CONFIG_IEEE80211_SOFTMAC
-
 /* Compat work for 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
 
@@ -146,7 +100,7 @@ static inline void sg_init_table(struct scatterlist *sgl, unsigned int nents)
 	memset(sgl, 0, sizeof(*sgl) * nents);
 }
 
-#endif
+#endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)) */
 
 /* Compat work for 2.6.22 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
@@ -176,8 +130,12 @@ extern int cancel_delayed_work_sync(struct delayed_work *work);
 
 #define debugfs_rename(a, b, c, d) 1
 
-/* Eh we need a lot more than this to complete this support. Not
- * a priority for now. This is for nl80211 support */
+/* nl80211 requires multicast group support which is new and added on
+ * 2.6.23. We can't add support for it for older kernels to support it
+ * genl_family structure was changed. Lets just let through the
+ * genl_register_mc_group call. This means no multicast group suppport */
+
+#define genl_register_mc_group(a, b) 0
 
 /**
  * struct genl_multicast_group - generic netlink multicast group
@@ -195,6 +153,7 @@ struct genl_multicast_group
 	u32                     id;
 };
 
+
 /* Added as of 2.6.23 */
 int pci_try_set_mwi(struct pci_dev *dev);
 
@@ -210,8 +169,7 @@ static inline void set_freezable(void)
 
 #else
 static inline void set_freezable(void) {}
-#endif
+#endif /* CONFIG_PM_SLEEP */
 
-#endif
-
-#endif
+#endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)) */
+#endif /* LINUX_26_COMPAT_H */

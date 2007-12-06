@@ -8,6 +8,13 @@
 # git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-2.6.git
 # We assume you have it on your ~/devel/wireless-2.6/ directory. If you do,
 # just run this script from the compat-wireless-2.6 directory.
+# You can specify where your GIT_TREE is by doing:
+#
+# export GIT_TREE=/home/mcgrof/wireless-2.6/
+# 
+# for example
+#
+GIT_URL="git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-2.6.git"
 
 INCLUDE_LINUX="ieee80211.h nl80211.h wireless.h"
 INCLUDE_LINUX="$INCLUDE_LINUX pci_ids.h bitops.h eeprom_93cx6.h"
@@ -16,8 +23,22 @@ INCLUDE_NET="cfg80211.h ieee80211_radiotap.h iw_handler.h"
 INCLUDE_NET="$INCLUDE_NET mac80211.h wext.h wireless.h"
 
 NET_DIRS="wireless mac80211 ieee80211"
-GIT_TREE="/home/$USER/devel/wireless-2.6"
-
+# User exported this variable
+if [ -z $GIT_TREE ]; then
+	GIT_TREE="/home/$USER/devel/wireless-2.6/"
+	if [ ! -d $GIT_TREE ]; then
+		echo "Please tell me where your wireless-2.6 git tree is."
+		echo "You can do this by exporting its location as follows:"
+		echo
+		echo "  export GIT_TREE=/home/mcgrof/wireless-2.6/"
+		echo
+		echo "If you do not have one you can clone the repository:"
+		echo "  git-clone $GIT_URL"
+		exit 1
+	fi
+else
+	echo "You said your wireless-2.6 git tree is: $GIT_TREE"
+fi
 # Drivers that have their own directory
 DRIVERS="drivers/net/wireless/ath5k"
 DRIVERS="$DRIVERS drivers/ssb"
@@ -25,11 +46,13 @@ DRIVERS="$DRIVERS drivers/net/wireless/b43"
 DRIVERS="$DRIVERS drivers/net/wireless/b43legacy"
 DRIVERS="$DRIVERS drivers/net/wireless/iwlwifi"
 DRIVERS="$DRIVERS drivers/net/wireless/rt2x00"
-DRIVERS="$DRIVERS drivers/net/wireless/zd1211rw-mac80211"
+DRIVERS="$DRIVERS drivers/net/wireless/zd1211rw"
 DRIVERS="$DRIVERS drivers/net/wireless/libertas"
 
 # Drivers that belong the the wireless directory
-DRIVER_FILES="rtl818x.h"
+DRIVER_FILES="rtl818x.h rtl8180_sa2400.h rtl8180_max2820.h"
+DRIVER_FILES="$DRIVER_FILES rtl8180_sa2400.h rtl8180_sa2400.c"
+DRIVER_FILES="$DRIVER_FILES rtl8180_max2820.h rtl8180_max2820.c"
 DRIVER_FILES="$DRIVER_FILES rtl8180.h rtl8180_rtl8225.h"
 DRIVER_FILES="$DRIVER_FILES rtl8180_dev.c rtl8180_rtl8225.c"
 DRIVER_FILES="$DRIVER_FILES rtl8187.h rtl8187_rtl8225.h"
@@ -95,10 +118,15 @@ cp $GIT_TREE/$DIR/Makefile $DIR
 cp compat/compat.c net/mac80211/
 cp compat/compat.h include/net/
 
-patch -p1 < compat/compat.diff
+patch -p1 -N -t < compat/compat.diff
+RET=$?
+if [[ $RET -ne 0 ]]; then
+	echo "Patching compat.diff failed, update it"
+	exit $RET
+fi
 DIR="$PWD"
 cd $GIT_TREE && git-describe > $DIR/git-describe && cd $DIR
-echo "Updated ${GIT_TREE##*/}, git-describe says:"
+echo "Updated from ${GIT_TREE}, git-describe says:"
 cat git-describe
 if [ -d ./.git ]; then
 	git-describe > compat-release

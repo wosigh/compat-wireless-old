@@ -113,7 +113,10 @@ for example, wlan0_rename. This is a known issue and will be worked on.
 
 * nl80211:
 
-More compatibility work is needed to add nl80211
+Kernels <= 2.6.22 now get nl80211 support, however, genl_multicast_group
+won't work. This compatibility cannot be extended to older
+kernels as the struct genl_family was extended on 2.6.23 to add
+the struct list_head mcast_groups.
 
 * b43:
 
@@ -196,6 +199,20 @@ Report the bug because you are working with the latest and greatest.
 If your bug is compatibility-related then we should still try to fix
 it within the compat.[ch] work.
 
+ChangeLog
+---------
+
+Here you see the list of changes to all wireless drivers, the wireless core and mac80211.
+
+ * Driver changes:
+http://git.kernel.org/?p=linux/kernel/git/linville/wireless-2.6.git;a=history;f=drivers/net/wireless;
+
+ * Wireless core changes:
+http://git.kernel.org/?p=linux/kernel/git/linville/wireless-2.6.git;a=history;f=net/wireless;
+
+ * mac80211 changes:
+http://git.kernel.org/?p=linux/kernel/git/linville/wireless-2.6.git;a=history;f=net/mac80211;
+
 License
 -------
 
@@ -210,6 +227,11 @@ Developers
 Compatibility work goes into compat/compat.[ch]. If using those files do 
 not suffice additional actual code changes can go into compat/compat.diff.
 
+If you have your own wireless-2.6 git tree, before running admin-update.sh
+be sure to set your GIT_TREE variable. For example:
+
+export GIT_TREE=/home/mcgrof/wireless-2.6/
+
 scripts/admin-clean.sh		- Cleans the compat-wireless-2.6 tree
 scripts/admin-update.sh		- Updates compat-wireless-2.6 with your git tree
 scripts/admin-refresh.sh	- Does the above two
@@ -217,7 +239,6 @@ scripts/admin-refresh.sh	- Does the above two
 TODO
 ----
 
-* Finish nl80211 port
 * Compatibilty work for 2.6.18 --> 2.6.21
 * Dialog (make menuconfig) option for this package 
 

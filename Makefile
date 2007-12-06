@@ -10,11 +10,19 @@ MADWIFI=$(shell modprobe -l ath_pci)
 
 ifneq ($(KERNELRELEASE),)
 
--include $(src)/config.mk
+# Bug: $(src) is not working ??
+include $(src)/config.mk
+export $(COPTS)
+COMPAT_WIRELESS=$(HOME)/devel/compat-wireless-2.6
+EXTRA_CFLAGS += $(COPTS) 
+#NOSTDINC_FLAGS := -I$(PWD)/include/
+NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
 
-# This is a hack! But hey.. it works, got any better ideas, send a patch ;)
-NOSTDINC_FLAGS := -I$(PWD)/include/ $(CFLAGS)
-NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/compat/compat.h $(CFLAGS)
+#NOSTDINC_FLAGS := -I$(PWD)/include/ $(CFLAGS)
+#NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
+
+#NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h
+#NOSTDINC_FLAGS := $(COPTS) $(CFLAGS)
 
 obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
 	drivers/ssb/ \
@@ -31,8 +39,9 @@ modules:
 
 clean:
 	$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean
+	@rm -f *.symvers
 
-install:
+install: modules
 	@# Previous versions of compat installed stuff into different
 	@# directories lets make sure we remove that suff for now.
 	@rm -rf $(KLIB)/$(KMODDIR)/wireless/
