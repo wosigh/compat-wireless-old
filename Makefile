@@ -10,19 +10,12 @@ MADWIFI=$(shell modprobe -l ath_pci)
 
 ifneq ($(KERNELRELEASE),)
 
-# Bug: $(src) is not working ??
 include $(src)/config.mk
 export $(COPTS)
+
 COMPAT_WIRELESS=$(HOME)/devel/compat-wireless-2.6
 EXTRA_CFLAGS += $(COPTS) 
-#NOSTDINC_FLAGS := -I$(PWD)/include/
 NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
-
-#NOSTDINC_FLAGS := -I$(PWD)/include/ $(CFLAGS)
-#NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
-
-#NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h
-#NOSTDINC_FLAGS := $(COPTS) $(CFLAGS)
 
 obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
 	drivers/ssb/ \
