@@ -188,6 +188,14 @@ How about compatibility work for kernels < 2.6.22 ?
 Sure, feel free to send patches. The main work was designed to support 
 kernels >= 2.6.22 as that was when mac80211 was introduced.
 
+Building for external kernels
+----------------------------------
+
+If you have a kernel you do not have installed but yet want to build the
+compat-wireless-2.6 drivers for it you can use this syntax:
+
+make KLIB=/home/mcgrof/kernels/linux-2.6.23.9 KLIB_BUILD=/home/mcgrof/kernels/linux-2.6.23.9
+
 Bugs
 -----
 
@@ -204,14 +212,9 @@ ChangeLog
 
 Here you see the list of changes to all wireless drivers, the wireless core and mac80211.
 
- * Driver changes:
-http://git.kernel.org/?p=linux/kernel/git/linville/wireless-2.6.git;a=history;f=drivers/net/wireless;
+http://git.kernel.org/?p=linux/kernel/git/linville/wireless-2.6.git;a=log;h=everything
 
- * Wireless core changes:
-http://git.kernel.org/?p=linux/kernel/git/linville/wireless-2.6.git;a=history;f=net/wireless;
-
- * mac80211 changes:
-http://git.kernel.org/?p=linux/kernel/git/linville/wireless-2.6.git;a=history;f=net/mac80211;
+This views all the changes on the 'everything' branch of wireless-2.6.git.
 
 License
 -------

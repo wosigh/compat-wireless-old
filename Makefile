@@ -5,7 +5,7 @@ KMODPATH_ARG:=  "INSTALL_MOD_PATH=$(KLIB)"
 else
 KLIB:=          /lib/modules/$(shell uname -r)
 endif
-KLIB_BUILD :=	$(KLIB)/build
+KLIB_BUILD ?=	$(KLIB)/build
 MADWIFI=$(shell modprobe -l ath_pci)
 
 ifneq ($(KERNELRELEASE),)
@@ -13,9 +13,7 @@ ifneq ($(KERNELRELEASE),)
 include $(src)/config.mk
 export $(COPTS)
 
-COMPAT_WIRELESS=$(HOME)/devel/compat-wireless-2.6
-EXTRA_CFLAGS += $(COPTS) 
-NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
+NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(COPTS) $(CFLAGS)
 
 obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
 	drivers/ssb/ \
