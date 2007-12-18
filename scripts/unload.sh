@@ -2,11 +2,11 @@
 
 # The old stack drivers and the mac80211 rc80211_simple modules 
 # which is no longer on recent kernels (its internal)
-OLD_MODULES="rc80211_simple zd1211rw bcm43xx"
+OLD_MODULES="rc80211_simple zd1211rw zd1211rw-mac80211 bcm43xx"
 MODULES="$OLD_MODULES"
-MODULES="$MODULES ieee80211softmac ieee80211_crypt ieee80211"
 MODULES="$MODULES ipw2100 ipw2200"
-MODULES="$MODULES libertas libertas_cs ub8xxx"
+MODULES="$MODULES libertas_cs usb8xxx libertas"
+MODULES="$MODULES ieee80211softmac ieee80211_crypt ieee80211"
 MODULES="$MODULES adm8211"
 MODULES="$MODULES b43 b43legacy"
 MODULES="$MODULES iwl3945 iwl4965"
@@ -33,12 +33,15 @@ if [ -f $IPW3945D ]; then
 fi
 
 grep ath_pci /proc/modules 2>&1 > /dev/null
-if [ $?  -eq 0 ]; then
+if [ $? -eq 0 ]; then
 	echo "MadWifi driver is loaded, going to try to unload it..."
 	./scripts/madwifi-unload
 fi
 
 for i in $MODULES; do
-	echo Unloading $i...
-	modprobe -r --ignore-remove $i
+	grep $i /proc/modules 2>&1 > /dev/null
+	if [ $? -eq 0 ]; then
+		echo Unloading $i...
+		modprobe -r --ignore-remove $i
+	fi
 done

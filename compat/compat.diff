@@ -431,44 +431,6 @@
 -obj-$(CONFIG_THINKPAD_ACPI)	+= thinkpad_acpi.o
 -obj-$(CONFIG_FUJITSU_LAPTOP)	+= fujitsu-laptop.o
  obj-$(CONFIG_EEPROM_93CX6)	+= eeprom_93cx6.o
---- a/drivers/net/wireless/libertas/dev.h	2007-11-15 20:19:33.000000000 -0500
-+++ b/drivers/net/wireless/libertas/dev.h	2007-11-15 20:27:51.000000000 -0500
-@@ -11,6 +11,7 @@
- #include <linux/ethtool.h>
- #include <linux/debugfs.h>
- #include <net/ieee80211.h>
-+#include <net/compat.h>
- 
- #include "defs.h"
- #include "scan.h"
---- a/drivers/net/wireless/libertas/ethtool.c	2007-11-16 19:05:35.000000000 -0500
-+++ b/drivers/net/wireless/libertas/ethtool.c	2007-11-16 19:06:41.000000000 -0500
-@@ -143,6 +143,7 @@
- 	lbs_deb_enter(LBS_DEB_ETHTOOL);
- }
- 
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- static int lbs_ethtool_get_sset_count(struct net_device * dev, int sset)
- {
- 	switch (sset) {
-@@ -152,6 +153,7 @@
- 		return -EOPNOTSUPP;
- 	}
- }
-+#endif
- 
- static void lbs_ethtool_get_strings(struct net_device *dev,
- 					  u32 stringset,
-@@ -177,7 +179,9 @@
- 	.get_drvinfo = lbs_ethtool_get_drvinfo,
- 	.get_eeprom =  lbs_ethtool_get_eeprom,
- 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	.get_sset_count = lbs_ethtool_get_sset_count,
-+#endif
- 	.get_ethtool_stats = lbs_ethtool_get_stats,
- 	.get_strings = lbs_ethtool_get_strings,
- };
 --- a/net/mac80211/util.c	2007-11-27 18:13:44.000000000 -0500
 +++ b/net/mac80211/util.c	2007-11-27 18:13:45.000000000 -0500
 @@ -20,7 +20,9 @@
@@ -550,8 +512,53 @@
  obj-$(CONFIG_LIBERTAS)		+= libertas/
  
  rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o rtl8180_sa2400.o rtl8180_max2820.o
---- a/net/mac80211/ieee80211.c	2007-12-05 20:41:35.000000000 -0500
-+++ b/net/mac80211/ieee80211.c	2007-12-05 20:41:43.000000000 -0500
+--- a/net/wireless/Makefile	2007-12-06 01:00:12.000000000 -0500
++++ b/net/wireless/Makefile	2007-12-06 01:01:51.000000000 -0500
+@@ -1,4 +1,3 @@
+-obj-$(CONFIG_WIRELESS_EXT) += wext.o
+ obj-$(CONFIG_CFG80211) += cfg80211.o
+ 
+ cfg80211-y += core.o sysfs.o radiotap.o
+--- a/drivers/net/wireless/libertas/dev.h	2007-12-18 12:49:31.000000000 -0500
++++ b/drivers/net/wireless/libertas/dev.h	2007-12-18 12:53:34.000000000 -0500
+@@ -10,6 +10,7 @@
+ #include <linux/wireless.h>
+ #include <linux/ethtool.h>
+ #include <linux/debugfs.h>
++#include <net/compat.h>
+ 
+ #include "defs.h"
+ #include "scan.h"
+--- a/drivers/net/wireless/libertas/ethtool.c	2007-12-18 12:54:21.000000000 -0500
++++ b/drivers/net/wireless/libertas/ethtool.c	2007-12-18 12:54:21.000000000 -0500
+@@ -144,6 +144,7 @@
+ 	lbs_deb_enter(LBS_DEB_ETHTOOL);
+ }
+ 
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ static int lbs_ethtool_get_sset_count(struct net_device * dev, int sset)
+ {
+ 	switch (sset) {
+@@ -153,6 +154,7 @@
+ 		return -EOPNOTSUPP;
+ 	}
+ }
++#endif
+ 
+ static void lbs_ethtool_get_strings(struct net_device *dev,
+ 					  u32 stringset,
+@@ -221,7 +223,9 @@
+ 	.get_drvinfo = lbs_ethtool_get_drvinfo,
+ 	.get_eeprom =  lbs_ethtool_get_eeprom,
+ 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	.get_sset_count = lbs_ethtool_get_sset_count,
++#endif
+ 	.get_ethtool_stats = lbs_ethtool_get_stats,
+ 	.get_strings = lbs_ethtool_get_strings,
+ 	.get_wol = lbs_ethtool_get_wol,
+--- a/net/mac80211/ieee80211.c	2007-12-18 13:04:16.000000000 -0500
++++ b/net/mac80211/ieee80211.c	2007-12-18 13:04:25.000000000 -0500
 @@ -21,7 +21,9 @@
  #include <linux/wireless.h>
  #include <linux/rtnetlink.h>
@@ -562,17 +569,7 @@
  #include <net/cfg80211.h>
  
  #include "ieee80211_i.h"
-@@ -432,7 +434,9 @@
- void ieee80211_if_setup(struct net_device *dev)
- {
- 	ether_setup(dev);
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	dev->header_ops = &ieee80211_header_ops;
-+#endif
- 	dev->hard_start_xmit = ieee80211_subif_start_xmit;
- 	dev->wireless_handlers = &ieee80211_iw_handler_def;
- 	dev->set_multicast_list = ieee80211_set_multicast_list;
-@@ -1068,7 +1072,9 @@
+@@ -1067,7 +1069,9 @@
  	mdev->open = ieee80211_master_open;
  	mdev->stop = ieee80211_master_stop;
  	mdev->type = ARPHRD_IEEE80211;
@@ -582,10 +579,3 @@
  	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
  
  	sdata->type = IEEE80211_IF_TYPE_AP;
---- a/net/wireless/Makefile	2007-12-06 01:00:12.000000000 -0500
-+++ b/net/wireless/Makefile	2007-12-06 01:01:51.000000000 -0500
-@@ -1,4 +1,3 @@
--obj-$(CONFIG_WIRELESS_EXT) += wext.o
- obj-$(CONFIG_CFG80211) += cfg80211.o
- 
- cfg80211-y += core.o sysfs.o radiotap.o

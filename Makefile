@@ -29,19 +29,12 @@ modules:
 	$(MAKE) -C $(KLIB_BUILD) M=$(PWD) modules
 
 clean:
-	$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean
+	@if [ -d net ]; then \
+		$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean ;\
+	fi
 	@rm -f *.symvers
 
 install: modules
-	@# Previous versions of compat installed stuff into different
-	@# directories lets make sure we remove that suff for now.
-	@rm -rf $(KLIB)/$(KMODDIR)/wireless/
-	@rm -rf $(KLIB)/$(KMODDIR)/mac80211/
-	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ath5k/
-	@rm -rf $(KLIB)/$(KMODDIR)/drivers/iwlwifi/
-	@rm -rf $(KLIB)/$(KMODDIR)/drivers/b43/
-	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ssb/
-	@rm -rf $(KLIB)/$(KMODDIR)/drivers/zd1211rw-mac80211/
 	@$(MAKE) -C $(KLIB_BUILD) M=$(PWD) $(KMODDIR_ARG) $(KMODPATH_ARG) \
 		modules_install
 	@# All the scripts we can use
@@ -82,8 +75,8 @@ install: modules
 	@modprobe -l ieee80211_crypt
 	@modprobe -l libertas_cs
 	@modprobe -l ub8xxx
-	@modprobe -l p54pci
-	@modprobe -l p54usb
+	@modprobe -l p54_pci
+	@modprobe -l p54_usb
 	@modprobe -l rt2400pci
 	@modprobe -l rt2500pci
 	@modprobe -l rt2500usb
@@ -93,7 +86,7 @@ install: modules
 	@modprobe -l rtl8187
 	@# rc80211_simple is no longer a module
 	@#modprobe -l rc80211_simple
-	@modprobe -l zd1211rw-mac80211
+	@modprobe -l zd1211rw
 	@echo 
 	@echo Now run: make load
 	@echo
@@ -145,7 +138,7 @@ uninstall:
 	@modprobe -l rtl8187
 	@# rc80211_simple is no longer a module
 	@#modprobe -l rc80211_simple
-	@modprobe -l zd1211rw-mac80211
+	@modprobe -l zd1211rw
 	@# Old kernels have ieee80211softmac, this will be removed soon :)
 	@modprobe -l ieee80211softmac
 	@
