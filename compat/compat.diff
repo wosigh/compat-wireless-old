@@ -8,14 +8,6 @@
  
  /*
   * 802.11 configuration in-kernel interface
---- a/net/mac80211/Makefile	2007-11-10 17:52:07.000000000 -0500
-+++ b/net/mac80211/Makefile	2007-11-10 17:52:38.000000000 -0500
-@@ -24,4 +24,5 @@
- 	key.o \
- 	util.o \
- 	event.o \
-+	compat.o \
- 	$(mac80211-objs-y)
 --- a/net/mac80211/tx.c	2007-11-09 13:14:28.000000000 -0500
 +++ b/net/mac80211/tx.c	2007-11-09 15:40:09.000000000 -0500
 @@ -18,7 +18,9 @@
@@ -123,18 +115,6 @@
  
  static struct bus_type ssb_bustype = {
  	.name		= "ssb",
---- a/net/mac80211/cfg.c	2007-11-13 17:02:24.000000000 -0500
-+++ b/net/mac80211/cfg.c	2007-11-13 17:02:39.000000000 -0500
-@@ -8,7 +8,9 @@
- 
- #include <linux/nl80211.h>
- #include <linux/rtnetlink.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- #include "ieee80211_i.h"
- #include "cfg.h"
 --- a/drivers/net/wireless/adm8211.h	2007-11-15 19:12:07.000000000 -0500
 +++ b/drivers/net/wireless/adm8211.h	2007-11-15 20:01:20.000000000 -0500
 @@ -416,8 +416,13 @@
@@ -161,8 +141,126 @@
  
  	u32 nar;
  
---- a/drivers/net/wireless/adm8211.c	2007-11-15 19:11:53.000000000 -0500
-+++ b/drivers/net/wireless/adm8211.c	2007-11-15 20:03:15.000000000 -0500
+--- a/drivers/misc/Makefile	2007-11-15 22:15:29.000000000 -0500
++++ b/drivers/misc/Makefile	2007-11-15 22:15:45.000000000 -0500
+@@ -3,17 +3,4 @@
+ #
+ obj- := misc.o	# Dummy rule to force built-in.o to be made
+ 
+-obj-$(CONFIG_IBM_ASM)		+= ibmasm/
+-obj-$(CONFIG_HDPU_FEATURES)	+= hdpuftrs/
+-obj-$(CONFIG_MSI_LAPTOP)     += msi-laptop.o
+-obj-$(CONFIG_ASUS_LAPTOP)     += asus-laptop.o
+-obj-$(CONFIG_ATMEL_SSC)		+= atmel-ssc.o
+-obj-$(CONFIG_LKDTM)		+= lkdtm.o
+-obj-$(CONFIG_TIFM_CORE)       	+= tifm_core.o
+-obj-$(CONFIG_TIFM_7XX1)       	+= tifm_7xx1.o
+-obj-$(CONFIG_PHANTOM)		+= phantom.o
+-obj-$(CONFIG_SGI_IOC4)		+= ioc4.o
+-obj-$(CONFIG_SONY_LAPTOP)	+= sony-laptop.o
+-obj-$(CONFIG_THINKPAD_ACPI)	+= thinkpad_acpi.o
+-obj-$(CONFIG_FUJITSU_LAPTOP)	+= fujitsu-laptop.o
+ obj-$(CONFIG_EEPROM_93CX6)	+= eeprom_93cx6.o
+--- a/net/mac80211/util.c	2007-11-27 18:13:44.000000000 -0500
++++ b/net/mac80211/util.c	2007-11-27 18:13:45.000000000 -0500
+@@ -20,7 +20,9 @@
+ #include <linux/if_arp.h>
+ #include <linux/wireless.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ #include <net/rtnetlink.h>
+ 
+--- a/net/ieee80211/Makefile	2007-11-27 20:00:21.000000000 -0500
++++ b/net/ieee80211/Makefile	2007-11-27 19:58:36.000000000 -0500
+@@ -10,4 +10,3 @@
+ 	ieee80211_wx.o \
+ 	ieee80211_geo.o
+ 
+-obj-$(CONFIG_IEEE80211_SOFTMAC) += softmac/
+--- a/net/ieee80211/ieee80211_module.c	2007-11-27 19:55:49.000000000 -0500
++++ b/net/ieee80211/ieee80211_module.c	2007-11-27 19:56:25.000000000 -0500
+@@ -47,7 +47,9 @@
+ #include <linux/wireless.h>
+ #include <linux/etherdevice.h>
+ #include <asm/uaccess.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/arp.h>
+ 
+ #include <net/ieee80211.h>
+--- a/net/wireless/Makefile	2007-12-06 01:00:12.000000000 -0500
++++ b/net/wireless/Makefile	2007-12-06 01:01:51.000000000 -0500
+@@ -1,4 +1,3 @@
+-obj-$(CONFIG_WIRELESS_EXT) += wext.o
+ obj-$(CONFIG_CFG80211) += cfg80211.o
+ 
+ cfg80211-y += core.o sysfs.o radiotap.o
+--- a/drivers/net/wireless/libertas/dev.h	2007-12-18 12:49:31.000000000 -0500
++++ b/drivers/net/wireless/libertas/dev.h	2007-12-18 12:53:34.000000000 -0500
+@@ -10,6 +10,7 @@
+ #include <linux/wireless.h>
+ #include <linux/ethtool.h>
+ #include <linux/debugfs.h>
++#include <net/compat.h>
+ 
+ #include "defs.h"
+ #include "scan.h"
+--- a/drivers/net/wireless/libertas/ethtool.c	2007-12-18 12:54:21.000000000 -0500
++++ b/drivers/net/wireless/libertas/ethtool.c	2007-12-18 12:54:21.000000000 -0500
+@@ -144,6 +144,7 @@
+ 	lbs_deb_enter(LBS_DEB_ETHTOOL);
+ }
+ 
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ static int lbs_ethtool_get_sset_count(struct net_device * dev, int sset)
+ {
+ 	switch (sset) {
+@@ -153,6 +154,7 @@
+ 		return -EOPNOTSUPP;
+ 	}
+ }
++#endif
+ 
+ static void lbs_ethtool_get_strings(struct net_device *dev,
+ 					  u32 stringset,
+@@ -221,7 +223,9 @@
+ 	.get_drvinfo = lbs_ethtool_get_drvinfo,
+ 	.get_eeprom =  lbs_ethtool_get_eeprom,
+ 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	.get_sset_count = lbs_ethtool_get_sset_count,
++#endif
+ 	.get_ethtool_stats = lbs_ethtool_get_stats,
+ 	.get_strings = lbs_ethtool_get_strings,
+ 	.get_wol = lbs_ethtool_get_wol,
+--- a/net/mac80211/Makefile	2007-12-20 14:42:53.000000000 -0500
++++ b/net/mac80211/Makefile	2007-12-20 14:42:54.000000000 -0500
+@@ -27,6 +27,7 @@
+ 	key.o \
+ 	util.o \
+ 	event.o \
++	compat.o \
+ 	$(mac80211-objs-y)
+ 
+ ifneq ($(CONFIG_MAC80211_RC_PID),y)
+--- a/net/mac80211/cfg.c	2007-12-20 14:42:53.000000000 -0500
++++ b/net/mac80211/cfg.c	2007-12-20 14:48:07.000000000 -0500
+@@ -9,7 +9,9 @@
+ #include <linux/ieee80211.h>
+ #include <linux/nl80211.h>
+ #include <linux/rtnetlink.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <linux/rcupdate.h>
+ #include <net/cfg80211.h>
+ #include "ieee80211_i.h"
+--- a/drivers/net/wireless/adm8211.c	2007-12-20 14:42:54.000000000 -0500
++++ b/drivers/net/wireless/adm8211.c	2007-12-20 14:42:54.000000000 -0500
 @@ -117,7 +117,11 @@
  		break;
  
@@ -377,7 +475,7 @@
  		reg = ADM8211_CSR_READ(CSR_TEST1);
  		reg &= ~((1 << 4) | (1 << 5));
  		ADM8211_CSR_WRITE(CSR_TEST1, reg);
-@@ -1866,6 +1942,9 @@
+@@ -1867,6 +1943,9 @@
  		       pci_name(pdev));
  		goto err_iounmap;
  	}
@@ -387,7 +485,7 @@
  
  	*(u32 *)perm_addr = le32_to_cpu((__force __le32)ADM8211_CSR_READ(PAR0));
  	*(u16 *)&perm_addr[4] =
-@@ -1901,7 +1980,11 @@
+@@ -1902,7 +1981,11 @@
  	priv->mode = IEEE80211_IF_TYPE_INVALID;
  
  	/* Power-on issue. EEPROM won't read correctly without */
@@ -399,7 +497,7 @@
  		ADM8211_CSR_WRITE(FRCTL, 0);
  		ADM8211_CSR_READ(FRCTL);
  		ADM8211_CSR_WRITE(FRCTL, 1);
-@@ -1934,7 +2017,11 @@
+@@ -1935,7 +2018,11 @@
  
  	printk(KERN_INFO "%s: hwaddr %s, Rev 0x%02x\n",
  	       wiphy_name(dev->wiphy), print_mac(mac, dev->wiphy->perm_addr),
@@ -411,59 +509,8 @@
  
  	return 0;
  
---- a/drivers/misc/Makefile	2007-11-15 22:15:29.000000000 -0500
-+++ b/drivers/misc/Makefile	2007-11-15 22:15:45.000000000 -0500
-@@ -3,17 +3,4 @@
- #
- obj- := misc.o	# Dummy rule to force built-in.o to be made
- 
--obj-$(CONFIG_IBM_ASM)		+= ibmasm/
--obj-$(CONFIG_HDPU_FEATURES)	+= hdpuftrs/
--obj-$(CONFIG_MSI_LAPTOP)     += msi-laptop.o
--obj-$(CONFIG_ASUS_LAPTOP)     += asus-laptop.o
--obj-$(CONFIG_ATMEL_SSC)		+= atmel-ssc.o
--obj-$(CONFIG_LKDTM)		+= lkdtm.o
--obj-$(CONFIG_TIFM_CORE)       	+= tifm_core.o
--obj-$(CONFIG_TIFM_7XX1)       	+= tifm_7xx1.o
--obj-$(CONFIG_PHANTOM)		+= phantom.o
--obj-$(CONFIG_SGI_IOC4)		+= ioc4.o
--obj-$(CONFIG_SONY_LAPTOP)	+= sony-laptop.o
--obj-$(CONFIG_THINKPAD_ACPI)	+= thinkpad_acpi.o
--obj-$(CONFIG_FUJITSU_LAPTOP)	+= fujitsu-laptop.o
- obj-$(CONFIG_EEPROM_93CX6)	+= eeprom_93cx6.o
---- a/net/mac80211/util.c	2007-11-27 18:13:44.000000000 -0500
-+++ b/net/mac80211/util.c	2007-11-27 18:13:45.000000000 -0500
-@@ -20,7 +20,9 @@
- #include <linux/if_arp.h>
- #include <linux/wireless.h>
- #include <linux/bitmap.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- #include <net/rtnetlink.h>
- 
---- a/net/ieee80211/Makefile	2007-11-27 20:00:21.000000000 -0500
-+++ b/net/ieee80211/Makefile	2007-11-27 19:58:36.000000000 -0500
-@@ -10,4 +10,3 @@
- 	ieee80211_wx.o \
- 	ieee80211_geo.o
- 
--obj-$(CONFIG_IEEE80211_SOFTMAC) += softmac/
---- a/net/ieee80211/ieee80211_module.c	2007-11-27 19:55:49.000000000 -0500
-+++ b/net/ieee80211/ieee80211_module.c	2007-11-27 19:56:25.000000000 -0500
-@@ -47,7 +47,9 @@
- #include <linux/wireless.h>
- #include <linux/etherdevice.h>
- #include <asm/uaccess.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/arp.h>
- 
- #include <net/ieee80211.h>
---- a/drivers/net/wireless/Makefile	2007-12-05 20:38:37.000000000 -0500
-+++ b/drivers/net/wireless/Makefile	2007-12-05 20:39:35.000000000 -0500
+--- a/drivers/net/wireless/Makefile	2007-12-20 14:42:54.000000000 -0500
++++ b/drivers/net/wireless/Makefile	2007-12-20 14:42:54.000000000 -0500
 @@ -6,47 +6,10 @@
  
  obj-$(CONFIG_IPW2200) += ipw2200.o
@@ -511,54 +558,9 @@
 -obj-$(CONFIG_USB_ZD1201)	+= zd1201.o
  obj-$(CONFIG_LIBERTAS)		+= libertas/
  
- rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o rtl8180_sa2400.o rtl8180_max2820.o
---- a/net/wireless/Makefile	2007-12-06 01:00:12.000000000 -0500
-+++ b/net/wireless/Makefile	2007-12-06 01:01:51.000000000 -0500
-@@ -1,4 +1,3 @@
--obj-$(CONFIG_WIRELESS_EXT) += wext.o
- obj-$(CONFIG_CFG80211) += cfg80211.o
- 
- cfg80211-y += core.o sysfs.o radiotap.o
---- a/drivers/net/wireless/libertas/dev.h	2007-12-18 12:49:31.000000000 -0500
-+++ b/drivers/net/wireless/libertas/dev.h	2007-12-18 12:53:34.000000000 -0500
-@@ -10,6 +10,7 @@
- #include <linux/wireless.h>
- #include <linux/ethtool.h>
- #include <linux/debugfs.h>
-+#include <net/compat.h>
- 
- #include "defs.h"
- #include "scan.h"
---- a/drivers/net/wireless/libertas/ethtool.c	2007-12-18 12:54:21.000000000 -0500
-+++ b/drivers/net/wireless/libertas/ethtool.c	2007-12-18 12:54:21.000000000 -0500
-@@ -144,6 +144,7 @@
- 	lbs_deb_enter(LBS_DEB_ETHTOOL);
- }
- 
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- static int lbs_ethtool_get_sset_count(struct net_device * dev, int sset)
- {
- 	switch (sset) {
-@@ -153,6 +154,7 @@
- 		return -EOPNOTSUPP;
- 	}
- }
-+#endif
- 
- static void lbs_ethtool_get_strings(struct net_device *dev,
- 					  u32 stringset,
-@@ -221,7 +223,9 @@
- 	.get_drvinfo = lbs_ethtool_get_drvinfo,
- 	.get_eeprom =  lbs_ethtool_get_eeprom,
- 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	.get_sset_count = lbs_ethtool_get_sset_count,
-+#endif
- 	.get_ethtool_stats = lbs_ethtool_get_stats,
- 	.get_strings = lbs_ethtool_get_strings,
- 	.get_wol = lbs_ethtool_get_wol,
---- a/net/mac80211/ieee80211.c	2007-12-18 13:04:16.000000000 -0500
-+++ b/net/mac80211/ieee80211.c	2007-12-18 13:04:25.000000000 -0500
+ rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o rtl8180_sa2400.o rtl8180_max2820.o rtl8180_grf5101.o
+--- a/net/mac80211/ieee80211.c	2007-12-20 14:42:53.000000000 -0500
++++ b/net/mac80211/ieee80211.c	2007-12-20 14:42:54.000000000 -0500
 @@ -21,7 +21,9 @@
  #include <linux/wireless.h>
  #include <linux/rtnetlink.h>
@@ -569,7 +571,7 @@
  #include <net/cfg80211.h>
  
  #include "ieee80211_i.h"
-@@ -1067,7 +1069,9 @@
+@@ -1076,7 +1078,9 @@
  	mdev->open = ieee80211_master_open;
  	mdev->stop = ieee80211_master_stop;
  	mdev->type = ARPHRD_IEEE80211;
@@ -578,4 +580,4 @@
 +#endif
  	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
  
- 	sdata->type = IEEE80211_IF_TYPE_AP;
+ 	sdata->vif.type = IEEE80211_IF_TYPE_AP;

@@ -8,6 +8,7 @@
 #include <net/neighbour.h>
 #include <linux/version.h>
 #include <linux/scatterlist.h>
+#include <linux/usb.h>
 
 /* Compat work for 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
@@ -98,6 +99,17 @@ static inline void sg_mark_end(struct scatterlist *sg)
 static inline void sg_init_table(struct scatterlist *sgl, unsigned int nents)
 {
 	memset(sgl, 0, sizeof(*sgl) * nents);
+}
+
+/**
+ * usb_endpoint_num - get the endpoint's number
+ * @epd: endpoint to be checked
+ *
+ * Returns @epd's number: 0 to 15.
+ */
+static inline int usb_endpoint_num(const struct usb_endpoint_descriptor *epd)
+{
+	return epd->bEndpointAddress & USB_ENDPOINT_NUMBER_MASK;
 }
 
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)) */

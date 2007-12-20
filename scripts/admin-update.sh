@@ -19,7 +19,10 @@ GIT_URL="git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-2.6.git
 INCLUDE_LINUX="ieee80211.h nl80211.h wireless.h"
 INCLUDE_LINUX="$INCLUDE_LINUX pci_ids.h bitops.h eeprom_93cx6.h"
 
-INCLUDE_NET="cfg80211.h ieee80211_radiotap.h iw_handler.h"
+# Stuff that should die or be merged, only ipw uses it
+INCLUDE_NET_OLD="ieee80211.h ieee80211_crypt.h"
+# The good new yummy stuff
+INCLUDE_NET="$INCLUDE_NET_OLD cfg80211.h ieee80211_radiotap.h iw_handler.h"
 INCLUDE_NET="$INCLUDE_NET mac80211.h wext.h wireless.h"
 
 NET_DIRS="wireless mac80211 ieee80211"
@@ -56,6 +59,7 @@ DRIVER_FILES="$DRIVER_FILES rtl8180_max2820.h rtl8180_max2820.c"
 DRIVER_FILES="$DRIVER_FILES rtl8180.h rtl8180_rtl8225.h"
 DRIVER_FILES="$DRIVER_FILES rtl8180_dev.c rtl8180_rtl8225.c"
 DRIVER_FILES="$DRIVER_FILES rtl8187.h rtl8187_rtl8225.h"
+DRIVER_FILES="$DRIVER_FILES rtl8180_grf5101.c rtl8180_grf5101.h"
 DRIVER_FILES="$DRIVER_FILES rtl8187_dev.c rtl8187_rtl8225.c"
 DRIVER_FILES="$DRIVER_FILES adm8211.c  adm8211.h"
 DRIVER_FILES="$DRIVER_FILES p54.h p54common.h p54common.c net2280.h"
