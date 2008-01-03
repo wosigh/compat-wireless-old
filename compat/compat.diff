@@ -237,16 +237,6 @@
  	.get_ethtool_stats = lbs_ethtool_get_stats,
  	.get_strings = lbs_ethtool_get_strings,
  	.get_wol = lbs_ethtool_get_wol,
---- a/net/mac80211/Makefile	2007-12-20 14:42:53.000000000 -0500
-+++ b/net/mac80211/Makefile	2007-12-20 14:42:54.000000000 -0500
-@@ -27,6 +27,7 @@
- 	key.o \
- 	util.o \
- 	event.o \
-+	compat.o \
- 	$(mac80211-objs-y)
- 
- ifneq ($(CONFIG_MAC80211_RC_PID),y)
 --- a/net/mac80211/cfg.c	2007-12-20 14:42:53.000000000 -0500
 +++ b/net/mac80211/cfg.c	2007-12-20 14:48:07.000000000 -0500
 @@ -9,7 +9,9 @@
@@ -581,3 +571,11 @@
  	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
  
  	sdata->vif.type = IEEE80211_IF_TYPE_AP;
+--- a/net/mac80211/Makefile.orig	2008-01-02 17:03:50.000000000 -0500
++++ b/net/mac80211/Makefile	2008-01-02 17:03:50.000000000 -0500
+@@ -32,4 +32,5 @@
+ 	key.o \
+ 	util.o \
+ 	event.o \
++	compat.o \
+ 	$(mac80211-objs-y)
