@@ -29,7 +29,7 @@ modules:
 	$(MAKE) -C $(KLIB_BUILD) M=$(PWD) modules
 
 clean:
-	@if [ -d net ]; then \
+	@if [ -d net -a -d $(KLIB_BUILD) ]; then \
 		$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean ;\
 	fi
 	@rm -f *.symvers
