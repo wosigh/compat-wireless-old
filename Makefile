@@ -8,12 +8,19 @@ endif
 KLIB_BUILD ?=	$(KLIB)/build
 MADWIFI=$(shell modprobe -l ath_pci)
 
+# These exported as they are used by the scripts
+# to check config and compat autoconf
+export COMPAT_CONFIG=config.mk
+export CONFIG_CHECK=.$(COMPAT_CONFIG)_md5sum.txt
+export COMPAT_AUTOCONF=include/linux/compat_autoconf.h
+export CREL=$(shell cat $(PWD)/compat-release)
+export CREL_CHECK:=.compat_autoconf_$(CREL)
+
+include $(PWD)/$(COMPAT_CONFIG)
+
 ifneq ($(KERNELRELEASE),)
 
-include $(src)/config.mk
-export $(COPTS)
-
-NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(COPTS) $(CFLAGS)
+NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
 
 obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
 	drivers/ssb/ \
@@ -25,14 +32,19 @@ export PWD :=	$(shell pwd)
 
 all: modules
 
-modules:
+modules: $(CREL_CHECK)
+	@./scripts/check_config.sh
 	$(MAKE) -C $(KLIB_BUILD) M=$(PWD) modules
 
-clean:
-	@if [ -d net -a -d $(KLIB_BUILD) ]; then \
-		$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean ;\
-	fi
-	@rm -f *.symvers
+# With the above and this we make sure we generate a new compat autoconf per
+# new relase of compat-wireless-2.6 OR when the user updates the 
+# $(COMPAT_CONFIG) file
+$(CREL_CHECK):
+	@# Force to regenerate compat autoconf
+	@rm -f $(CONFIG_CHECK)
+	@./scripts/check_config.sh
+	@touch $@
+	@md5sum $(COMPAT_CONFIG) > $(CONFIG_CHECK)
 
 install: modules
 	@$(MAKE) -C $(KLIB_BUILD) M=$(PWD) $(KMODDIR_ARG) $(KMODPATH_ARG) \
@@ -144,6 +156,10 @@ uninstall:
 	@
 	@echo 
 
+clean:
+	@if [ -d net -a -d $(KLIB_BUILD) ]; then \
+		$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean ;\
+	fi
 unload:
 	@./scripts/unload.sh
 
@@ -153,3 +169,5 @@ load: unload
 .PHONY: all clean install uninstall unload load
 
 endif
+
+clean-files += Module.symvers $(CREL_CHECK) $(CONFIG_CHECK)

@@ -9,6 +9,7 @@
 #include <linux/version.h>
 #include <linux/scatterlist.h>
 #include <linux/usb.h>
+#include <linux/compat_autoconf.h>
 
 /* Compat work for 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
