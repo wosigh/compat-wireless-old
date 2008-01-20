@@ -8,6 +8,22 @@ endif
 KLIB_BUILD ?=	$(KLIB)/build
 MADWIFI=$(shell modprobe -l ath_pci)
 
+
+ifneq ($(KERNELRELEASE),)
+
+include $(src)/$(COMPAT_CONFIG)
+
+NOSTDINC_FLAGS := -I$(src)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
+
+obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
+	drivers/ssb/ \
+	drivers/misc/ \
+	drivers/net/wireless/
+
+else
+
+export PWD :=	$(shell pwd)
+
 # These exported as they are used by the scripts
 # to check config and compat autoconf
 export COMPAT_CONFIG=config.mk
@@ -17,18 +33,6 @@ export CREL=$(shell cat $(PWD)/compat-release)
 export CREL_CHECK:=.compat_autoconf_$(CREL)
 
 include $(PWD)/$(COMPAT_CONFIG)
-
-ifneq ($(KERNELRELEASE),)
-
-NOSTDINC_FLAGS := -I$(PWD)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
-
-obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
-	drivers/ssb/ \
-	drivers/misc/ \
-	drivers/net/wireless/
-
-else
-export PWD :=	$(shell pwd)
 
 all: modules
 
