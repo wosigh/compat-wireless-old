@@ -14,7 +14,8 @@ CONFIG_CFG80211=m
 CONFIG_NL80211=y
 
 # Drivers
-CONFIG_ATH5K=m
+# Note: currently broken, needs updating after new mode changes
+CONFIG_ATH5K=n
 CONFIG_IWL3945=m
 CONFIG_IWL4965=m
 CONFIG_ZD1211RW=m
@@ -41,6 +42,14 @@ CONFIG_B43LEGACY_DMA_AND_PIO_MODE=y
 
 # This is required for some cards
 CONFIG_EEPROM_93CX6=m
+
+# Wireless RNDIS USB support (RTL8185 802.11g) A-Link WL54PC
+# All of these devices are based on Broadcom 4320 chip which
+# is only wireless RNDIS chip known to date.
+# Note: this depends on CONFIG_USB_NET_RNDIS_HOST and CONFIG_USB_NET_CDCETHER
+# it also requires a new RNDIS_HOST module which we add
+CONFIG_USB_NET_RNDIS_HOST=m
+CONFIG_USB_NET_RNDIS_WEXT=m
 
 # Realtek
 CONFIG_RTL8180=m

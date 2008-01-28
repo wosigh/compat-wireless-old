@@ -19,6 +19,9 @@ GIT_URL="git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-2.6.git
 INCLUDE_LINUX="ieee80211.h nl80211.h wireless.h"
 INCLUDE_LINUX="$INCLUDE_LINUX pci_ids.h bitops.h eeprom_93cx6.h"
 
+# For rndis_wext
+INCLUDE_LINUX_USB="usbnet.h rndis_host.h"
+
 # Stuff that should die or be merged, only ipw uses it
 INCLUDE_NET_OLD="ieee80211.h ieee80211_crypt.h"
 # The good new yummy stuff
@@ -67,10 +70,12 @@ DRIVER_FILES="$DRIVER_FILES p54pci.h p54pci.c"
 DRIVER_FILES="$DRIVER_FILES p54usb.h p54usb.c"
 DRIVER_FILES="$DRIVER_FILES ipw2100.h ipw2100.c"
 DRIVER_FILES="$DRIVER_FILES ipw2200.h ipw2200.c"
+DRIVER_FILES="$DRIVER_FILES rndis_wext.c"
 
-mkdir -p include/linux/ include/net/ \
+mkdir -p include/linux/ include/net/ include/linux/usb \
 	net/mac80211/ net/wireless/ net/ieee80211/ \
 	drivers/ssb/ \
+	drivers/net/usb/ \
 	drivers/net/wireless/
 
 # include/linux
@@ -89,6 +94,12 @@ for i in $INCLUDE_NET; do
 	cp "$GIT_TREE/$DIR/$i" $DIR/
 done
 
+DIR="include/linux/usb"
+for i in $INCLUDE_LINUX_USB; do
+	echo "Copying $GIT_TREE/$DIR/$i"
+	cp $GIT_TREE/$DIR/$i $DIR/
+done
+
 # net/wireless and net/mac80211
 for i in $NET_DIRS; do
 	echo "Copying $GIT_TREE/net/$i/*.[ch]"
@@ -100,10 +111,18 @@ done
 # Drivers in their own directory
 for i in $DRIVERS; do
 	mkdir -p $i
+	echo "Copying $GIT_TREE/$i/*.[ch]"
 	cp $GIT_TREE/$i/*.[ch] $i/
 	cp $GIT_TREE/$i/Makefile $i/
 	rm -f $i/*.mod.c
 done
+
+# For rndis_wext, we need a new rndis_host
+DIR="drivers/net/usb"
+echo "Copying $GIT_TREE/$DIR/rndis_host.c"
+cp $GIT_TREE/$DIR/rndis_host.c $DIR/
+echo "Copying $GIT_TREE/$DIR/Makefile"
+cp $GIT_TREE/$DIR/Makefile $DIR/
 
 # Misc
 mkdir -p drivers/misc/

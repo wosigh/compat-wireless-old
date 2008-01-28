@@ -18,6 +18,7 @@ NOSTDINC_FLAGS := -I$(src)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
 obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
 	drivers/ssb/ \
 	drivers/misc/ \
+	drivers/net/usb/ \
 	drivers/net/wireless/
 
 else
@@ -50,7 +51,7 @@ $(CREL_CHECK):
 	@touch $@
 	@md5sum $(COMPAT_CONFIG) > $(CONFIG_CHECK)
 
-install: modules
+install: uninstall modules
 	@$(MAKE) -C $(KLIB_BUILD) M=$(PWD) $(KMODDIR_ARG) $(KMODPATH_ARG) \
 		modules_install
 	@# All the scripts we can use
@@ -98,6 +99,8 @@ install: modules
 	@modprobe -l rt2500usb
 	@modprobe -l rt61pci
 	@modprobe -l rt73usb
+	@modprobe -l rndis_host
+	@modprobe -l rndis_wext
 	@modprobe -l rtl8180
 	@modprobe -l rtl8187
 	@# rc80211_simple is no longer a module
@@ -115,6 +118,7 @@ uninstall:
 	@rm -rf $(KLIB)/$(KMODDIR)/net/wireless/
 	@rm -rf $(KLIB)/$(KMODDIR)/net/ieee80211/
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/ssb/
+	@rm -rf $(KLIB)/$(KMODDIR)/drivers/net/usb/
 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/net/wireless/
 	@# Lets only remove the stuff we are sure we are providing
 	@# on the misc directory.
@@ -150,6 +154,8 @@ uninstall:
 	@modprobe -l rt2500usb
 	@modprobe -l rt61pci
 	@modprobe -l rt73usb
+	@modprobe -l rndis_host
+	@modprobe -l rndis_wext
 	@modprobe -l rtl8180
 	@modprobe -l rtl8187
 	@# rc80211_simple is no longer a module
