@@ -280,28 +280,6 @@
  	event.o
  
  mac80211-$(CONFIG_MAC80211_LEDS) += ieee80211_led.o
---- a/net/mac80211/ieee80211.c	2008-01-26 19:37:05.000000000 -0500
-+++ b/net/mac80211/ieee80211.c	2008-01-26 19:37:05.000000000 -0500
-@@ -21,7 +21,9 @@
- #include <linux/wireless.h>
- #include <linux/rtnetlink.h>
- #include <linux/bitmap.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- 
- #include "ieee80211_i.h"
-@@ -1084,7 +1086,9 @@
- 	mdev->open = ieee80211_master_open;
- 	mdev->stop = ieee80211_master_stop;
- 	mdev->type = ARPHRD_IEEE80211;
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	mdev->header_ops = &ieee80211_header_ops;
-+#endif
- 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
- 
- 	sdata->vif.type = IEEE80211_IF_TYPE_AP;
 --- a/drivers/net/wireless/adm8211.c	2008-01-26 19:37:05.000000000 -0500
 +++ b/drivers/net/wireless/adm8211.c	2008-01-26 19:37:05.000000000 -0500
 @@ -143,7 +143,11 @@
@@ -552,8 +530,54 @@
  
  	return 0;
  
---- a/drivers/net/wireless/Makefile	2008-01-26 19:37:05.000000000 -0500
-+++ b/drivers/net/wireless/Makefile	2008-01-26 19:45:21.000000000 -0500
+--- a/drivers/net/usb/Makefile	2008-01-28 11:00:13.000000000 -0500
++++ b/drivers/net/usb/Makefile	2008-01-28 11:00:31.000000000 -0500
+@@ -2,21 +2,7 @@
+ # Makefile for USB Network drivers
+ #
+ 
+-obj-$(CONFIG_USB_CATC)		+= catc.o
+-obj-$(CONFIG_USB_KAWETH)	+= kaweth.o
+-obj-$(CONFIG_USB_PEGASUS)	+= pegasus.o
+-obj-$(CONFIG_USB_RTL8150)	+= rtl8150.o
+-obj-$(CONFIG_USB_NET_AX8817X)	+= asix.o
+-obj-$(CONFIG_USB_NET_CDCETHER)	+= cdc_ether.o
+-obj-$(CONFIG_USB_NET_DM9601)	+= dm9601.o
+-obj-$(CONFIG_USB_NET_GL620A)	+= gl620a.o
+-obj-$(CONFIG_USB_NET_NET1080)	+= net1080.o
+-obj-$(CONFIG_USB_NET_PLUSB)	+= plusb.o
+ obj-$(CONFIG_USB_NET_RNDIS_HOST)	+= rndis_host.o
+-obj-$(CONFIG_USB_NET_CDC_SUBSET)	+= cdc_subset.o
+-obj-$(CONFIG_USB_NET_ZAURUS)	+= zaurus.o
+-obj-$(CONFIG_USB_NET_MCS7830)	+= mcs7830.o
+-obj-$(CONFIG_USB_USBNET)	+= usbnet.o
+ 
+ ifeq ($(CONFIG_USB_DEBUG),y)
+ EXTRA_CFLAGS += -DDEBUG
+--- a/net/mac80211/ieee80211.c	2008-01-30 03:51:28.000000000 -0500
++++ b/net/mac80211/ieee80211.c	2008-01-30 03:51:28.000000000 -0500
+@@ -21,7 +21,9 @@
+ #include <linux/wireless.h>
+ #include <linux/rtnetlink.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ 
+ #include "ieee80211_i.h"
+@@ -1423,7 +1425,9 @@
+ 	mdev->open = ieee80211_master_open;
+ 	mdev->stop = ieee80211_master_stop;
+ 	mdev->type = ARPHRD_IEEE80211;
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	mdev->header_ops = &ieee80211_header_ops;
++#endif
+ 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
+ 
+ 	sdata->vif.type = IEEE80211_IF_TYPE_AP;
+--- a/drivers/net/wireless/Makefile	2008-01-30 03:51:28.000000000 -0500
++++ b/drivers/net/wireless/Makefile	2008-01-30 03:54:03.000000000 -0500
 @@ -6,49 +6,12 @@
  
  obj-$(CONFIG_IPW2200) += ipw2200.o
@@ -598,33 +622,9 @@
 -obj-$(CONFIG_PCMCIA_RAYCS)	+= ray_cs.o
 -obj-$(CONFIG_PCMCIA_WL3501)	+= wl3501_cs.o
 -
- obj-$(CONFIG_USB_NET_RNDIS_WEXT)	+= rndis_wext.o
+ obj-$(CONFIG_USB_NET_RNDIS_WLAN)	+= rndis_wlan.o
  
 -obj-$(CONFIG_USB_ZD1201)	+= zd1201.o
  obj-$(CONFIG_LIBERTAS)		+= libertas/
  
  rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o rtl8180_sa2400.o rtl8180_max2820.o rtl8180_grf5101.o
---- a/drivers/net/usb/Makefile	2008-01-28 11:00:13.000000000 -0500
-+++ b/drivers/net/usb/Makefile	2008-01-28 11:00:31.000000000 -0500
-@@ -2,21 +2,7 @@
- # Makefile for USB Network drivers
- #
- 
--obj-$(CONFIG_USB_CATC)		+= catc.o
--obj-$(CONFIG_USB_KAWETH)	+= kaweth.o
--obj-$(CONFIG_USB_PEGASUS)	+= pegasus.o
--obj-$(CONFIG_USB_RTL8150)	+= rtl8150.o
--obj-$(CONFIG_USB_NET_AX8817X)	+= asix.o
--obj-$(CONFIG_USB_NET_CDCETHER)	+= cdc_ether.o
--obj-$(CONFIG_USB_NET_DM9601)	+= dm9601.o
--obj-$(CONFIG_USB_NET_GL620A)	+= gl620a.o
--obj-$(CONFIG_USB_NET_NET1080)	+= net1080.o
--obj-$(CONFIG_USB_NET_PLUSB)	+= plusb.o
- obj-$(CONFIG_USB_NET_RNDIS_HOST)	+= rndis_host.o
--obj-$(CONFIG_USB_NET_CDC_SUBSET)	+= cdc_subset.o
--obj-$(CONFIG_USB_NET_ZAURUS)	+= zaurus.o
--obj-$(CONFIG_USB_NET_MCS7830)	+= mcs7830.o
--obj-$(CONFIG_USB_USBNET)	+= usbnet.o
- 
- ifeq ($(CONFIG_USB_DEBUG),y)
- EXTRA_CFLAGS += -DDEBUG

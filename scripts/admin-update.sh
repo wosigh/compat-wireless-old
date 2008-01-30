@@ -70,7 +70,7 @@ DRIVER_FILES="$DRIVER_FILES p54pci.h p54pci.c"
 DRIVER_FILES="$DRIVER_FILES p54usb.h p54usb.c"
 DRIVER_FILES="$DRIVER_FILES ipw2100.h ipw2100.c"
 DRIVER_FILES="$DRIVER_FILES ipw2200.h ipw2200.c"
-DRIVER_FILES="$DRIVER_FILES rndis_wext.c"
+DRIVER_FILES="$DRIVER_FILES rndis_wlan.c"
 
 mkdir -p include/linux/ include/net/ include/linux/usb \
 	net/mac80211/ net/wireless/ net/ieee80211/ \
@@ -117,7 +117,7 @@ for i in $DRIVERS; do
 	rm -f $i/*.mod.c
 done
 
-# For rndis_wext, we need a new rndis_host
+# For rndis_wlan, we need a new rndis_host
 DIR="drivers/net/usb"
 echo "Copying $GIT_TREE/$DIR/rndis_host.c"
 cp $GIT_TREE/$DIR/rndis_host.c $DIR/

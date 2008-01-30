@@ -100,7 +100,7 @@ install: uninstall modules
 	@modprobe -l rt61pci
 	@modprobe -l rt73usb
 	@modprobe -l rndis_host
-	@modprobe -l rndis_wext
+	@modprobe -l rndis_wlan
 	@modprobe -l rtl8180
 	@modprobe -l rtl8187
 	@# rc80211_simple is no longer a module
@@ -155,7 +155,7 @@ uninstall:
 	@modprobe -l rt61pci
 	@modprobe -l rt73usb
 	@modprobe -l rndis_host
-	@modprobe -l rndis_wext
+	@modprobe -l rndis_wlan
 	@modprobe -l rtl8180
 	@modprobe -l rtl8187
 	@# rc80211_simple is no longer a module
