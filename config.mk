@@ -14,8 +14,8 @@ CONFIG_CFG80211=m
 CONFIG_NL80211=y
 
 # Drivers
-# Note: currently broken, needs updating after new mode changes
-CONFIG_ATH5K=n
+CONFIG_ATH5K=m
+CONFIG_ATH5K_DEBUG=n
 CONFIG_IWL3945=m
 CONFIG_IWL4965=m
 CONFIG_ZD1211RW=m
