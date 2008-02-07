@@ -17,6 +17,7 @@
 /* From include/linux/mod_devicetable.h */
 
 /* SSB core, see drivers/ssb/ */
+#ifndef CONFIG_SSB
 struct ssb_device_id {
 	__u16   vendor;
 	__u16   coreid;
@@ -30,6 +31,7 @@ struct ssb_device_id {
 #define SSB_ANY_VENDOR          0xFFFF
 #define SSB_ANY_ID              0xFFFF
 #define SSB_ANY_REV             0xFF
+#endif
 
 
 /* Namespace stuff, introduced on 2.6.24 */
