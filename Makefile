@@ -126,8 +126,6 @@ uninstall:
 	@depmod -ae
 	@if [ -x /usr/sbin/athenable ]; then /usr/sbin/athenable madwifi; fi
 	@if [ -x /usr/sbin/b43enable ]; then /usr/sbin/b43enable bcm43xx; fi
-	@/usr/sbin/athenable madwifi
-	@/usr/sbin/b43enable bcm43xx
 	@echo
 	@echo "Your old wireless subsystem modules were left intact:"
 	@echo 
