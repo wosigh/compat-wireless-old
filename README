@@ -9,8 +9,8 @@ onto the stock kernel. This adds mac80211, mac80211 drivers, and any new
 full MAC driver which has had fairly recent updates worth getting such as 
 libertas, ipw2100 and ipw2200.
 
-If you'd like to keep the wireless-2.6 git repository local as well, please read
-out git-guide which explains how to achieve this:
+If you'd like to keep the wireless-testing git repository local as well,
+please read out git-guide which explains how to achieve this:
 
 http://linuxwireless.org/en/developers/git-guide
 
@@ -20,7 +20,8 @@ For more information on how to do this please refer the Developers section below
 Documenation
 ------------
 
-This package is also documented online.
+This package is also documented online and probably has more-up-to date
+information online than on this README file.
 
 http://linuxwireless.org/en/users/Download
 
@@ -28,8 +29,8 @@ Where to get the latest
 -----------------------
 
 This package lets you build your own 'latest', all you need is a local git repository
-checkout of wireless-2.6.git. However since not many users are expected to keep
-a local git repository of wireless-2.6 we provide daily snapshots of this
+checkout of wireless-testing.git. However since not many users are expected to keep
+a local git repository of wireless-testing we provide daily snapshots of this
 package + the wireless subsystem code. You can find the latest snapshot at:
 
 http://linuxwireless.org/download/compat-wireless-2.6/compat-wireless-2.6.tar.bz2
@@ -176,7 +177,7 @@ Why?
 
 For users or developers stuck on older kernels that want to help test or 
 patch wireless work. Additionally if you're on a recent kernel this lets
-you get the latest and greatest wireless-2.6 git work without much effort.
+you get the latest and greatest wireless-testing git work without much effort.
 This may mean new drivers for some users. Last but not least we hope this
 will encourage vendors and developers to post patches upstream first
 rather than forking or maintaining their own mac80211 releases with
@@ -212,9 +213,9 @@ ChangeLog
 
 Here you see the list of changes to all wireless drivers, the wireless core and mac80211.
 
-http://git.kernel.org/?p=linux/kernel/git/linville/wireless-2.6.git;a=log;h=everything
+http://git.kernel.org/?p=linux/kernel/git/linville/wireless-testing.git;a=log;
 
-This views all the changes on the 'everything' branch of wireless-2.6.git.
+This views all the changes on the 'everything' branch of wireless-testing.git.
 
 License
 -------
@@ -230,10 +231,10 @@ Developers
 Compatibility work goes into compat/compat.[ch]. If using those files do 
 not suffice additional actual code changes can go into compat/compat.diff.
 
-If you have your own wireless-2.6 git tree, before running admin-update.sh
+If you have your own wireless-testing git tree, before running admin-update.sh
 be sure to set your GIT_TREE variable. For example:
 
-export GIT_TREE=/home/mcgrof/wireless-2.6/
+export GIT_TREE=/home/mcgrof/wireless-testing/
 
 scripts/admin-clean.sh		- Cleans the compat-wireless-2.6 tree
 scripts/admin-update.sh		- Updates compat-wireless-2.6 with your git tree
