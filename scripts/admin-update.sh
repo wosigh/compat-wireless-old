@@ -2,19 +2,20 @@
 # 
 # Copyright 2007	Luis R. Rodriguez <mcgrof@winlab.rutgers.edu>
 #
-# Use this to update compat-wireless-2.6 to the lates wireless-2.6.git tree you have.
+# Use this to update compat-wireless-2.6 to the latest
+# wireless-testing.git tree you have.
 #
 # Usage: you should have the latest pull of wireless-2.6.git
-# git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-2.6.git
-# We assume you have it on your ~/devel/wireless-2.6/ directory. If you do,
+# git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing.git
+# We assume you have it on your ~/devel/wireless-testing/ directory. If you do,
 # just run this script from the compat-wireless-2.6 directory.
 # You can specify where your GIT_TREE is by doing:
 #
-# export GIT_TREE=/home/mcgrof/wireless-2.6/
+# export GIT_TREE=/home/mcgrof/wireless-testing/
 # 
 # for example
 #
-GIT_URL="git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-2.6.git"
+GIT_URL="git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing.git"
 
 INCLUDE_LINUX="ieee80211.h nl80211.h wireless.h"
 INCLUDE_LINUX="$INCLUDE_LINUX pci_ids.h bitops.h eeprom_93cx6.h"
@@ -31,19 +32,19 @@ INCLUDE_NET="$INCLUDE_NET mac80211.h wext.h wireless.h"
 NET_DIRS="wireless mac80211 ieee80211"
 # User exported this variable
 if [ -z $GIT_TREE ]; then
-	GIT_TREE="/home/$USER/devel/wireless-2.6/"
+	GIT_TREE="/home/$USER/devel/wireless-testing/"
 	if [ ! -d $GIT_TREE ]; then
-		echo "Please tell me where your wireless-2.6 git tree is."
+		echo "Please tell me where your wireless-testing git tree is."
 		echo "You can do this by exporting its location as follows:"
 		echo
-		echo "  export GIT_TREE=/home/mcgrof/wireless-2.6/"
+		echo "  export GIT_TREE=/home/$USER/wireless-testing/"
 		echo
 		echo "If you do not have one you can clone the repository:"
 		echo "  git-clone $GIT_URL"
 		exit 1
 	fi
 else
-	echo "You said your wireless-2.6 git tree is: $GIT_TREE"
+	echo "You said your wireless-testing git tree is: $GIT_TREE"
 fi
 # Drivers that have their own directory
 DRIVERS="drivers/net/wireless/ath5k"
