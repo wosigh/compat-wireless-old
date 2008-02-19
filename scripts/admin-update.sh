@@ -18,7 +18,7 @@
 GIT_URL="git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing.git"
 
 INCLUDE_LINUX="ieee80211.h nl80211.h wireless.h"
-INCLUDE_LINUX="$INCLUDE_LINUX pci_ids.h bitops.h eeprom_93cx6.h"
+INCLUDE_LINUX="$INCLUDE_LINUX pci_ids.h bitops.h eeprom_93cx6.h pm_qos_params.h"
 
 # For rndis_wext
 INCLUDE_LINUX_USB="usbnet.h rndis_host.h"
@@ -139,7 +139,7 @@ done
 cp $GIT_TREE/$DIR/Makefile $DIR
 
 # Compat stuff
-cp compat/compat.c net/mac80211/
+cp compat/compat.c net/wireless/
 cp compat/compat.h include/net/
 
 patch -p1 -N -t < compat/compat.diff

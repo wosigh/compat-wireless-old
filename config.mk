@@ -4,11 +4,12 @@ export
 # Wireless subsystem stuff
 CONFIG_MAC80211=m
 
-CONFIG_MAC80211_RC_DEFAULT=simple
-CONFIG_MAC80211_RC_SIMPLE=y
-# Comment above and uncomment below to use rate pid
-#CONFIG_MAC80211_RC_DEFAULT=pid
-#CONFIG_MAC80211_RC_PID=y
+CONFIG_MAC80211_RC_DEFAULT=pid
+CONFIG_MAC80211_RC_PID=y
+# Comment above and uncomment below if you are having issues with
+# the rate pid control algorithm.
+#CONFIG_MAC80211_RC_DEFAULT=simple
+#CONFIG_MAC80211_RC_SIMPLE=y
 
 CONFIG_CFG80211=m
 CONFIG_NL80211=y
@@ -30,7 +31,7 @@ CONFIG_B43_DMA_AND_PIO_MODE=y
 CONFIG_B43_PCI_AUTOSELECT=y
 CONFIG_B43_PCICORE_AUTOSELECT=y
 #CONFIG_B43_RFKILL=n
-#CONFIG_B43_LEDS=n
+CONFIG_B43_LEDS=y
 # CONFIG_B43_DEBUG is not set
 
 CONFIG_B43LEGACY=m

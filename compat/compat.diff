@@ -250,16 +250,6 @@
  obj-$(CONFIG_CFG80211) += cfg80211.o
  
  cfg80211-y += core.o sysfs.o radiotap.o util.o reg.o
---- a/net/mac80211/Makefile	2008-01-26 19:37:05.000000000 -0500
-+++ b/net/mac80211/Makefile	2008-01-26 19:37:05.000000000 -0500
-@@ -26,6 +26,7 @@
- 	tx.o \
- 	key.o \
- 	util.o \
-+	compat.o \
- 	event.o
- 
- mac80211-$(CONFIG_MAC80211_LEDS) += ieee80211_led.o
 --- a/drivers/net/wireless/adm8211.c	2008-01-26 19:37:05.000000000 -0500
 +++ b/drivers/net/wireless/adm8211.c	2008-01-26 19:37:05.000000000 -0500
 @@ -143,7 +143,11 @@
@@ -586,28 +576,6 @@
  obj-$(CONFIG_LIBERTAS)		+= libertas/
  
  rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o rtl8180_sa2400.o rtl8180_max2820.o rtl8180_grf5101.o
---- a/net/mac80211/ieee80211.c	2008-02-06 14:28:58.000000000 -0500
-+++ b/net/mac80211/ieee80211.c	2008-02-06 14:28:58.000000000 -0500
-@@ -21,7 +21,9 @@
- #include <linux/wireless.h>
- #include <linux/rtnetlink.h>
- #include <linux/bitmap.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- 
- #include "ieee80211_i.h"
-@@ -1455,7 +1457,9 @@
- 	mdev->open = ieee80211_master_open;
- 	mdev->stop = ieee80211_master_stop;
- 	mdev->type = ARPHRD_IEEE80211;
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	mdev->header_ops = &ieee80211_header_ops;
-+#endif
- 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
- 
- 	sdata->vif.type = IEEE80211_IF_TYPE_AP;
 --- a/drivers/misc/Makefile	2008-02-15 16:29:43.000000000 -0500
 +++ b/drivers/misc/Makefile	2008-02-15 16:29:24.000000000 -0500
 @@ -3,22 +3,4 @@
@@ -633,3 +601,64 @@
  obj-$(CONFIG_EEPROM_93CX6)	+= eeprom_93cx6.o
 -obj-$(CONFIG_INTEL_MENLOW)	+= intel_menlow.o
 -obj-$(CONFIG_ENCLOSURE_SERVICES) += enclosure.o
+--- a/drivers/net/wireless/zd1211rw/zd_chip.c	2008-02-15 16:29:43.000000000 -0500
++++ b/drivers/net/wireless/zd1211rw/zd_chip.c	2008-02-15 16:29:43.000000000 -0500
+@@ -1280,7 +1280,7 @@ int zd_chip_control_leds(struct zd_chip *chip, enum led_status status)
+ 	other_led = chip->link_led == LED1 ? LED2 : LED1;
+ 
+ 	switch (status) {
+-	case LED_OFF:
++	case LED_OFF_ZD:
+ 		ioreqs[0].value = FW_LINK_OFF;
+ 		ioreqs[1].value = v[1] & ~(LED1|LED2);
+ 		break;
+--- a/drivers/net/wireless/zd1211rw/zd_chip.h	2008-02-15 16:29:43.000000000 -0500
++++ b/drivers/net/wireless/zd1211rw/zd_chip.h	2008-02-15 16:29:43.000000000 -0500
+@@ -890,7 +890,7 @@ int zd_chip_lock_phy_regs(struct zd_chip *chip);
+ int zd_chip_unlock_phy_regs(struct zd_chip *chip);
+ 
+ enum led_status {
+-	LED_OFF = 0,
++	LED_OFF_ZD = 0,
+ 	LED_SCANNING = 1,
+ 	LED_ASSOCIATED = 2,
+ };
+--- a/drivers/net/wireless/zd1211rw/zd_mac.c	2008-02-15 16:29:43.000000000 -0500
++++ b/drivers/net/wireless/zd1211rw/zd_mac.c	2008-02-15 16:29:43.000000000 -0500
+@@ -965,5 +965,5 @@ static void housekeeping_disable(struct zd_mac *mac)
+ 	dev_dbg_f(zd_mac_dev(mac), "\n");
+ 	cancel_rearming_delayed_workqueue(zd_workqueue,
+ 		&mac->housekeeping.link_led_work);
+-	zd_chip_control_leds(&mac->chip, LED_OFF);
++	zd_chip_control_leds(&mac->chip, LED_OFF_ZD);
+ }
+--- a/net/mac80211/ieee80211.c	2008-02-19 10:29:53.000000000 -0500
++++ b/net/mac80211/ieee80211.c	2008-02-19 10:29:55.000000000 -0500
+@@ -21,7 +21,9 @@
+ #include <linux/wireless.h>
+ #include <linux/rtnetlink.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ 
+ #include "ieee80211_i.h"
+@@ -1458,7 +1460,9 @@
+ 	mdev->open = ieee80211_master_open;
+ 	mdev->stop = ieee80211_master_stop;
+ 	mdev->type = ARPHRD_IEEE80211;
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	mdev->header_ops = &ieee80211_header_ops;
++#endif
+ 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
+ 
+ 	sdata->vif.type = IEEE80211_IF_TYPE_AP;
+--- a/net/wireless/Makefile	2008-02-19 17:13:07.000000000 -0500
++++ b/net/wireless/Makefile	2008-02-19 17:13:19.000000000 -0500
+@@ -1,4 +1,4 @@
+ obj-$(CONFIG_CFG80211) += cfg80211.o
+ 
+-cfg80211-y += core.o sysfs.o radiotap.o util.o reg.o
++cfg80211-y += core.o sysfs.o radiotap.o util.o reg.o compat.o
+ cfg80211-$(CONFIG_NL80211) += nl80211.o

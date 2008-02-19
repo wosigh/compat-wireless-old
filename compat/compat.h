@@ -3,12 +3,36 @@
 
 #include <linux/autoconf.h>
 #include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/version.h>
+#include <linux/skbuff.h>
+#include <linux/spinlock.h>
+#include <linux/netpoll.h>
+#include <linux/rtnetlink.h>
+#include <linux/audit.h>
+#include <linux/workqueue.h>
+#include <linux/pci.h>
 #include <linux/netdevice.h>
 #include <linux/genetlink.h>
-#include <net/neighbour.h>
-#include <linux/version.h>
 #include <linux/scatterlist.h>
 #include <linux/usb.h>
+#include <linux/hw_random.h>
+#include <linux/leds.h>
+#include <linux/pm_qos_params.h>
+#include <linux/sched.h>
+#include <linux/slab.h>
+#include <linux/time.h>
+#include <linux/fs.h>
+#include <linux/device.h>
+#include <linux/miscdevice.h>
+#include <linux/string.h>
+#include <linux/platform_device.h>
+#include <linux/init.h>
+#include <linux/uaccess.h>
+
+#include <net/arp.h>
+#include <net/neighbour.h>
+
 #include <linux/compat_autoconf.h>
 
 /* Compat work for 2.6.22 and 2.6.23 */
@@ -17,7 +41,7 @@
 /* From include/linux/mod_devicetable.h */
 
 /* SSB core, see drivers/ssb/ */
-#ifndef CONFIG_SSB
+#ifndef SSB_DEVICE
 struct ssb_device_id {
 	__u16   vendor;
 	__u16   coreid;
@@ -190,4 +214,28 @@ static inline void set_freezable(void) {}
 #endif /* CONFIG_PM_SLEEP */
 
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)) */
+
+/* Compat work for 2.6.24 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25))
+
+/* 2.6.25 changes hwrng_unregister()'s behaviour by supporting 
+ * suspend of its parent device (the misc device, which is itself the
+ * hardware random number generator). It does this by passing a parameter to
+ * unregister_miscdev() which is not supported in older kernels. The suspend
+ * parameter allows us to enable access to the device's hardware
+ * number generator during suspend. As far as wireless is concerned this means
+ * if a driver goes to suspend it you won't have the HNR available in
+ * older kernels. */
+static inline void __hwrng_unregister(struct hwrng *rng, bool suspended)
+{
+	hwrng_unregister(rng);
+}
+
+static inline void led_classdev_unregister_suspended(struct led_classdev *lcd)
+{
+	led_classdev_unregister(lcd);
+}
+
+
+#endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)) */
 #endif /* LINUX_26_COMPAT_H */

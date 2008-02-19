@@ -52,7 +52,7 @@ $(CREL_CHECK):
 	@md5sum $(COMPAT_CONFIG) > $(CONFIG_CHECK)
 
 install: uninstall modules
-	@$(MAKE) -C $(KLIB_BUILD) M=$(PWD) $(KMODDIR_ARG) $(KMODPATH_ARG) \
+	$(MAKE) -C $(KLIB_BUILD) M=$(PWD) $(KMODDIR_ARG) $(KMODPATH_ARG) \
 		modules_install
 	@# All the scripts we can use
 	@mkdir -p /usr/lib/compat-wireless/
