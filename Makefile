@@ -4,6 +4,7 @@ ifneq ($(origin $(KLIB)), undefined)
 KMODPATH_ARG:=  "INSTALL_MOD_PATH=$(KLIB)"
 else
 KLIB:=          /lib/modules/$(shell uname -r)
+KMODPATH_ARG:=  "INSTALL_MOD_PATH=$(KLIB)"
 endif
 KLIB_BUILD ?=	$(KLIB)/build
 MADWIFI=$(shell modprobe -l ath_pci)
