@@ -640,8 +640,8 @@
 -	zd_chip_control_leds(&mac->chip, LED_OFF);
 +	zd_chip_control_leds(&mac->chip, LED_OFF_ZD);
  }
---- a/net/mac80211/ieee80211.c	2008-02-21 13:07:01.000000000 -0500
-+++ b/net/mac80211/ieee80211.c	2008-02-21 13:07:01.000000000 -0500
+--- a/net/mac80211/ieee80211.c	2008-02-28 13:35:06.000000000 -0500
++++ b/net/mac80211/ieee80211.c	2008-02-28 13:35:08.000000000 -0500
 @@ -21,7 +21,9 @@
  #include <linux/wireless.h>
  #include <linux/rtnetlink.h>
@@ -652,7 +652,7 @@
  #include <net/cfg80211.h>
  
  #include "ieee80211_i.h"
-@@ -1502,7 +1504,9 @@
+@@ -1601,7 +1603,9 @@
  	mdev->open = ieee80211_master_open;
  	mdev->stop = ieee80211_master_stop;
  	mdev->type = ARPHRD_IEEE80211;

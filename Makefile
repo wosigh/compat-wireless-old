@@ -4,11 +4,11 @@ ifneq ($(origin $(KLIB)), undefined)
 KMODPATH_ARG:=  "INSTALL_MOD_PATH=$(KLIB)"
 else
 KLIB:=          /lib/modules/$(shell uname -r)
-KMODPATH_ARG:=  "INSTALL_MOD_PATH=$(KLIB)"
 endif
 KLIB_BUILD ?=	$(KLIB)/build
-MADWIFI=$(shell modprobe -l ath_pci)
-
+# Sometimes not available in the path
+MODPROBE := /sbin/modprobe
+MADWIFI=$(shell $(MODPROBE) -l ath_pci)
 
 ifneq ($(KERNELRELEASE),)
 
@@ -77,36 +77,36 @@ install: uninstall modules
 	@echo
 	@echo "Currently detected wireless subsystem modules:"
 	@echo 
-	@modprobe -l mac80211
+	@$(MODPROBE) -l mac80211
 	@# rc80211_simple is a module only on 2.6.22 and 2.6.23
-	@modprobe -l cfg80211
-	@modprobe -l adm8211
-	@modprobe -l ath5k
-	@modprobe -l b43
-	@modprobe -l b43legacy
-	@modprobe -l ssb
-	@modprobe -l iwl3945
-	@modprobe -l iwl4965
-	@modprobe -l ipw2100
-	@modprobe -l ipw2200
-	@modprobe -l ieee80211
-	@modprobe -l ieee80211_crypt
-	@modprobe -l libertas_cs
-	@modprobe -l ub8xxx
-	@modprobe -l p54_pci
-	@modprobe -l p54_usb
-	@modprobe -l rt2400pci
-	@modprobe -l rt2500pci
-	@modprobe -l rt2500usb
-	@modprobe -l rt61pci
-	@modprobe -l rt73usb
-	@modprobe -l rndis_host
-	@modprobe -l rndis_wlan
-	@modprobe -l rtl8180
-	@modprobe -l rtl8187
+	@$(MODPROBE) -l cfg80211
+	@$(MODPROBE) -l adm8211
+	@$(MODPROBE) -l ath5k
+	@$(MODPROBE) -l b43
+	@$(MODPROBE) -l b43legacy
+	@$(MODPROBE) -l ssb
+	@$(MODPROBE) -l iwl3945
+	@$(MODPROBE) -l iwl4965
+	@$(MODPROBE) -l ipw2100
+	@$(MODPROBE) -l ipw2200
+	@$(MODPROBE) -l ieee80211
+	@$(MODPROBE) -l ieee80211_crypt
+	@$(MODPROBE) -l libertas_cs
+	@$(MODPROBE) -l ub8xxx
+	@$(MODPROBE) -l p54_pci
+	@$(MODPROBE) -l p54_usb
+	@$(MODPROBE) -l rt2400pci
+	@$(MODPROBE) -l rt2500pci
+	@$(MODPROBE) -l rt2500usb
+	@$(MODPROBE) -l rt61pci
+	@$(MODPROBE) -l rt73usb
+	@$(MODPROBE) -l rndis_host
+	@$(MODPROBE) -l rndis_wlan
+	@$(MODPROBE) -l rtl8180
+	@$(MODPROBE) -l rtl8187
 	@# rc80211_simple is no longer a module
-	@#modprobe -l rc80211_simple
-	@modprobe -l zd1211rw
+	@#$(MODPROBE) -l rc80211_simple
+	@$(MODPROBE) -l zd1211rw
 	@echo 
 	@echo Now run: make load
 	@echo
@@ -130,40 +130,40 @@ uninstall:
 	@echo
 	@echo "Your old wireless subsystem modules were left intact:"
 	@echo 
-	@modprobe -l mac80211
-	@modprobe -l cfg80211
+	@$(MODPROBE) -l mac80211
+	@$(MODPROBE) -l cfg80211
 	@# rc80211_simple is a module on 2.6.22 and 2.6.23 though
-	@modprobe -l adm8211
-	@modprobe -l ath5k
-	@modprobe -l b43
-	@modprobe -l b43legacy
-	@modprobe -l ssb
-	@modprobe -l rc80211_simple
-	@modprobe -l iwl3945
-	@modprobe -l iwl4965
-	@modprobe -l ipw2100
-	@modprobe -l ipw2200
-	@modprobe -l ieee80211
-	@modprobe -l ieee80211_crypt
-	@modprobe -l libertas_cs
-	@modprobe -l mac80211
-	@modprobe -l ub8xxx
-	@modprobe -l p54pci
-	@modprobe -l p54usb
-	@modprobe -l rt2400pci
-	@modprobe -l rt2500pci
-	@modprobe -l rt2500usb
-	@modprobe -l rt61pci
-	@modprobe -l rt73usb
-	@modprobe -l rndis_host
-	@modprobe -l rndis_wlan
-	@modprobe -l rtl8180
-	@modprobe -l rtl8187
+	@$(MODPROBE) -l adm8211
+	@$(MODPROBE) -l ath5k
+	@$(MODPROBE) -l b43
+	@$(MODPROBE) -l b43legacy
+	@$(MODPROBE) -l ssb
+	@$(MODPROBE) -l rc80211_simple
+	@$(MODPROBE) -l iwl3945
+	@$(MODPROBE) -l iwl4965
+	@$(MODPROBE) -l ipw2100
+	@$(MODPROBE) -l ipw2200
+	@$(MODPROBE) -l ieee80211
+	@$(MODPROBE) -l ieee80211_crypt
+	@$(MODPROBE) -l libertas_cs
+	@$(MODPROBE) -l mac80211
+	@$(MODPROBE) -l ub8xxx
+	@$(MODPROBE) -l p54pci
+	@$(MODPROBE) -l p54usb
+	@$(MODPROBE) -l rt2400pci
+	@$(MODPROBE) -l rt2500pci
+	@$(MODPROBE) -l rt2500usb
+	@$(MODPROBE) -l rt61pci
+	@$(MODPROBE) -l rt73usb
+	@$(MODPROBE) -l rndis_host
+	@$(MODPROBE) -l rndis_wlan
+	@$(MODPROBE) -l rtl8180
+	@$(MODPROBE) -l rtl8187
 	@# rc80211_simple is no longer a module
-	@#modprobe -l rc80211_simple
-	@modprobe -l zd1211rw
+	@#$(MODPROBE) -l rc80211_simple
+	@$(MODPROBE) -l zd1211rw
 	@# Old kernels have ieee80211softmac, this will be removed soon :)
-	@modprobe -l ieee80211softmac
+	@$(MODPROBE) -l ieee80211softmac
 	@
 	@echo 
 
