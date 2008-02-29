@@ -11,7 +11,7 @@
 
 # This indicates which is the oldest kernel we support
 # Update this if you are adding support for older kernels.
-OLDEST_KERNEL_SUPPORTED="2.6.22"
+OLDEST_KERNEL_SUPPORTED="2.6.21"
 COMPAT_RELEASE="compat-release"
 KERNEL_RELEASE="git-describe"
 
@@ -120,11 +120,16 @@ kernel_version_req $OLDEST_KERNEL_SUPPORTED
 define_config_req CONFIG_WIRELESS_EXT
 
 # For each CONFIG_FOO=x option
-for i in $(grep -v ^# $COMPAT_CONFIG | grep ^CONFIG_); do
+for i in $(grep '^CONFIG_' $COMPAT_CONFIG); do
 	# Get the element on the left of the "="
 	VAR=$(echo $i | cut -d"=" -f 1)
 	# Get the element on the right of the "="
 	VALUE=$(echo $i | cut -d"=" -f 2)
+
+	# skip vars that weren't actually set due to dependencies
+	if [ "${!VAR}" = "" ] ; then
+		continue
+	fi
 
 	# Handle core kernel module depenencies here.
 	case $VAR in

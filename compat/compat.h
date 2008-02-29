@@ -35,6 +35,97 @@
 
 #include <linux/compat_autoconf.h>
 
+#include <asm/io.h>
+
+/* Compat work for 2.6.21 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
+
+/* reuse ax25_ptr */
+#define ieee80211_ptr ax25_ptr
+
+#ifdef CONFIG_AX25
+#error Compat reuses the AX.25 pointer so that may not be enabled!
+#endif
+
+static inline unsigned char *skb_mac_header(const struct sk_buff *skb)
+{
+	return skb->mac.raw;
+}
+
+static inline void skb_set_mac_header(struct sk_buff *skb, int offset)
+{
+	skb->mac.raw = skb->data + offset;
+}
+
+static inline void skb_reset_mac_header(struct sk_buff *skb)
+{
+	skb->mac.raw = skb->data;
+}
+
+static inline void skb_reset_network_header(struct sk_buff *skb)
+{
+	skb->nh.raw = skb->data;
+}
+
+static inline void skb_set_network_header(struct sk_buff *skb, int offset)
+{
+	skb->nh.raw = skb->data + offset;
+}
+
+static inline void skb_set_transport_header(struct sk_buff *skb, int offset)
+{
+	skb->h.raw = skb->data + offset;
+}
+
+static inline unsigned char *skb_transport_header(struct sk_buff *skb)
+{
+	return skb->h.raw;
+}
+
+static inline unsigned char *skb_network_header(struct sk_buff *skb)
+{
+	return skb->nh.raw;
+}
+
+static inline unsigned char *skb_tail_pointer(const struct sk_buff *skb)
+{
+	return skb->tail;
+}
+
+#define __maybe_unused	__attribute__((unused))
+
+#define uninitialized_var(x) x = x
+
+/* This will lead to very weird behaviour... */
+#define NLA_BINARY NLA_STRING
+
+static inline int pci_set_mwi(struct pci_dev *dev)
+{
+	return -ENOSYS;
+}
+
+static inline void pci_clear_mwi(struct pci_dev *dev)
+{
+}
+
+#define list_first_entry(ptr, type, member) \
+        list_entry((ptr)->next, type, member)
+
+/*
+ * Force link bug if constructor is used, can't be done compatibly
+ * because constructor arguments were swapped since then!
+ */
+extern void __incompatible_kmem_cache_create(void);
+
+#define kmem_cache_create(name, objsize, align, flags, ctor) 	\
+	({							\
+		if (ctor) __incompatible_kmem_cache_create();	\
+		kmem_cache_create((name), (objsize), (align),	\
+				  (flags), NULL, NULL);		\
+	})
+
+#endif
+
 /* Compat work for 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
 
@@ -246,17 +337,20 @@ static inline void le64_add_cpu(__le64 *var, u64 val)
 
 static inline void be16_add_cpu(__be16 *var, u16 val)
 {
-	*var = cpu_to_be16(be16_to_cpu(*var) + val);
+	u16 v = be16_to_cpu(*var);
+	*var = cpu_to_be16(v + val);
 }
 
 static inline void be32_add_cpu(__be32 *var, u32 val)
 {
-	*var = cpu_to_be32(be32_to_cpu(*var) + val);
+	u32 v = be32_to_cpu(*var);
+	*var = cpu_to_be32(v + val);
 }
 
 static inline void be64_add_cpu(__be64 *var, u64 val)
 {
-	*var = cpu_to_be64(be64_to_cpu(*var) + val);
+	u64 v = be64_to_cpu(*var);
+	*var = cpu_to_be64(v + val);
 }
 
 /* 2.6.25 changes hwrng_unregister()'s behaviour by supporting 
