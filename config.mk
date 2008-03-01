@@ -90,7 +90,7 @@ ifneq ($(CONFIG_USB),)
 CONFIG_ZD1211RW=m
 
 # Sorry, it uses cancel_work_sync which is new and can't be done in compat...
-ifeq ($(shell test $(shell sed 's/^SUBLEVEL = //;t;d' < $(KLIB)/Makefile) -gt 21 && echo yes),yes)
+ifeq ($(shell test $(shell sed 's/^SUBLEVEL = //;t;d' < $(KLIB_BUILD)/Makefile) -gt 21 && echo yes),yes)
 
 # Wireless RNDIS USB support (RTL8185 802.11g) A-Link WL54PC
 # All of these devices are based on Broadcom 4320 chip which
