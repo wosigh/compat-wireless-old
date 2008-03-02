@@ -5,9 +5,10 @@ export
 ## in the first column, no whitespace allowed.
 
 ifeq ($(wildcard $(KLIB)/.config),)
-CONFIG_PCI=y
-CONFIG_USB=y
-CONFIG_PCMCIA=y
+# These will be ignored by compat autoconf
+ CONFIG_PCI=y
+ CONFIG_USB=y
+ CONFIG_PCMCIA=y
 else
 include $(KLIB)/.config
 endif
