@@ -130,23 +130,36 @@ static inline void pci_clear_mwi(struct pci_dev *dev)
 #define list_first_entry(ptr, type, member) \
         list_entry((ptr)->next, type, member)
 
+#endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)) */
+
+/* Compat work for 2.6.21, 2.6.22 and 2.6.23 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
+
 /*
  * Force link bug if constructor is used, can't be done compatibly
  * because constructor arguments were swapped since then!
  */
 extern void __incompatible_kmem_cache_create(void);
 
+/* 2.6.21 and 2.6.22 kmem_cache_create() takes 6 arguments */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
 #define kmem_cache_create(name, objsize, align, flags, ctor) 	\
 	({							\
 		if (ctor) __incompatible_kmem_cache_create();	\
 		kmem_cache_create((name), (objsize), (align),	\
 				  (flags), NULL, NULL);		\
 	})
-
 #endif
 
-/* Compat work for 2.6.22 and 2.6.23 */
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
+/* 2.6.23 kmem_cache_create() takes 5 arguments */
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,23))
+#define kmem_cache_create(name, objsize, align, flags, ctor) 	\
+	({							\
+		if (ctor) __incompatible_kmem_cache_create();	\
+		kmem_cache_create((name), (objsize), (align),	\
+				  (flags), NULL);		\
+	})
+#endif
 
 /* From include/linux/mod_devicetable.h */
 
@@ -254,7 +267,7 @@ int compat_is_pcie(struct pci_dev *pdev);
 
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)) */
 
-/* Compat work for 2.6.22 */
+/* Compat work for kernels <= 2.6.22 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
 
 /* dev_mc_list was replaced with dev_addr_list as of 2.6.23 */
