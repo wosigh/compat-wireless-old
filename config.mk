@@ -141,20 +141,6 @@ CONFIG_SSB_PCICORE_HOSTMODE=n
 # CONFIG_SSB_DEBUG is not set
 # CONFIG_SSB_DRIVER_EXTIF=y
 
-ifeq ($(NEED_IEEE80211),y)
-# Old ieee80211 "stack"
-# Note: old softmac is scheduled for removal so we
-# ignore that stuff
-CONFIG_IEEE80211=m
-CONFIG_IEEE80211_CRYPT_CCMP=m
-CONFIG_IEEE80211_CRYPT_TKIP=m
-CONFIG_IEEE80211_CRYPT_WEP=m
-CONFIG_IEEE80211_SOFTMAC=n
-# Old drivers which use the old stack
-endif
-
-# Libertas uses the old stack but not fully, it will soon 
-# be cleaned.
 ifneq ($(CONFIG_USB),)
 CONFIG_LIBERTAS_USB=m
 NEED_LIBERTAS=y
@@ -165,4 +151,18 @@ NEED_LIBERTAS=y
 endif
 ifeq ($(NEED_LIBERTAS),y)
 CONFIG_LIBERTAS=m
+# Libertas uses the old stack but not fully, it will soon 
+# be cleaned.
+NEED_IEEE80211=y
+endif
+
+ifeq ($(NEED_IEEE80211),y)
+# Old ieee80211 "stack"
+# Note: old softmac is scheduled for removal so we
+# ignore that stuff
+CONFIG_IEEE80211=m
+CONFIG_IEEE80211_CRYPT_CCMP=m
+CONFIG_IEEE80211_CRYPT_TKIP=m
+CONFIG_IEEE80211_CRYPT_WEP=m
+CONFIG_IEEE80211_SOFTMAC=n
 endif
