@@ -854,3 +854,13 @@
  	LED_SCANNING = 1,
  	LED_ASSOCIATED = 2,
  };
+--- a/drivers/net/wireless/Makefile	2008-03-02 22:29:20.000000000 -0500
++++ b/drivers/net/wireless/Makefile	2008-03-02 22:29:32.000000000 -0500
+@@ -24,7 +24,6 @@
+ 
+ obj-$(CONFIG_IWL3945)	+= iwlwifi/
+ obj-$(CONFIG_IWL4965)	+= iwlwifi/
+-obj-$(CONFIG_RT2X00)	+= rt2x00/
+ 
+ obj-$(CONFIG_P54_COMMON)	+= p54common.o
+ obj-$(CONFIG_P54_USB)		+= p54usb.o
