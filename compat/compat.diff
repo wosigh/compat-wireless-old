@@ -373,17 +373,6 @@
  obj-$(CONFIG_EEPROM_93CX6)	+= eeprom_93cx6.o
 -obj-$(CONFIG_INTEL_MENLOW)	+= intel_menlow.o
 -obj-$(CONFIG_ENCLOSURE_SERVICES) += enclosure.o
---- a/drivers/net/wireless/zd1211rw/zd_chip.c	2008-02-28 19:54:52.000000000 +0100
-+++ b/drivers/net/wireless/zd1211rw/zd_chip.c	2008-02-28 19:54:53.000000000 +0100
-@@ -1281,7 +1281,7 @@ int zd_chip_control_leds(struct zd_chip 
- 	other_led = chip->link_led == LED1 ? LED2 : LED1;
- 
- 	switch (status) {
--	case LED_OFF:
-+	case LED_OFF_ZD:
- 		ioreqs[0].value = FW_LINK_OFF;
- 		ioreqs[1].value = v[1] & ~(LED1|LED2);
- 		break;
 --- a/drivers/net/wireless/adm8211.c	2008-02-28 19:54:52.000000000 +0100
 +++ b/drivers/net/wireless/adm8211.c	2008-02-28 19:54:53.000000000 +0100
 @@ -143,7 +143,11 @@ static int adm8211_read_eeprom(struct ie
@@ -634,17 +623,6 @@
  
  	return 0;
  
---- a/drivers/net/wireless/zd1211rw/zd_chip.h	2008-02-28 19:54:52.000000000 +0100
-+++ b/drivers/net/wireless/zd1211rw/zd_chip.h	2008-02-28 19:54:53.000000000 +0100
-@@ -897,7 +897,7 @@ int zd_chip_lock_phy_regs(struct zd_chip
- int zd_chip_unlock_phy_regs(struct zd_chip *chip);
- 
- enum led_status {
--	LED_OFF = 0,
-+	LED_OFF_ZD = 0,
- 	LED_SCANNING = 1,
- 	LED_ASSOCIATED = 2,
- };
 --- a/drivers/net/wireless/zd1211rw/zd_mac.c	2008-02-21 13:07:01.000000000 -0500
 +++ b/drivers/net/wireless/zd1211rw/zd_mac.c	2008-02-21 13:07:01.000000000 -0500
 @@ -971,5 +971,5 @@
@@ -854,3 +832,25 @@
  			return -EINVAL;
  	}
  	return 0;
+--- a/drivers/net/wireless/zd1211rw/zd_chip.c	2008-03-02 22:24:54.000000000 -0500
++++ b/drivers/net/wireless/zd1211rw/zd_chip.c	2008-03-02 22:24:54.000000000 -0500
+@@ -1280,7 +1280,7 @@
+ 	other_led = chip->link_led == LED1 ? LED2 : LED1;
+ 
+ 	switch (status) {
+-	case LED_OFF:
++	case LED_OFF_ZD:
+ 		ioreqs[0].value = FW_LINK_OFF;
+ 		ioreqs[1].value = v[1] & ~(LED1|LED2);
+ 		break;
+--- a/drivers/net/wireless/zd1211rw/zd_chip.h	2008-03-02 22:26:47.000000000 -0500
++++ b/drivers/net/wireless/zd1211rw/zd_chip.h	2008-03-02 22:26:48.000000000 -0500
+@@ -889,7 +889,7 @@
+ int zd_chip_unlock_phy_regs(struct zd_chip *chip);
+ 
+ enum led_status {
+-	LED_OFF = 0,
++	LED_OFF_ZD = 0,
+ 	LED_SCANNING = 1,
+ 	LED_ASSOCIATED = 2,
+ };
