@@ -82,7 +82,7 @@ static inline unsigned char *skb_transport_header(struct sk_buff *skb)
 	return skb->h.raw;
 }
 
-static inline unsigned char *skb_network_header(struct sk_buff *skb)
+static inline unsigned char *skb_network_header(const struct sk_buff *skb)
 {
 	return skb->nh.raw;
 }
@@ -90,6 +90,25 @@ static inline unsigned char *skb_network_header(struct sk_buff *skb)
 static inline unsigned char *skb_tail_pointer(const struct sk_buff *skb)
 {
 	return skb->tail;
+}
+
+static inline struct iphdr *ip_hdr(const struct sk_buff *skb)
+{
+	return (struct iphdr *)skb_network_header(skb);
+}
+
+static inline void skb_copy_from_linear_data(const struct sk_buff *skb,
+					     void *to,
+					     const unsigned int len)
+{
+	memcpy(to, skb->data, len);
+}
+
+static inline void skb_copy_from_linear_data_offset(const struct sk_buff *skb,
+						    const int offset, void *to,
+						    const unsigned int len)
+{
+	memcpy(to, skb->data + offset, len);
 }
 
 #define __maybe_unused	__attribute__((unused))
