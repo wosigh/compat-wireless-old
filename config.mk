@@ -59,7 +59,25 @@ CONFIG_B43LEGACY_DMA_AND_PIO_MODE=y
 
 # The Intel ipws
 CONFIG_IPW2100=m
+IPW2100_MONITOR=y
 CONFIG_IPW2200=m
+IPW2200_MONITOR=y
+IPW2200_RADIOTAP=y
+IPW2200_PROMISCUOUS=y
+# The above enables use a second interface prefixed 'rtap'.
+#           Example usage:
+#
+# % modprobe ipw2200 rtap_iface=1
+# % ifconfig rtap0 up
+# % tethereal -i rtap0
+#
+# If you do not specify 'rtap_iface=1' as a module parameter then
+# the rtap interface will not be created and you will need to turn
+# it on via sysfs:
+#
+# % echo 1 > /sys/bus/pci/drivers/ipw2200/*/rtap_iface
+IPW2200_QOS=y
+
 NEED_IEEE80211=y
 
 CONFIG_P54_PCI=m
