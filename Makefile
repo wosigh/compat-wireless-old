@@ -32,7 +32,8 @@ export COMPAT_CONFIG=config.mk
 export CONFIG_CHECK=.$(COMPAT_CONFIG)_md5sum.txt
 export COMPAT_AUTOCONF=include/linux/compat_autoconf.h
 export CREL=$(shell cat $(PWD)/compat-release)
-export CREL_CHECK:=.compat_autoconf_$(CREL)
+export CREL_PRE:=.compat_autoconf_
+export CREL_CHECK:=$(CREL_PRE)$(CREL)
 
 include $(PWD)/$(COMPAT_CONFIG)
 
@@ -171,6 +172,7 @@ clean:
 	@if [ -d net -a -d $(KLIB_BUILD) ]; then \
 		$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean ;\
 	fi
+	@rm -f $(CREL_PRE)*
 unload:
 	@./scripts/unload.sh
 
