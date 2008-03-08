@@ -72,12 +72,17 @@ CONFIG_SSB_DRIVER_PCICORE=y
 CONFIG_RTL8180=m
 CONFIG_ADM8211=m
 
-ifneq ($(CONFIG_CRC_ITU_T),)
 CONFIG_RT2X00_LIB_PCI=m
 CONFIG_RT2400PCI=m
 CONFIG_RT2500PCI=m
-CONFIG_RT61PCI=m
 NEED_RT2X00=y
+
+# Two rt2x00 drivers require firmware: rt61pci and rt73usb. They depend on
+# CRC to check the firmware. We check here first for the PCI
+# driver as we're in the PCI section.
+ifneq ($(CONFIG_CRC_ITU_T),)
+CONFIG_RT61PCI=m
+NEED_RT2X00_FIRMWARE=y
 endif
 
 endif
@@ -106,22 +111,27 @@ endif
 CONFIG_P54_USB=m
 CONFIG_RTL8187=m
 
-ifneq ($(CONFIG_CRC_ITU_T),)
-CONFIG_RT2X00_LIB_USB=m
+# RT2500USB does not require firmware
 CONFIG_RT2500USB=m
-CONFIG_RT73USB=m
 NEED_RT2X00=y
+# RT73USB requires firmware
+ifneq ($(CONFIG_CRC_ITU_T),)
+CONFIG_RT73USB=m
+NEED_RT2X00_FIRMWARE=y
 endif
 
-endif
+endif # end of USB driver list
 
-# rt2x00
+# Common rt2x00 requirements
 ifeq ($(NEED_RT2X00),y)
 CONFIG_RT2X00=m
 CONFIG_RT2X00_LIB=m
+endif
+
+ifeq ($(NEED_RT2X00_FIRMWARE),y)
 CONFIG_RT2X00_LIB_FIRMWARE=y
 # CONFIG_RT2X00_LIB_DEBUGFS is not set
-# CONFIG_RT2X00_DEBUG is not se
+# CONFIG_RT2X00_DEBUG is not set
 endif
 
 # p54
