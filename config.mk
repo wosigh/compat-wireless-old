@@ -59,11 +59,11 @@ CONFIG_B43LEGACY_DMA_AND_PIO_MODE=y
 
 # The Intel ipws
 CONFIG_IPW2100=m
-IPW2100_MONITOR=y
+CONFIG_IPW2100_MONITOR=y
 CONFIG_IPW2200=m
-IPW2200_MONITOR=y
-IPW2200_RADIOTAP=y
-IPW2200_PROMISCUOUS=y
+CONFIG_IPW2200_MONITOR=y
+CONFIG_IPW2200_RADIOTAP=y
+CONFIG_IPW2200_PROMISCUOUS=y
 # The above enables use a second interface prefixed 'rtap'.
 #           Example usage:
 #
@@ -76,7 +76,7 @@ IPW2200_PROMISCUOUS=y
 # it on via sysfs:
 #
 # % echo 1 > /sys/bus/pci/drivers/ipw2200/*/rtap_iface
-IPW2200_QOS=y
+CONFIG_IPW2200_QOS=y
 
 NEED_IEEE80211=y
 
@@ -113,8 +113,11 @@ CONFIG_EEPROM_93CX6=m
 ifneq ($(CONFIG_USB),)
 CONFIG_ZD1211RW=m
 
-# Sorry, it uses cancel_work_sync which is new and can't be done in compat...
+# Stuff here things which depend on kernel versions for USB
+ifeq ($(shell test -e $(KLIB_BUILD)/Makefile && echo yes),yes)
 ifeq ($(shell test $(shell sed 's/^SUBLEVEL = //;t;d' < $(KLIB_BUILD)/Makefile) -gt 21 && echo yes),yes)
+
+# Sorry, rndis_wlan uses cancel_work_sync which is new and can't be done in compat...
 
 # Wireless RNDIS USB support (RTL8185 802.11g) A-Link WL54PC
 # All of these devices are based on Broadcom 4320 chip which
@@ -125,12 +128,14 @@ CONFIG_USB_NET_RNDIS_HOST=m
 CONFIG_USB_NET_RNDIS_WLAN=m
 
 endif
+endif
 
 CONFIG_P54_USB=m
 CONFIG_RTL8187=m
 
 # RT2500USB does not require firmware
 CONFIG_RT2500USB=m
+CONFIG_RT2X00_LIB_USB=m
 NEED_RT2X00=y
 # RT73USB requires firmware
 ifneq ($(CONFIG_CRC_ITU_T),)
@@ -144,12 +149,12 @@ endif # end of USB driver list
 ifeq ($(NEED_RT2X00),y)
 CONFIG_RT2X00=m
 CONFIG_RT2X00_LIB=m
+# CONFIG_RT2X00_LIB_DEBUGFS is not set
+# CONFIG_RT2X00_DEBUG is not set
 endif
 
 ifeq ($(NEED_RT2X00_FIRMWARE),y)
 CONFIG_RT2X00_LIB_FIRMWARE=y
-# CONFIG_RT2X00_LIB_DEBUGFS is not set
-# CONFIG_RT2X00_DEBUG is not set
 endif
 
 # p54
