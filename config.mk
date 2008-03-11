@@ -113,6 +113,10 @@ CONFIG_EEPROM_93CX6=m
 ifneq ($(CONFIG_USB),)
 CONFIG_ZD1211RW=m
 
+# support for USB Wireless devices using Atmel at76c503,
+# at76c505 or at76c505a chips.
+CONFIG_USB_ATMEL=m
+
 # Stuff here things which depend on kernel versions for USB
 ifeq ($(shell test -e $(KLIB_BUILD)/Makefile && echo yes),yes)
 ifeq ($(shell test $(shell sed 's/^SUBLEVEL = //;t;d' < $(KLIB_BUILD)/Makefile) -gt 21 && echo yes),yes)

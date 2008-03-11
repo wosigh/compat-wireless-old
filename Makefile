@@ -82,6 +82,7 @@ install: uninstall modules
 	@# rc80211_simple is a module only on 2.6.22 and 2.6.23
 	@$(MODPROBE) -l cfg80211
 	@$(MODPROBE) -l adm8211
+	@$(MODPROBE) -l at76_usb
 	@$(MODPROBE) -l ath5k
 	@$(MODPROBE) -l b43
 	@$(MODPROBE) -l b43legacy
@@ -136,6 +137,7 @@ uninstall:
 	@# rc80211_simple is a module on 2.6.22 and 2.6.23 though
 	@$(MODPROBE) -l adm8211
 	@$(MODPROBE) -l ath5k
+	@$(MODPROBE) -l at76_usb
 	@$(MODPROBE) -l b43
 	@$(MODPROBE) -l b43legacy
 	@$(MODPROBE) -l ssb

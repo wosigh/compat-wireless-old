@@ -258,9 +258,9 @@
  
  ifeq ($(CONFIG_USB_DEBUG),y)
  EXTRA_CFLAGS += -DDEBUG
---- a/drivers/net/wireless/Makefile	2008-02-28 19:54:52.000000000 +0100
-+++ b/drivers/net/wireless/Makefile	2008-02-28 19:54:53.000000000 +0100
-@@ -6,49 +6,12 @@ obj-$(CONFIG_IPW2100) += ipw2100.o
+--- a/drivers/net/wireless/Makefile	2008-03-11 19:54:52.000000000 +0100
++++ b/drivers/net/wireless/Makefile	2008-03-11 19:54:53.000000000 +0100
+@@ -6,49 +6,13 @@ obj-$(CONFIG_IPW2100) += ipw2100.o
  
  obj-$(CONFIG_IPW2200) += ipw2200.o
  
@@ -290,7 +290,7 @@
 -obj-$(CONFIG_PCI_ATMEL)         += atmel_pci.o 
 -obj-$(CONFIG_PCMCIA_ATMEL)      += atmel_cs.o
 -
--obj-$(CONFIG_USB_ATMEL)	        += at76_usb.o
+ obj-$(CONFIG_USB_ATMEL)	        += at76_usb.o
 -
 -obj-$(CONFIG_PRISM54)		+= prism54/
 -
