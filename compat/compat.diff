@@ -109,13 +109,6 @@
  
  #include "ieee80211_i.h"
  #include "ieee80211_rate.h"
---- a/net/ieee80211/Makefile	2008-02-28 19:54:52.000000000 +0100
-+++ b/net/ieee80211/Makefile	2008-02-28 19:54:53.000000000 +0100
-@@ -10,4 +10,3 @@ ieee80211-objs := \
- 	ieee80211_wx.o \
- 	ieee80211_geo.o
- 
--obj-$(CONFIG_IEEE80211_SOFTMAC) += softmac/
 --- a/net/ieee80211/ieee80211_module.c	2008-02-28 19:54:52.000000000 +0100
 +++ b/net/ieee80211/ieee80211_module.c	2008-02-28 19:54:53.000000000 +0100
 @@ -47,7 +47,9 @@
@@ -260,7 +253,7 @@
  EXTRA_CFLAGS += -DDEBUG
 --- a/drivers/net/wireless/Makefile	2008-03-11 19:54:52.000000000 +0100
 +++ b/drivers/net/wireless/Makefile	2008-03-11 19:54:53.000000000 +0100
-@@ -6,49 +6,13 @@ obj-$(CONFIG_IPW2100) += ipw2100.o
+@@ -6,48 +6,13 @@ obj-$(CONFIG_IPW2100) += ipw2100.o
  
  obj-$(CONFIG_IPW2200) += ipw2200.o
  
@@ -295,7 +288,6 @@
 -obj-$(CONFIG_PRISM54)		+= prism54/
 -
 -obj-$(CONFIG_HOSTAP)		+= hostap/
--obj-$(CONFIG_BCM43XX)		+= bcm43xx/
  obj-$(CONFIG_B43)		+= b43/
  obj-$(CONFIG_B43LEGACY)		+= b43legacy/
  obj-$(CONFIG_ZD1211RW)		+= zd1211rw/
@@ -785,44 +777,6 @@
  			return -EINVAL;
  	}
  	return 0;
---- a/drivers/ssb/main.c	2008-03-07 20:02:05.000000000 -0500
-+++ b/drivers/ssb/main.c	2008-03-07 20:02:07.000000000 -0500
-@@ -341,6 +341,27 @@
- 	return 0;
- }
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
-+static int ssb_device_uevent(struct device *dev, char **envp,
-+	int num_envp, char *buffer, int buffer_size)
-+{
-+	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
-+	int cur_index = 0, cur_len = 0;
-+
-+	if (!dev)
-+		return -ENODEV;
-+
-+	return add_uevent_var(envp,
-+			num_envp,
-+			&cur_index,
-+			buffer,
-+			buffer_size,
-+			&cur_len,
-+			"MODALIAS=ssb:v%04Xid%04Xrev%02X",
-+			ssb_dev->id.vendor, ssb_dev->id.coreid,
-+			ssb_dev->id.revision);
-+}
-+#else
- static int ssb_device_uevent(struct device *dev, struct kobj_uevent_env *env)
- {
- 	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
-@@ -353,6 +374,7 @@
- 			     ssb_dev->id.vendor, ssb_dev->id.coreid,
- 			     ssb_dev->id.revision);
- }
-+#endif
- 
- static struct bus_type ssb_bustype = {
- 	.name		= "ssb",
 --- a/drivers/net/wireless/zd1211rw/zd_mac.c	2008-03-07 20:02:06.000000000 -0500
 +++ b/drivers/net/wireless/zd1211rw/zd_mac.c	2008-03-07 20:02:07.000000000 -0500
 @@ -1042,5 +1042,5 @@
@@ -854,8 +808,46 @@
  	LED_SCANNING = 1,
  	LED_ASSOCIATED = 2,
  };
---- a/drivers/net/wireless/ath5k/hw.c	2008-03-07 20:16:26.000000000 -0500
-+++ b/drivers/net/wireless/ath5k/hw.c	2008-03-07 20:16:26.000000000 -0500
+--- a/drivers/ssb/main.c	2008-03-14 10:30:04.000000000 -0400
++++ b/drivers/ssb/main.c	2008-03-14 10:30:05.000000000 -0400
+@@ -360,6 +360,27 @@
+ 	return 0;
+ }
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
++static int ssb_device_uevent(struct device *dev, char **envp,
++	int num_envp, char *buffer, int buffer_size)
++{
++	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
++	int cur_index = 0, cur_len = 0;
++
++	if (!dev)
++		return -ENODEV;
++
++	return add_uevent_var(envp,
++			num_envp,
++			&cur_index,
++			buffer,
++			buffer_size,
++			&cur_len,
++			"MODALIAS=ssb:v%04Xid%04Xrev%02X",
++			ssb_dev->id.vendor, ssb_dev->id.coreid,
++			ssb_dev->id.revision);
++}
++#else
+ static int ssb_device_uevent(struct device *dev, struct kobj_uevent_env *env)
+ {
+ 	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
+@@ -372,6 +393,7 @@
+ 			     ssb_dev->id.vendor, ssb_dev->id.coreid,
+ 			     ssb_dev->id.revision);
+ }
++#endif
+ 
+ static struct bus_type ssb_bustype = {
+ 	.name		= "ssb",
+--- a/drivers/net/wireless/ath5k/hw.c	2008-03-14 10:32:35.000000000 -0400
++++ b/drivers/net/wireless/ath5k/hw.c	2008-03-14 10:32:36.000000000 -0400
 @@ -385,7 +385,11 @@
  	/* reseting PCI on PCI-E cards results card to hang
  	 * and always return 0xffff... so we ingore that flag
@@ -868,7 +860,7 @@
  
  	/* Reset chipset */
  	ret = ath5k_hw_nic_reset(ah, AR5K_RESET_CTL_PCU |
-@@ -935,7 +939,11 @@
+@@ -937,7 +941,11 @@
  	 * TODO: Check out tx triger level, it's always 64 on dumps but I
  	 * guess we can tweak it and see how it goes ;-)
  	 */

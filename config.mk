@@ -18,10 +18,6 @@ CONFIG_MAC80211=m
 
 CONFIG_MAC80211_RC_DEFAULT=pid
 CONFIG_MAC80211_RC_PID=y
-# Comment above and uncomment below if you are having issues with
-# the rate pid control algorithm.
-#CONFIG_MAC80211_RC_DEFAULT=simple
-#CONFIG_MAC80211_RC_SIMPLE=y
 
 # enable mesh networking too
 CONFIG_MAC80211_MESH=y
@@ -34,6 +30,7 @@ ifneq ($(CONFIG_PCI),)
 
 CONFIG_ATH5K=m
 CONFIG_ATH5K_DEBUG=n
+CONFIG_IWLCORE=m
 CONFIG_IWL3945=m
 CONFIG_IWL4965=m
 CONFIG_B43=m
@@ -167,6 +164,7 @@ CONFIG_P54_COMMON=m
 # Sonics Silicon Backplane
 CONFIG_SSB_POSSIBLE=y
 CONFIG_SSB=m
+CONFIG_SSB_SPROM=y
 
 ifneq ($(CONFIG_PCMCIA),)
 CONFIG_SSB_PCMCIAHOST=y
