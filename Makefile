@@ -74,7 +74,7 @@ install: uninstall modules
 		echo Running athenable ath5k...;\
 		/usr/sbin/athenable ath5k ;\
 	fi
-	@depmod -ae
+	@/sbin/depmod -ae
 	@echo
 	@echo "Currently detected wireless subsystem modules:"
 	@echo 
@@ -126,7 +126,7 @@ uninstall:
 	@# Lets only remove the stuff we are sure we are providing
 	@# on the misc directory.
 	@rm -f $(KLIB)/$(KMODDIR)/drivers/misc/eeprom_93cx6.ko
-	@depmod -ae
+	@/sbin/depmod -ae
 	@if [ -x /usr/sbin/athenable ]; then /usr/sbin/athenable madwifi; fi
 	@if [ -x /usr/sbin/b43enable ]; then /usr/sbin/b43enable bcm43xx; fi
 	@echo
