@@ -577,135 +577,6 @@
  
  	return 0;
  
---- a/net/mac80211/ieee80211.c	2008-02-28 13:35:06.000000000 -0500
-+++ b/net/mac80211/ieee80211.c	2008-02-28 13:35:08.000000000 -0500
-@@ -21,7 +21,9 @@
- #include <linux/wireless.h>
- #include <linux/rtnetlink.h>
- #include <linux/bitmap.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- 
- #include "ieee80211_i.h"
-@@ -915,6 +917,13 @@ static const struct header_ops ieee80211
- 	.cache_update	= eth_header_cache_update,
- };
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+static struct net_device_stats *ieee80211_get_stats(struct net_device *dev)
-+{
-+	return &IEEE80211_DEV_TO_SUB_IF(dev)->stats;
-+}
-+#endif
-+
- /* Must not be called for mdev */
- void ieee80211_if_setup(struct net_device *dev)
- {
-@@ -926,6 +935,9 @@ void ieee80211_if_setup(struct net_devic
- 	dev->open = ieee80211_open;
- 	dev->stop = ieee80211_stop;
- 	dev->destructor = ieee80211_if_free;
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	dev->get_stats = ieee80211_get_stats;
-+#endif
- }
- 
- /* everything else */
-@@ -1616,7 +1628,12 @@ int ieee80211_register_hw(struct ieee802
- 	mdev->open = ieee80211_master_open;
- 	mdev->stop = ieee80211_master_stop;
- 	mdev->type = ARPHRD_IEEE80211;
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	mdev->get_stats = ieee80211_get_stats;
-+#endif
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	mdev->header_ops = &ieee80211_header_ops;
-+#endif
- 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
- 
- 	sdata->vif.type = IEEE80211_IF_TYPE_AP;
---- a/net/mac80211/ieee80211_i.h	2008-02-28 19:54:52.000000000 +0100
-+++ b/net/mac80211/ieee80211_i.h	2008-02-28 19:54:53.000000000 +0100
-@@ -417,6 +417,10 @@ struct ieee80211_sub_if_data {
- 
- 	struct wireless_dev wdev;
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	struct net_device_stats stats;
-+#endif
-+
- 	/* keys */
- 	struct list_head key_list;
- 
-@@ -549,7 +553,7 @@ struct ieee80211_sub_if_data *vif_to_sda
- 	return container_of(p, struct ieee80211_sub_if_data, vif);
- }
- 
--#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
-+#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
- 
- enum {
- 	IEEE80211_RX_MSG	= 1,
---- a/net/mac80211/rx.c	2008-02-28 19:54:52.000000000 +0100
-+++ b/net/mac80211/rx.c	2008-02-28 19:54:53.000000000 +0100
-@@ -237,8 +237,13 @@ ieee80211_rx_monitor(struct ieee80211_lo
- 		}
- 
- 		prev_dev = sdata->dev;
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+		sdata->stats.rx_packets++;
-+		sdata->stats.rx_bytes += skb->len;
-+#else
- 		sdata->dev->stats.rx_packets++;
- 		sdata->dev->stats.rx_bytes += skb->len;
-+#endif
- 	}
- 
- 	if (prev_dev) {
-@@ -1378,8 +1383,13 @@ ieee80211_rx_h_amsdu(struct ieee80211_rx
- 
- 	skb->dev = dev;
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	IEEE80211_DEV_TO_SUB_IF(dev)->stats.rx_packets++;
-+	IEEE80211_DEV_TO_SUB_IF(dev)->stats.rx_bytes += skb->len;
-+#else
- 	dev->stats.rx_packets++;
- 	dev->stats.rx_bytes += skb->len;
-+#endif
- 
- 	/* skip the wrapping header */
- 	eth = (struct ethhdr *) skb_pull(skb, sizeof(struct ethhdr));
-@@ -1488,8 +1498,13 @@ ieee80211_rx_h_data(struct ieee80211_rx_
- 
- 	rx->skb->dev = dev;
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	rx->sdata->stats.rx_packets++;
-+	rx->sdata->stats.rx_bytes += rx->skb->len;
-+#else
- 	dev->stats.rx_packets++;
- 	dev->stats.rx_bytes += rx->skb->len;
-+#endif
- 
- 	ieee80211_deliver_skb(rx);
- 
-@@ -1694,8 +1709,13 @@ static void ieee80211_rx_cooked_monitor(
- 		}
- 
- 		prev_dev = sdata->dev;
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+		sdata->stats.rx_packets++;
-+		sdata->stats.rx_bytes += skb->len;
-+#else
- 		sdata->dev->stats.rx_packets++;
- 		sdata->dev->stats.rx_bytes += skb->len;
-+#endif
- 	}
- 
- 	if (prev_dev) {
 --- a/net/wireless/core.c	2008-02-28 19:54:52.000000000 +0100
 +++ b/net/wireless/core.c	2008-02-28 19:54:53.000000000 +0100
 @@ -71,9 +71,9 @@ __cfg80211_drv_from_info(struct genl_inf
@@ -872,3 +743,132 @@
  	if (ah->ah_version != AR5K_AR5210) {
  		AR5K_REG_WRITE_BITS(ah, AR5K_TXCFG,
  			AR5K_TXCFG_SDMAMR, dma_size);
+--- a/net/mac80211/ieee80211.c	2008-03-28 15:35:48.000000000 -0400
++++ b/net/mac80211/ieee80211.c	2008-03-28 15:35:48.000000000 -0400
+@@ -21,7 +21,9 @@
+ #include <linux/wireless.h>
+ #include <linux/rtnetlink.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ 
+ #include "ieee80211_i.h"
+@@ -930,6 +932,13 @@
+ 	.cache_update	= eth_header_cache_update,
+ };
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++static struct net_device_stats *ieee80211_get_stats(struct net_device *dev)
++{
++	return &IEEE80211_DEV_TO_SUB_IF(dev)->stats;
++}
++#endif
++
+ /* Must not be called for mdev */
+ void ieee80211_if_setup(struct net_device *dev)
+ {
+@@ -941,6 +950,9 @@
+ 	dev->open = ieee80211_open;
+ 	dev->stop = ieee80211_stop;
+ 	dev->destructor = ieee80211_if_free;
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	dev->get_stats = ieee80211_get_stats;
++#endif
+ }
+ 
+ /* everything else */
+@@ -1631,7 +1643,12 @@
+ 	mdev->open = ieee80211_master_open;
+ 	mdev->stop = ieee80211_master_stop;
+ 	mdev->type = ARPHRD_IEEE80211;
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	mdev->get_stats = ieee80211_get_stats;
++#endif
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	mdev->header_ops = &ieee80211_header_ops;
++#endif
+ 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
+ 
+ 	sdata->vif.type = IEEE80211_IF_TYPE_AP;
+--- a/net/mac80211/ieee80211_i.h	2008-03-28 15:35:48.000000000 -0400
++++ b/net/mac80211/ieee80211_i.h	2008-03-28 15:35:48.000000000 -0400
+@@ -421,6 +421,10 @@
+ 
+ 	struct wireless_dev wdev;
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	struct net_device_stats stats;
++#endif
++
+ 	/* keys */
+ 	struct list_head key_list;
+ 
+@@ -553,7 +557,7 @@
+ 	return container_of(p, struct ieee80211_sub_if_data, vif);
+ }
+ 
+-#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
++#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
+ 
+ enum {
+ 	IEEE80211_RX_MSG	= 1,
+--- a/net/mac80211/rx.c	2008-03-28 15:35:48.000000000 -0400
++++ b/net/mac80211/rx.c	2008-03-28 15:35:48.000000000 -0400
+@@ -237,8 +237,13 @@
+ 		}
+ 
+ 		prev_dev = sdata->dev;
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++		sdata->stats.rx_packets++;
++		sdata->stats.rx_bytes += skb->len;
++#else
+ 		sdata->dev->stats.rx_packets++;
+ 		sdata->dev->stats.rx_bytes += skb->len;
++#endif
+ 	}
+ 
+ 	if (prev_dev) {
+@@ -1378,8 +1383,13 @@
+ 
+ 	skb->dev = dev;
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	IEEE80211_DEV_TO_SUB_IF(dev)->stats.rx_packets++;
++	IEEE80211_DEV_TO_SUB_IF(dev)->stats.rx_bytes += skb->len;
++#else
+ 	dev->stats.rx_packets++;
+ 	dev->stats.rx_bytes += skb->len;
++#endif
+ 
+ 	/* skip the wrapping header */
+ 	eth = (struct ethhdr *) skb_pull(skb, sizeof(struct ethhdr));
+@@ -1488,8 +1498,13 @@
+ 
+ 	rx->skb->dev = dev;
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	rx->sdata->stats.rx_packets++;
++	rx->sdata->stats.rx_bytes += rx->skb->len;
++#else
+ 	dev->stats.rx_packets++;
+ 	dev->stats.rx_bytes += rx->skb->len;
++#endif
+ 
+ 	ieee80211_deliver_skb(rx);
+ 
+@@ -1695,8 +1710,13 @@
+ 		}
+ 
+ 		prev_dev = sdata->dev;
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++		sdata->stats.rx_packets++;
++		sdata->stats.rx_bytes += skb->len;
++#else
+ 		sdata->dev->stats.rx_packets++;
+ 		sdata->dev->stats.rx_bytes += skb->len;
++#endif
+ 	}
+ 
+ 	if (prev_dev) {
