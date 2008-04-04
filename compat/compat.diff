@@ -131,34 +131,6 @@
  
  #include "defs.h"
  #include "scan.h"
---- a/drivers/net/wireless/libertas/ethtool.c	2008-02-28 19:54:52.000000000 +0100
-+++ b/drivers/net/wireless/libertas/ethtool.c	2008-02-28 19:54:53.000000000 +0100
-@@ -144,6 +144,7 @@ static void lbs_ethtool_get_stats(struct
- 	lbs_deb_enter(LBS_DEB_ETHTOOL);
- }
- 
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- static int lbs_ethtool_get_sset_count(struct net_device * dev, int sset)
- {
- 	switch (sset) {
-@@ -153,6 +154,7 @@ static int lbs_ethtool_get_sset_count(st
- 		return -EOPNOTSUPP;
- 	}
- }
-+#endif
- 
- static void lbs_ethtool_get_strings(struct net_device *dev,
- 					  u32 stringset,
-@@ -221,7 +223,9 @@ struct ethtool_ops lbs_ethtool_ops = {
- 	.get_drvinfo = lbs_ethtool_get_drvinfo,
- 	.get_eeprom =  lbs_ethtool_get_eeprom,
- 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	.get_sset_count = lbs_ethtool_get_sset_count,
-+#endif
- 	.get_ethtool_stats = lbs_ethtool_get_stats,
- 	.get_strings = lbs_ethtool_get_strings,
- 	.get_wol = lbs_ethtool_get_wol,
 --- a/net/mac80211/cfg.c	2008-02-28 19:54:52.000000000 +0100
 +++ b/net/mac80211/cfg.c	2008-02-28 19:54:53.000000000 +0100
 @@ -9,7 +9,9 @@
@@ -743,77 +715,6 @@
  	if (ah->ah_version != AR5K_AR5210) {
  		AR5K_REG_WRITE_BITS(ah, AR5K_TXCFG,
  			AR5K_TXCFG_SDMAMR, dma_size);
---- a/net/mac80211/ieee80211.c	2008-03-28 15:35:48.000000000 -0400
-+++ b/net/mac80211/ieee80211.c	2008-03-28 15:35:48.000000000 -0400
-@@ -21,7 +21,9 @@
- #include <linux/wireless.h>
- #include <linux/rtnetlink.h>
- #include <linux/bitmap.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/cfg80211.h>
- 
- #include "ieee80211_i.h"
-@@ -930,6 +932,13 @@
- 	.cache_update	= eth_header_cache_update,
- };
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+static struct net_device_stats *ieee80211_get_stats(struct net_device *dev)
-+{
-+	return &IEEE80211_DEV_TO_SUB_IF(dev)->stats;
-+}
-+#endif
-+
- /* Must not be called for mdev */
- void ieee80211_if_setup(struct net_device *dev)
- {
-@@ -941,6 +950,9 @@
- 	dev->open = ieee80211_open;
- 	dev->stop = ieee80211_stop;
- 	dev->destructor = ieee80211_if_free;
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	dev->get_stats = ieee80211_get_stats;
-+#endif
- }
- 
- /* everything else */
-@@ -1631,7 +1643,12 @@
- 	mdev->open = ieee80211_master_open;
- 	mdev->stop = ieee80211_master_stop;
- 	mdev->type = ARPHRD_IEEE80211;
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	mdev->get_stats = ieee80211_get_stats;
-+#endif
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	mdev->header_ops = &ieee80211_header_ops;
-+#endif
- 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
- 
- 	sdata->vif.type = IEEE80211_IF_TYPE_AP;
---- a/net/mac80211/ieee80211_i.h	2008-03-28 15:35:48.000000000 -0400
-+++ b/net/mac80211/ieee80211_i.h	2008-03-28 15:35:48.000000000 -0400
-@@ -421,6 +421,10 @@
- 
- 	struct wireless_dev wdev;
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	struct net_device_stats stats;
-+#endif
-+
- 	/* keys */
- 	struct list_head key_list;
- 
-@@ -553,7 +557,7 @@
- 	return container_of(p, struct ieee80211_sub_if_data, vif);
- }
- 
--#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
-+#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
- 
- enum {
- 	IEEE80211_RX_MSG	= 1,
 --- a/net/mac80211/rx.c	2008-03-28 15:35:48.000000000 -0400
 +++ b/net/mac80211/rx.c	2008-03-28 15:35:48.000000000 -0400
 @@ -237,8 +237,13 @@
@@ -872,3 +773,102 @@
  	}
  
  	if (prev_dev) {
+--- a/drivers/net/wireless/libertas/ethtool.c	2008-04-03 21:51:48.000000000 -0400
++++ b/drivers/net/wireless/libertas/ethtool.c	2008-04-03 21:51:49.000000000 -0400
+@@ -111,6 +111,7 @@
+ 	lbs_deb_enter(LBS_DEB_ETHTOOL);
+ }
+ 
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ static int lbs_ethtool_get_sset_count(struct net_device * dev, int sset)
+ {
+ 	switch (sset) {
+@@ -120,6 +121,7 @@
+ 		return -EOPNOTSUPP;
+ 	}
+ }
++#endif
+ 
+ static void lbs_ethtool_get_strings(struct net_device *dev,
+ 					  u32 stringset,
+@@ -188,7 +190,9 @@
+ 	.get_drvinfo = lbs_ethtool_get_drvinfo,
+ 	.get_eeprom =  lbs_ethtool_get_eeprom,
+ 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	.get_sset_count = lbs_ethtool_get_sset_count,
++#endif
+ 	.get_ethtool_stats = lbs_ethtool_get_stats,
+ 	.get_strings = lbs_ethtool_get_strings,
+ 	.get_wol = lbs_ethtool_get_wol,
+--- a/net/mac80211/ieee80211.c	2008-04-03 21:51:48.000000000 -0400
++++ b/net/mac80211/ieee80211.c	2008-04-03 21:51:49.000000000 -0400
+@@ -21,7 +21,9 @@
+ #include <linux/wireless.h>
+ #include <linux/rtnetlink.h>
+ #include <linux/bitmap.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/cfg80211.h>
+ 
+ #include "ieee80211_i.h"
+@@ -942,6 +944,13 @@
+ 	.cache_update	= eth_header_cache_update,
+ };
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++static struct net_device_stats *ieee80211_get_stats(struct net_device *dev)
++{
++	return &IEEE80211_DEV_TO_SUB_IF(dev)->stats;
++}
++#endif
++
+ /* Must not be called for mdev */
+ void ieee80211_if_setup(struct net_device *dev)
+ {
+@@ -953,6 +962,9 @@
+ 	dev->open = ieee80211_open;
+ 	dev->stop = ieee80211_stop;
+ 	dev->destructor = ieee80211_if_free;
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	dev->get_stats = ieee80211_get_stats;
++#endif
+ }
+ 
+ /* everything else */
+@@ -1643,7 +1655,12 @@
+ 	mdev->open = ieee80211_master_open;
+ 	mdev->stop = ieee80211_master_stop;
+ 	mdev->type = ARPHRD_IEEE80211;
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	mdev->get_stats = ieee80211_get_stats;
++#endif
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	mdev->header_ops = &ieee80211_header_ops;
++#endif
+ 	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
+ 
+ 	sdata->vif.type = IEEE80211_IF_TYPE_AP;
+--- a/net/mac80211/ieee80211_i.h	2008-04-03 21:51:48.000000000 -0400
++++ b/net/mac80211/ieee80211_i.h	2008-04-03 21:51:49.000000000 -0400
+@@ -430,6 +430,10 @@
+ 
+ 	struct wireless_dev wdev;
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	struct net_device_stats stats;
++#endif
++
+ 	/* keys */
+ 	struct list_head key_list;
+ 
+@@ -562,7 +566,7 @@
+ 	return container_of(p, struct ieee80211_sub_if_data, vif);
+ }
+ 
+-#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
++#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
+ 
+ enum {
+ 	IEEE80211_RX_MSG	= 1,
