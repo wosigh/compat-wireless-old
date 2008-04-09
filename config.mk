@@ -118,7 +118,8 @@ CONFIG_USB_ATMEL=m
 
 # Stuff here things which depend on kernel versions for USB
 ifeq ($(shell test -e $(KLIB_BUILD)/Makefile && echo yes),yes)
-ifeq ($(shell test $(shell sed 's/^SUBLEVEL = //;t;d' < $(KLIB_BUILD)/Makefile) -gt 21 && echo yes),yes)
+KERNEL_SUBLEVEL = $(shell $(MAKE) -C $(KLIB_BUILD) kernelversion | sed -n 's/^2\.6\.\([0-9]\+\).*/\1/p')
+ifeq ($(shell test $(KERNEL_SUBLEVEL) -gt 21 && echo yes),yes)
 
 # Sorry, rndis_wlan uses cancel_work_sync which is new and can't be done in compat...
 
