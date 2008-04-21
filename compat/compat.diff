@@ -347,32 +347,6 @@
  	LED_SCANNING = 1,
  	LED_ASSOCIATED = 2,
  };
---- a/drivers/net/wireless/ath5k/hw.c	2008-03-14 10:32:35.000000000 -0400
-+++ b/drivers/net/wireless/ath5k/hw.c	2008-03-14 10:32:36.000000000 -0400
-@@ -385,7 +385,11 @@
- 	/* reseting PCI on PCI-E cards results card to hang
- 	 * and always return 0xffff... so we ingore that flag
- 	 * for PCI-E cards */
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
-+	bus_flags = (compat_is_pcie(pdev)) ? 0 : AR5K_RESET_CTL_PCI;
-+#else
- 	bus_flags = (pdev->is_pcie) ? 0 : AR5K_RESET_CTL_PCI;
-+#endif
- 
- 	/* Reset chipset */
- 	ret = ath5k_hw_nic_reset(ah, AR5K_RESET_CTL_PCU |
-@@ -937,7 +941,11 @@
- 	 * TODO: Check out tx triger level, it's always 64 on dumps but I
- 	 * guess we can tweak it and see how it goes ;-)
- 	 */
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
-+	dma_size = (compat_is_pcie(pdev)) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
-+#else
- 	dma_size = (pdev->is_pcie) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
-+#endif
- 	if (ah->ah_version != AR5K_AR5210) {
- 		AR5K_REG_WRITE_BITS(ah, AR5K_TXCFG,
- 			AR5K_TXCFG_SDMAMR, dma_size);
 --- a/drivers/net/wireless/libertas/ethtool.c	2008-04-03 21:51:48.000000000 -0400
 +++ b/drivers/net/wireless/libertas/ethtool.c	2008-04-03 21:51:49.000000000 -0400
 @@ -111,6 +111,7 @@
@@ -801,8 +775,56 @@
  	}
  
  	if (prev_dev) {
---- a/net/mac80211/main.c	2008-04-15 19:36:34.000000000 -0700
-+++ b/net/mac80211/main.c	2008-04-15 19:36:34.000000000 -0700
+--- a/net/mac80211/ieee80211_i.h	2008-04-15 19:38:02.000000000 -0700
++++ b/net/mac80211/ieee80211_i.h	2008-04-15 19:38:03.000000000 -0700
+@@ -421,6 +421,10 @@
+ 
+ 	struct wireless_dev wdev;
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	struct net_device_stats stats;
++#endif
++
+ 	/* keys */
+ 	struct list_head key_list;
+ 
+@@ -553,7 +557,7 @@
+ 	return container_of(p, struct ieee80211_sub_if_data, vif);
+ }
+ 
+-#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
++#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
+ 
+ enum {
+ 	IEEE80211_RX_MSG	= 1,
+--- a/drivers/net/wireless/ath5k/hw.c	2008-04-21 10:48:09.000000000 -0700
++++ b/drivers/net/wireless/ath5k/hw.c	2008-04-21 10:48:09.000000000 -0700
+@@ -490,7 +490,11 @@
+ 	/* reseting PCI on PCI-E cards results card to hang
+ 	 * and always return 0xffff... so we ingore that flag
+ 	 * for PCI-E cards */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
++	bus_flags = (compat_is_pcie(pdev)) ? 0 : AR5K_RESET_CTL_PCI;
++#else
+ 	bus_flags = (pdev->is_pcie) ? 0 : AR5K_RESET_CTL_PCI;
++#endif
+ 
+ 	/* Reset chipset */
+ 	ret = ath5k_hw_nic_reset(ah, AR5K_RESET_CTL_PCU |
+@@ -1043,7 +1047,11 @@
+ 	 * TODO: Check out tx triger level, it's always 64 on dumps but I
+ 	 * guess we can tweak it and see how it goes ;-)
+ 	 */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
++	dma_size = (compat_is_pcie(pdev)) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
++#else
+ 	dma_size = (pdev->is_pcie) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
++#endif
+ 	if (ah->ah_version != AR5K_AR5210) {
+ 		AR5K_REG_WRITE_BITS(ah, AR5K_TXCFG,
+ 			AR5K_TXCFG_SDMAMR, dma_size);
+--- a/net/mac80211/main.c	2008-04-21 10:48:09.000000000 -0700
++++ b/net/mac80211/main.c	2008-04-21 10:48:09.000000000 -0700
 @@ -21,7 +21,9 @@
  #include <linux/wireless.h>
  #include <linux/rtnetlink.h>
@@ -837,7 +859,7 @@
  }
  
  /* everything else */
-@@ -1656,7 +1668,12 @@
+@@ -1658,7 +1670,12 @@
  	mdev->open = ieee80211_master_open;
  	mdev->stop = ieee80211_master_stop;
  	mdev->type = ARPHRD_IEEE80211;
@@ -850,25 +872,3 @@
  	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
  
  	sdata->vif.type = IEEE80211_IF_TYPE_AP;
---- a/net/mac80211/ieee80211_i.h	2008-04-15 19:38:02.000000000 -0700
-+++ b/net/mac80211/ieee80211_i.h	2008-04-15 19:38:03.000000000 -0700
-@@ -421,6 +421,10 @@
- 
- 	struct wireless_dev wdev;
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	struct net_device_stats stats;
-+#endif
-+
- 	/* keys */
- 	struct list_head key_list;
- 
-@@ -553,7 +557,7 @@
- 	return container_of(p, struct ieee80211_sub_if_data, vif);
- }
- 
--#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
-+#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
- 
- enum {
- 	IEEE80211_RX_MSG	= 1,
