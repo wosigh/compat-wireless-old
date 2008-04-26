@@ -846,9 +846,9 @@
  	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
  
  	sdata->vif.type = IEEE80211_IF_TYPE_AP;
---- a/drivers/net/wireless/ath5k/hw.c	2008-04-21 15:30:47.000000000 -0400
-+++ b/drivers/net/wireless/ath5k/hw.c	2008-04-21 15:33:37.000000000 -0400
-@@ -343,7 +343,11 @@
+--- a/drivers/net/wireless/ath5k/hw.c	2008-04-26 14:14:19.000000000 -0700
++++ b/drivers/net/wireless/ath5k/hw.c	2008-04-26 14:14:21.000000000 -0700
+@@ -349,7 +349,11 @@
  	 * I guess these point to ClockReq but
  	 * i'm not sure.)
  	 */
@@ -860,7 +860,7 @@
  		ath5k_hw_reg_write(ah, 0x9248fc00, 0x4080);
  		ath5k_hw_reg_write(ah, 0x24924924, 0x4080);
  		ath5k_hw_reg_write(ah, 0x28000039, 0x4080);
-@@ -490,7 +494,11 @@
+@@ -496,7 +500,11 @@
  	/* reseting PCI on PCI-E cards results card to hang
  	 * and always return 0xffff... so we ingore that flag
  	 * for PCI-E cards */
@@ -872,7 +872,7 @@
  
  	/* Reset chipset */
  	ret = ath5k_hw_nic_reset(ah, AR5K_RESET_CTL_PCU |
-@@ -1043,7 +1051,11 @@
+@@ -1049,7 +1057,11 @@
  	 * TODO: Check out tx triger level, it's always 64 on dumps but I
  	 * guess we can tweak it and see how it goes ;-)
  	 */
