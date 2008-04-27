@@ -117,12 +117,13 @@ for i in $DRIVERS; do
 	rm -f $i/*.mod.c
 done
 
-# For rndis_wlan, we need a new rndis_host
+# For rndis_wlan, we need a new rndis_host and cdc_ether
+RNDIS_REQS="Makefile rndis_host.c cdc_ether.c"
 DIR="drivers/net/usb"
-echo "Copying $GIT_TREE/$DIR/rndis_host.c"
-cp $GIT_TREE/$DIR/rndis_host.c $DIR/
-echo "Copying $GIT_TREE/$DIR/Makefile"
-cp $GIT_TREE/$DIR/Makefile $DIR/
+for i in $RNDIS_REQS; do
+	echo "Copying $GIT_TREE/$DIR/$i"
+	cp $GIT_TREE/$DIR/$i $DIR/
+done
 
 # Misc
 mkdir -p drivers/misc/

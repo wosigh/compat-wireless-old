@@ -102,6 +102,7 @@ install: uninstall modules
 	@$(MODPROBE) -l rt2500usb
 	@$(MODPROBE) -l rt61pci
 	@$(MODPROBE) -l rt73usb
+	@$(MODPROBE) -l cdc_ether
 	@$(MODPROBE) -l rndis_host
 	@$(MODPROBE) -l rndis_wlan
 	@$(MODPROBE) -l rtl8180
@@ -158,6 +159,7 @@ uninstall:
 	@$(MODPROBE) -l rt2500usb
 	@$(MODPROBE) -l rt61pci
 	@$(MODPROBE) -l rt73usb
+	@$(MODPROBE) -l cdc_ether
 	@$(MODPROBE) -l rndis_host
 	@$(MODPROBE) -l rndis_wlan
 	@$(MODPROBE) -l rtl8180

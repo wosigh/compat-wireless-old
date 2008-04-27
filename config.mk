@@ -129,9 +129,10 @@ ifeq ($(shell test $(KERNEL_SUBLEVEL) -gt 21 && echo yes),yes)
 # All of these devices are based on Broadcom 4320 chip which
 # is only wireless RNDIS chip known to date.
 # Note: this depends on CONFIG_USB_NET_RNDIS_HOST and CONFIG_USB_NET_CDCETHER
-# it also requires a new RNDIS_HOST module which we add
+# it also requires new RNDIS_HOST and CDC_ETHER modules which we add
 CONFIG_USB_NET_RNDIS_HOST=m
 CONFIG_USB_NET_RNDIS_WLAN=m
+CONFIG_USB_NET_CDCETHER=m
 
 endif
 endif
