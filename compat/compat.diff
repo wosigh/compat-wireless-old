@@ -37,24 +37,6 @@
  };
  
  int wiphy_sysfs_init(void)
---- a/include/linux/bitops.h	2008-02-28 19:54:52.000000000 +0100
-+++ b/include/linux/bitops.h	2008-02-28 19:54:53.000000000 +0100
-@@ -1,12 +1,15 @@
- #ifndef _LINUX_BITOPS_H
- #define _LINUX_BITOPS_H
- #include <asm/types.h>
-+#include <linux/version.h>
- 
- #ifdef	__KERNEL__
- #define BIT(nr)			(1UL << (nr))
- #define BIT_MASK(nr)		(1UL << ((nr) % BITS_PER_LONG))
- #define BIT_WORD(nr)		((nr) / BITS_PER_LONG)
-+#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23))
- #define BITS_TO_LONGS(nr)	DIV_ROUND_UP(nr, BITS_PER_LONG)
-+#endif
- #define BITS_PER_BYTE		8
- #endif
- 
 --- a/include/linux/ssb/ssb.h	2008-02-28 19:54:52.000000000 +0100
 +++ b/include/linux/ssb/ssb.h	2008-02-28 19:54:53.000000000 +0100
 @@ -9,6 +9,7 @@
@@ -145,6 +127,30 @@
 -cfg80211-y += core.o sysfs.o radiotap.o util.o reg.o
 +cfg80211-y += core.o sysfs.o radiotap.o util.o reg.o compat.o
  cfg80211-$(CONFIG_NL80211) += nl80211.o
+--- a/drivers/net/usb/Makefile	2008-02-28 19:54:52.000000000 +0100
++++ b/drivers/net/usb/Makefile	2008-02-28 19:54:53.000000000 +0100
+@@ -2,21 +2,7 @@
+ # Makefile for USB Network drivers
+ #
+ 
+-obj-$(CONFIG_USB_CATC)		+= catc.o
+-obj-$(CONFIG_USB_KAWETH)	+= kaweth.o
+-obj-$(CONFIG_USB_PEGASUS)	+= pegasus.o
+-obj-$(CONFIG_USB_RTL8150)	+= rtl8150.o
+-obj-$(CONFIG_USB_NET_AX8817X)	+= asix.o
+-obj-$(CONFIG_USB_NET_CDCETHER)	+= cdc_ether.o
+-obj-$(CONFIG_USB_NET_DM9601)	+= dm9601.o
+-obj-$(CONFIG_USB_NET_GL620A)	+= gl620a.o
+-obj-$(CONFIG_USB_NET_NET1080)	+= net1080.o
+-obj-$(CONFIG_USB_NET_PLUSB)	+= plusb.o
+ obj-$(CONFIG_USB_NET_RNDIS_HOST)	+= rndis_host.o
+-obj-$(CONFIG_USB_NET_CDC_SUBSET)	+= cdc_subset.o
+-obj-$(CONFIG_USB_NET_ZAURUS)	+= zaurus.o
+-obj-$(CONFIG_USB_NET_MCS7830)	+= mcs7830.o
+-obj-$(CONFIG_USB_USBNET)	+= usbnet.o
+ 
+ ifeq ($(CONFIG_USB_DEBUG),y)
+ EXTRA_CFLAGS += -DDEBUG
 --- a/drivers/net/wireless/Makefile	2008-03-11 19:54:52.000000000 +0100
 +++ b/drivers/net/wireless/Makefile	2008-03-11 19:54:53.000000000 +0100
 @@ -6,48 +6,13 @@ obj-$(CONFIG_IPW2100) += ipw2100.o
@@ -196,91 +202,6 @@
  obj-$(CONFIG_LIBERTAS)		+= libertas/
  
  rtl8180-objs		:= rtl8180_dev.o rtl8180_rtl8225.o rtl8180_sa2400.o rtl8180_max2820.o rtl8180_grf5101.o
---- a/drivers/misc/Makefile	2008-02-28 19:54:52.000000000 +0100
-+++ b/drivers/misc/Makefile	2008-02-28 19:54:53.000000000 +0100
-@@ -3,22 +3,4 @@
- #
- obj- := misc.o	# Dummy rule to force built-in.o to be made
- 
--obj-$(CONFIG_IBM_ASM)		+= ibmasm/
--obj-$(CONFIG_HDPU_FEATURES)	+= hdpuftrs/
--obj-$(CONFIG_MSI_LAPTOP)     += msi-laptop.o
--obj-$(CONFIG_ACER_WMI)     += acer-wmi.o
--obj-$(CONFIG_ASUS_LAPTOP)     += asus-laptop.o
--obj-$(CONFIG_ATMEL_PWM)		+= atmel_pwm.o
--obj-$(CONFIG_ATMEL_SSC)		+= atmel-ssc.o
--obj-$(CONFIG_TC1100_WMI)	+= tc1100-wmi.o
--obj-$(CONFIG_LKDTM)		+= lkdtm.o
--obj-$(CONFIG_TIFM_CORE)       	+= tifm_core.o
--obj-$(CONFIG_TIFM_7XX1)       	+= tifm_7xx1.o
--obj-$(CONFIG_PHANTOM)		+= phantom.o
--obj-$(CONFIG_SGI_IOC4)		+= ioc4.o
--obj-$(CONFIG_SONY_LAPTOP)	+= sony-laptop.o
--obj-$(CONFIG_THINKPAD_ACPI)	+= thinkpad_acpi.o
--obj-$(CONFIG_FUJITSU_LAPTOP)	+= fujitsu-laptop.o
- obj-$(CONFIG_EEPROM_93CX6)	+= eeprom_93cx6.o
--obj-$(CONFIG_INTEL_MENLOW)	+= intel_menlow.o
--obj-$(CONFIG_ENCLOSURE_SERVICES) += enclosure.o
---- a/net/wireless/core.c	2008-02-28 19:54:52.000000000 +0100
-+++ b/net/wireless/core.c	2008-02-28 19:54:53.000000000 +0100
-@@ -71,9 +71,9 @@ __cfg80211_drv_from_info(struct genl_inf
- 		ifindex = nla_get_u32(info->attrs[NL80211_ATTR_IFINDEX]);
- 		dev = dev_get_by_index(&init_net, ifindex);
- 		if (dev) {
--			if (dev->ieee80211_ptr)
-+			if (((struct wireless_dev *)dev->ieee80211_ptr))
- 				byifidx =
--					wiphy_to_dev(dev->ieee80211_ptr->wiphy);
-+					wiphy_to_dev(((struct wireless_dev *)dev->ieee80211_ptr)->wiphy);
- 			dev_put(dev);
- 		}
- 		err = -ENODEV;
-@@ -123,8 +123,8 @@ cfg80211_get_dev_from_ifindex(int ifinde
- 	dev = dev_get_by_index(&init_net, ifindex);
- 	if (!dev)
- 		goto out;
--	if (dev->ieee80211_ptr) {
--		drv = wiphy_to_dev(dev->ieee80211_ptr->wiphy);
-+	if (((struct wireless_dev *)dev->ieee80211_ptr)) {
-+		drv = wiphy_to_dev(((struct wireless_dev *)dev->ieee80211_ptr)->wiphy);
- 		mutex_lock(&drv->mtx);
- 	} else
- 		drv = ERR_PTR(-ENODEV);
-@@ -345,28 +345,28 @@ static int cfg80211_netdev_notifier_call
- 	struct net_device *dev = ndev;
- 	struct cfg80211_registered_device *rdev;
- 
--	if (!dev->ieee80211_ptr)
-+	if (!((struct wireless_dev *)dev->ieee80211_ptr))
- 		return 0;
- 
--	rdev = wiphy_to_dev(dev->ieee80211_ptr->wiphy);
-+	rdev = wiphy_to_dev(((struct wireless_dev *)dev->ieee80211_ptr)->wiphy);
- 
- 	switch (state) {
- 	case NETDEV_REGISTER:
- 		mutex_lock(&rdev->devlist_mtx);
--		list_add(&dev->ieee80211_ptr->list, &rdev->netdev_list);
-+		list_add(&((struct wireless_dev *)dev->ieee80211_ptr)->list, &rdev->netdev_list);
- 		if (sysfs_create_link(&dev->dev.kobj, &rdev->wiphy.dev.kobj,
- 				      "phy80211")) {
- 			printk(KERN_ERR "wireless: failed to add phy80211 "
- 				"symlink to netdev!\n");
- 		}
--		dev->ieee80211_ptr->netdev = dev;
-+		((struct wireless_dev *)dev->ieee80211_ptr)->netdev = dev;
- 		mutex_unlock(&rdev->devlist_mtx);
- 		break;
- 	case NETDEV_UNREGISTER:
- 		mutex_lock(&rdev->devlist_mtx);
--		if (!list_empty(&dev->ieee80211_ptr->list)) {
-+		if (!list_empty(&((struct wireless_dev *)dev->ieee80211_ptr)->list)) {
- 			sysfs_remove_link(&dev->dev.kobj, "phy80211");
--			list_del_init(&dev->ieee80211_ptr->list);
-+			list_del_init(&((struct wireless_dev *)dev->ieee80211_ptr)->list);
- 		}
- 		mutex_unlock(&rdev->devlist_mtx);
- 		break;
 --- a/net/wireless/nl80211.c	2008-02-28 19:54:52.000000000 +0100
 +++ b/net/wireless/nl80211.c	2008-02-28 19:54:53.000000000 +0100
 @@ -1062,7 +1062,7 @@ static int get_vlan(struct nlattr *vlana
@@ -292,15 +213,6 @@
  			return -EINVAL;
  	}
  	return 0;
---- a/drivers/net/wireless/zd1211rw/zd_mac.c	2008-03-07 20:02:06.000000000 -0500
-+++ b/drivers/net/wireless/zd1211rw/zd_mac.c	2008-03-07 20:02:07.000000000 -0500
-@@ -1042,5 +1042,5 @@
- 	dev_dbg_f(zd_mac_dev(mac), "\n");
- 	cancel_rearming_delayed_workqueue(zd_workqueue,
- 		&mac->housekeeping.link_led_work);
--	zd_chip_control_leds(&mac->chip, LED_OFF);
-+	zd_chip_control_leds(&mac->chip, LED_OFF_ZD);
- }
 --- a/drivers/net/wireless/zd1211rw/zd_chip.c	2008-03-07 20:02:06.000000000 -0500
 +++ b/drivers/net/wireless/zd1211rw/zd_chip.c	2008-03-07 20:02:07.000000000 -0500
 @@ -1281,7 +1281,7 @@
@@ -351,32 +263,6 @@
  	.get_ethtool_stats = lbs_ethtool_get_stats,
  	.get_strings = lbs_ethtool_get_strings,
  	.get_wol = lbs_ethtool_get_wol,
---- a/net/mac80211/tx.c	2008-04-15 19:25:05.000000000 -0700
-+++ b/net/mac80211/tx.c	2008-04-15 19:25:05.000000000 -0700
-@@ -18,7 +18,9 @@
- #include <linux/etherdevice.h>
- #include <linux/bitmap.h>
- #include <linux/rcupdate.h>
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- #include <net/net_namespace.h>
-+#endif
- #include <net/ieee80211_radiotap.h>
- #include <net/cfg80211.h>
- #include <net/mac80211.h>
-@@ -1618,8 +1620,13 @@
- 		pkt_data->flags |= IEEE80211_TXPD_EAPOL_FRAME;
- 
- 	skb->dev = local->mdev;
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	sdata->stats.tx_packets++;
-+	sdata->stats.tx_bytes += skb->len;
-+#else
- 	dev->stats.tx_packets++;
- 	dev->stats.tx_bytes += skb->len;
-+#endif
- 
- 	/* Update skb pointers to various headers since this modified frame
- 	 * is going to go through Linux networking code that may potentially
 --- a/net/mac80211/util.c	2008-04-15 19:25:05.000000000 -0700
 +++ b/net/mac80211/util.c	2008-04-15 19:25:05.000000000 -0700
 @@ -20,9 +20,15 @@
@@ -405,8 +291,215 @@
  
  #include "defs.h"
  #include "hostcmd.h"
---- a/drivers/net/wireless/adm8211.c	2008-04-15 19:25:05.000000000 -0700
-+++ b/drivers/net/wireless/adm8211.c	2008-04-15 19:25:05.000000000 -0700
+--- a/drivers/ssb/main.c	2008-04-15 19:25:05.000000000 -0700
++++ b/drivers/ssb/main.c	2008-04-15 19:25:05.000000000 -0700
+@@ -347,6 +347,27 @@
+ 	return 0;
+ }
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
++static int ssb_device_uevent(struct device *dev, char **envp,
++	int num_envp, char *buffer, int buffer_size)
++{
++	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
++	int cur_index = 0, cur_len = 0;
++
++	if (!dev)
++		return -ENODEV;
++
++	return add_uevent_var(envp,
++			num_envp,
++			&cur_index,
++			buffer,
++			buffer_size,
++			&cur_len,
++			"MODALIAS=ssb:v%04Xid%04Xrev%02X",
++			ssb_dev->id.vendor, ssb_dev->id.coreid,
++			ssb_dev->id.revision);
++}
++#else
+ static int ssb_device_uevent(struct device *dev, struct kobj_uevent_env *env)
+ {
+ 	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
+@@ -359,6 +380,7 @@
+ 			     ssb_dev->id.vendor, ssb_dev->id.coreid,
+ 			     ssb_dev->id.revision);
+ }
++#endif
+ 
+ static struct bus_type ssb_bustype = {
+ 	.name		= "ssb",
+--- a/net/mac80211/ieee80211_i.h	2008-04-15 19:38:02.000000000 -0700
++++ b/net/mac80211/ieee80211_i.h	2008-04-15 19:38:03.000000000 -0700
+@@ -421,6 +421,10 @@
+ 
+ 	struct wireless_dev wdev;
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	struct net_device_stats stats;
++#endif
++
+ 	/* keys */
+ 	struct list_head key_list;
+ 
+@@ -553,7 +557,7 @@
+ 	return container_of(p, struct ieee80211_sub_if_data, vif);
+ }
+ 
+-#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
++#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
+ 
+ enum {
+ 	IEEE80211_RX_MSG	= 1,
+--- a/drivers/net/wireless/ath5k/hw.c	2008-04-24 12:20:11.000000000 -0700
++++ b/drivers/net/wireless/ath5k/hw.c	2008-04-24 12:20:12.000000000 -0700
+@@ -349,7 +349,11 @@
+ 	 * I guess these point to ClockReq but
+ 	 * i'm not sure.)
+ 	 */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
++	if ((ah->ah_version == AR5K_AR5212) && compat_is_pcie(pdev)) {
++#else
+ 	if ((ah->ah_version == AR5K_AR5212) && (pdev->is_pcie)) {
++#endif
+ 		ath5k_hw_reg_write(ah, 0x9248fc00, 0x4080);
+ 		ath5k_hw_reg_write(ah, 0x24924924, 0x4080);
+ 		ath5k_hw_reg_write(ah, 0x28000039, 0x4080);
+@@ -496,7 +500,11 @@
+ 	/* reseting PCI on PCI-E cards results card to hang
+ 	 * and always return 0xffff... so we ingore that flag
+ 	 * for PCI-E cards */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
++	bus_flags = (compat_is_pcie(pdev)) ? 0 : AR5K_RESET_CTL_PCI;
++#else
+ 	bus_flags = (pdev->is_pcie) ? 0 : AR5K_RESET_CTL_PCI;
++#endif
+ 
+ 	/* Reset chipset */
+ 	ret = ath5k_hw_nic_reset(ah, AR5K_RESET_CTL_PCU |
+@@ -1049,7 +1057,11 @@
+ 	 * TODO: Check out tx triger level, it's always 64 on dumps but I
+ 	 * guess we can tweak it and see how it goes ;-)
+ 	 */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
++	dma_size = (compat_is_pcie(pdev)) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
++#else
+ 	dma_size = (pdev->is_pcie) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
++#endif
+ 	if (ah->ah_version != AR5K_AR5210) {
+ 		AR5K_REG_WRITE_BITS(ah, AR5K_TXCFG,
+ 			AR5K_TXCFG_SDMAMR, dma_size);
+--- a/include/linux/bitops.h	2008-05-15 06:51:10.000000000 -0700
++++ b/include/linux/bitops.h	2008-05-15 07:04:23.000000000 -0700
+@@ -1,14 +1,17 @@
+ #ifndef _LINUX_BITOPS_H
+ #define _LINUX_BITOPS_H
+ #include <asm/types.h>
++#include <linux/version.h>
+ 
+ #ifdef	__KERNEL__
+ #define BIT(nr)			(1UL << (nr))
+ #define BIT_MASK(nr)		(1UL << ((nr) % BITS_PER_LONG))
+ #define BIT_WORD(nr)		((nr) / BITS_PER_LONG)
+ #define BITS_PER_BYTE		8
++#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23))
+ #define BITS_TO_LONGS(nr)	DIV_ROUND_UP(nr, BITS_PER_BYTE * sizeof(long))
+ #endif
++#endif
+ 
+ /*
+  * Include this here because some architectures need generic_ffs/fls in
+--- a/drivers/misc/Makefile	2008-05-15 07:10:28.000000000 -0700
++++ b/drivers/misc/Makefile	2008-05-15 07:13:18.000000000 -0700
+@@ -3,26 +3,4 @@
+ #
+ obj- := misc.o	# Dummy rule to force built-in.o to be made
+ 
+-obj-$(CONFIG_IBM_ASM)		+= ibmasm/
+-obj-$(CONFIG_HDPU_FEATURES)	+= hdpuftrs/
+-obj-$(CONFIG_MSI_LAPTOP)     += msi-laptop.o
+-obj-$(CONFIG_ACER_WMI)     += acer-wmi.o
+-obj-$(CONFIG_ASUS_LAPTOP)	+= asus-laptop.o
+-obj-$(CONFIG_EEEPC_LAPTOP)	+= eeepc-laptop.o
+-obj-$(CONFIG_ATMEL_PWM)		+= atmel_pwm.o
+-obj-$(CONFIG_ATMEL_SSC)		+= atmel-ssc.o
+-obj-$(CONFIG_ATMEL_TCLIB)	+= atmel_tclib.o
+-obj-$(CONFIG_TC1100_WMI)	+= tc1100-wmi.o
+-obj-$(CONFIG_LKDTM)		+= lkdtm.o
+-obj-$(CONFIG_TIFM_CORE)       	+= tifm_core.o
+-obj-$(CONFIG_TIFM_7XX1)       	+= tifm_7xx1.o
+-obj-$(CONFIG_PHANTOM)		+= phantom.o
+-obj-$(CONFIG_SGI_IOC4)		+= ioc4.o
+-obj-$(CONFIG_SONY_LAPTOP)	+= sony-laptop.o
+-obj-$(CONFIG_THINKPAD_ACPI)	+= thinkpad_acpi.o
+-obj-$(CONFIG_FUJITSU_LAPTOP)	+= fujitsu-laptop.o
+ obj-$(CONFIG_EEPROM_93CX6)	+= eeprom_93cx6.o
+-obj-$(CONFIG_INTEL_MENLOW)	+= intel_menlow.o
+-obj-$(CONFIG_ENCLOSURE_SERVICES) += enclosure.o
+-obj-$(CONFIG_KGDB_TESTS)	+= kgdbts.o
+-obj-$(CONFIG_SGI_XP)		+= sgi-xp/
+--- a/net/wireless/core.c	2008-05-15 07:15:18.000000000 -0700
++++ b/net/wireless/core.c	2008-05-15 07:15:19.000000000 -0700
+@@ -71,9 +71,9 @@
+ 		ifindex = nla_get_u32(info->attrs[NL80211_ATTR_IFINDEX]);
+ 		dev = dev_get_by_index(&init_net, ifindex);
+ 		if (dev) {
+-			if (dev->ieee80211_ptr)
++			if (((struct wireless_dev *)dev->ieee80211_ptr))
+ 				byifidx =
+-					wiphy_to_dev(dev->ieee80211_ptr->wiphy);
++					wiphy_to_dev(((struct wireless_dev *)dev->ieee80211_ptr)->wiphy);
+ 			dev_put(dev);
+ 		}
+ 		err = -ENODEV;
+@@ -123,8 +123,8 @@
+ 	dev = dev_get_by_index(&init_net, ifindex);
+ 	if (!dev)
+ 		goto out;
+-	if (dev->ieee80211_ptr) {
+-		drv = wiphy_to_dev(dev->ieee80211_ptr->wiphy);
++	if (((struct wireless_dev *)dev->ieee80211_ptr)) {
++		drv = wiphy_to_dev(((struct wireless_dev *)dev->ieee80211_ptr)->wiphy);
+ 		mutex_lock(&drv->mtx);
+ 	} else
+ 		drv = ERR_PTR(-ENODEV);
+@@ -368,28 +368,28 @@
+ 	struct net_device *dev = ndev;
+ 	struct cfg80211_registered_device *rdev;
+ 
+-	if (!dev->ieee80211_ptr)
++	if (!((struct wireless_dev *)dev->ieee80211_ptr))
+ 		return 0;
+ 
+-	rdev = wiphy_to_dev(dev->ieee80211_ptr->wiphy);
++	rdev = wiphy_to_dev(((struct wireless_dev *)dev->ieee80211_ptr)->wiphy);
+ 
+ 	switch (state) {
+ 	case NETDEV_REGISTER:
+ 		mutex_lock(&rdev->devlist_mtx);
+-		list_add(&dev->ieee80211_ptr->list, &rdev->netdev_list);
++		list_add(&((struct wireless_dev *)dev->ieee80211_ptr)->list, &rdev->netdev_list);
+ 		if (sysfs_create_link(&dev->dev.kobj, &rdev->wiphy.dev.kobj,
+ 				      "phy80211")) {
+ 			printk(KERN_ERR "wireless: failed to add phy80211 "
+ 				"symlink to netdev!\n");
+ 		}
+-		dev->ieee80211_ptr->netdev = dev;
++		((struct wireless_dev *)dev->ieee80211_ptr)->netdev = dev;
+ 		mutex_unlock(&rdev->devlist_mtx);
+ 		break;
+ 	case NETDEV_UNREGISTER:
+ 		mutex_lock(&rdev->devlist_mtx);
+-		if (!list_empty(&dev->ieee80211_ptr->list)) {
++		if (!list_empty(&((struct wireless_dev *)dev->ieee80211_ptr)->list)) {
+ 			sysfs_remove_link(&dev->dev.kobj, "phy80211");
+-			list_del_init(&dev->ieee80211_ptr->list);
++			list_del_init(&((struct wireless_dev *)dev->ieee80211_ptr)->list);
+ 		}
+ 		mutex_unlock(&rdev->devlist_mtx);
+ 		break;
+--- a/drivers/net/wireless/adm8211.c.orig	2008-05-15 07:20:29.000000000 -0700
++++ b/drivers/net/wireless/adm8211.c	2008-05-15 07:24:01.000000000 -0700
 @@ -143,7 +143,11 @@
  		break;
  
@@ -491,19 +584,19 @@
  		for (i = 0; i < len; i += 2) {
  			u16 val = buf[i] | (buf[i + 1] << 8);
  			adm8211_write_sram(dev, addr + i / 2, val);
-@@ -445,7 +477,11 @@
+@@ -444,7 +476,11 @@
  		if (skb) {
  			struct ieee80211_rx_status rx_status = {0};
  
 +#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
-+			if (priv->revid < ADM8211_REV_CA)
++			if (priv->revid < < ADM8211_REV_CA)
 +#else
  			if (priv->pdev->revision < ADM8211_REV_CA)
 +#endif
- 				rx_status.ssi = rssi;
+ 				rx_status.signal = rssi;
  			else
- 				rx_status.ssi = 100 - rssi;
-@@ -718,7 +754,11 @@
+ 				rx_status.signal = 100 - rssi;
+@@ -717,7 +753,11 @@
  		adm8211_rf_write_syn_rfmd2958(dev, 0x0A, reg);
  		/* set TXRX TX_GAIN */
  		adm8211_rf_write_syn_rfmd2958(dev, 0x09, 0x00050 |
@@ -515,7 +608,7 @@
  	} else {
  		reg = ADM8211_CSR_READ(PLCPHD);
  		reg &= 0xff00ffff;
-@@ -737,7 +777,11 @@
+@@ -736,7 +776,11 @@
  				  tx_power<<2);
  	adm8211_write_bbp(dev, RF3000_LOW_GAIN_CALIB, lpf_cutoff);
  	adm8211_write_bbp(dev, RF3000_HIGH_GAIN_CALIB, lnags_thresh);
@@ -527,7 +620,7 @@
  				     priv->eeprom->cr28 : 0);
  	adm8211_write_bbp(dev, 0x1d, priv->eeprom->cr29);
  
-@@ -776,7 +820,11 @@
+@@ -775,7 +819,11 @@
  		priv->nar |= ADM8211_NAR_EA | ADM8211_NAR_ST | ADM8211_NAR_SR;
  
  		/* don't trust the error bits on rev 0x20 and up in adhoc */
@@ -539,7 +632,7 @@
  			priv->soft_rx_crc = 1;
  		break;
  	case IEEE80211_IF_TYPE_MNTR:
-@@ -877,7 +925,11 @@
+@@ -876,7 +924,11 @@
  			break;
  		}
  
@@ -551,7 +644,7 @@
  		case ADM8211_REV_CA:
  			if (priv->transceiver_type == ADM8211_RFMD2958 ||
  			    priv->transceiver_type == ADM8211_RFMD2958_RF3000_CONTROL_POWER ||
-@@ -935,7 +987,11 @@
+@@ -934,7 +986,11 @@
  			adm8211_write_bbp(dev, 0x1c, 0x00);
  			adm8211_write_bbp(dev, 0x1d, 0x80);
  		} else {
@@ -563,7 +656,7 @@
  				adm8211_write_bbp(dev, 0x1c, priv->eeprom->cr28);
  			else
  				adm8211_write_bbp(dev, 0x1c, 0x00);
-@@ -1067,7 +1123,11 @@
+@@ -1066,7 +1122,11 @@
  	u8 rate_buf[12] = {0};
  
  	/* write supported rates */
@@ -575,7 +668,7 @@
  		rate_buf[0] = ARRAY_SIZE(adm8211_rates);
  		for (i = 0; i < ARRAY_SIZE(adm8211_rates); i++)
  			rate_buf[i + 1] = (adm8211_rates[i].bitrate / 5) | 0x80;
-@@ -1151,7 +1211,11 @@
+@@ -1150,7 +1210,11 @@
  	 * PWR0PE2  = 13 us
  	 * PWR1PE2  = 1 us
  	 * PWR0TXPE = 8 or 6 */
@@ -587,7 +680,7 @@
  		ADM8211_CSR_WRITE(TOFS2, 0x8815cd18);
  	else
  		ADM8211_CSR_WRITE(TOFS2, 0x8535cd16);
-@@ -1180,7 +1244,11 @@
+@@ -1179,7 +1243,11 @@
  
  	/* SLOT=20 us, SIFS=110 cycles of 22 MHz (5 us),
  	 * DIFS=50 us, EIFS=100 us */
@@ -599,7 +692,7 @@
  		ADM8211_CSR_WRITE(IFST, (20 << 23) | (110 << 15) |
  					(50 << 9)  | 100);
  	else
-@@ -1239,13 +1307,21 @@
+@@ -1238,13 +1306,21 @@
  
  	ADM8211_CSR_WRITE(PAR, tmp);
  
@@ -621,7 +714,7 @@
  		reg = ADM8211_CSR_READ(CSR_TEST1);
  		reg &= ~((1 << 4) | (1 << 5));
  		ADM8211_CSR_WRITE(CSR_TEST1, reg);
-@@ -1880,6 +1956,9 @@
+@@ -1879,6 +1955,9 @@
  		       pci_name(pdev));
  		goto err_iounmap;
  	}
@@ -655,47 +748,44 @@
  
  	return 0;
  
---- a/drivers/ssb/main.c	2008-04-15 19:25:05.000000000 -0700
-+++ b/drivers/ssb/main.c	2008-04-15 19:25:05.000000000 -0700
-@@ -347,6 +347,27 @@
- 	return 0;
+--- a/drivers/net/wireless/zd1211rw/zd_mac.c	2008-05-16 08:25:57.000000000 -0700
++++ b/drivers/net/wireless/zd1211rw/zd_mac.c	2008-05-16 08:26:01.000000000 -0700
+@@ -1057,5 +1057,5 @@
+ 	dev_dbg_f(zd_mac_dev(mac), "\n");
+ 	cancel_rearming_delayed_workqueue(zd_workqueue,
+ 		&mac->housekeeping.link_led_work);
+-	zd_chip_control_leds(&mac->chip, LED_OFF);
++	zd_chip_control_leds(&mac->chip, LED_OFF_ZD);
  }
+--- a/net/mac80211/tx.c	2008-05-16 08:25:57.000000000 -0700
++++ b/net/mac80211/tx.c	2008-05-16 08:26:01.000000000 -0700
+@@ -18,7 +18,9 @@
+ #include <linux/etherdevice.h>
+ #include <linux/bitmap.h>
+ #include <linux/rcupdate.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ #include <net/net_namespace.h>
++#endif
+ #include <net/ieee80211_radiotap.h>
+ #include <net/cfg80211.h>
+ #include <net/mac80211.h>
+@@ -1624,8 +1626,13 @@
+ 	pkt_data->flags |= IEEE80211_TXPD_REQ_TX_STATUS;
  
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
-+static int ssb_device_uevent(struct device *dev, char **envp,
-+	int num_envp, char *buffer, int buffer_size)
-+{
-+	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
-+	int cur_index = 0, cur_len = 0;
-+
-+	if (!dev)
-+		return -ENODEV;
-+
-+	return add_uevent_var(envp,
-+			num_envp,
-+			&cur_index,
-+			buffer,
-+			buffer_size,
-+			&cur_len,
-+			"MODALIAS=ssb:v%04Xid%04Xrev%02X",
-+			ssb_dev->id.vendor, ssb_dev->id.coreid,
-+			ssb_dev->id.revision);
-+}
+ 	skb->dev = local->mdev;
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	sdata->stats.tx_packets++;
++	sdata->stats.tx_bytes += skb->len;
 +#else
- static int ssb_device_uevent(struct device *dev, struct kobj_uevent_env *env)
- {
- 	struct ssb_device *ssb_dev = dev_to_ssb_dev(dev);
-@@ -359,6 +380,7 @@
- 			     ssb_dev->id.vendor, ssb_dev->id.coreid,
- 			     ssb_dev->id.revision);
- }
+ 	dev->stats.tx_packets++;
+ 	dev->stats.tx_bytes += skb->len;
 +#endif
  
- static struct bus_type ssb_bustype = {
- 	.name		= "ssb",
---- a/net/mac80211/rx.c	2008-04-15 19:31:45.000000000 -0700
-+++ b/net/mac80211/rx.c	2008-04-15 19:31:45.000000000 -0700
-@@ -237,8 +237,13 @@
+ 	/* Update skb pointers to various headers since this modified frame
+ 	 * is going to go through Linux networking code that may potentially
+--- a/net/mac80211/rx.c	2008-05-16 08:25:57.000000000 -0700
++++ b/net/mac80211/rx.c	2008-05-16 08:26:01.000000000 -0700
+@@ -308,8 +308,13 @@
  		}
  
  		prev_dev = sdata->dev;
@@ -709,7 +799,7 @@
  	}
  
  	if (prev_dev) {
-@@ -1375,8 +1380,13 @@
+@@ -1442,8 +1447,13 @@
  
  	skb->dev = dev;
  
@@ -723,7 +813,7 @@
  
  	/* skip the wrapping header */
  	eth = (struct ethhdr *) skb_pull(skb, sizeof(struct ethhdr));
-@@ -1485,8 +1495,13 @@
+@@ -1552,8 +1562,13 @@
  
  	rx->skb->dev = dev;
  
@@ -737,7 +827,7 @@
  
  	ieee80211_deliver_skb(rx);
  
-@@ -1692,8 +1707,13 @@
+@@ -1759,8 +1774,13 @@
  		}
  
  		prev_dev = sdata->dev;
@@ -751,30 +841,8 @@
  	}
  
  	if (prev_dev) {
---- a/net/mac80211/ieee80211_i.h	2008-04-15 19:38:02.000000000 -0700
-+++ b/net/mac80211/ieee80211_i.h	2008-04-15 19:38:03.000000000 -0700
-@@ -421,6 +421,10 @@
- 
- 	struct wireless_dev wdev;
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	struct net_device_stats stats;
-+#endif
-+
- 	/* keys */
- 	struct list_head key_list;
- 
-@@ -553,7 +557,7 @@
- 	return container_of(p, struct ieee80211_sub_if_data, vif);
- }
- 
--#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
-+#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
- 
- enum {
- 	IEEE80211_RX_MSG	= 1,
---- a/net/mac80211/main.c	2008-04-21 10:48:09.000000000 -0700
-+++ b/net/mac80211/main.c	2008-04-21 10:48:09.000000000 -0700
+--- a/net/mac80211/main.c	2008-05-16 08:25:57.000000000 -0700
++++ b/net/mac80211/main.c	2008-05-16 08:26:01.000000000 -0700
 @@ -21,7 +21,9 @@
  #include <linux/wireless.h>
  #include <linux/rtnetlink.h>
@@ -785,7 +853,7 @@
  #include <net/cfg80211.h>
  
  #include "ieee80211_i.h"
-@@ -940,6 +942,13 @@
+@@ -951,6 +953,13 @@
  	.cache_update	= eth_header_cache_update,
  };
  
@@ -799,7 +867,7 @@
  /* Must not be called for mdev */
  void ieee80211_if_setup(struct net_device *dev)
  {
-@@ -951,6 +960,9 @@
+@@ -962,6 +971,9 @@
  	dev->open = ieee80211_open;
  	dev->stop = ieee80211_stop;
  	dev->destructor = ieee80211_if_free;
@@ -809,7 +877,7 @@
  }
  
  /* everything else */
-@@ -1658,7 +1670,12 @@
+@@ -1670,7 +1682,12 @@
  	mdev->open = ieee80211_master_open;
  	mdev->stop = ieee80211_master_stop;
  	mdev->type = ARPHRD_IEEE80211;
@@ -822,64 +890,3 @@
  	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
  
  	sdata->vif.type = IEEE80211_IF_TYPE_AP;
---- a/drivers/net/wireless/ath5k/hw.c	2008-04-26 14:14:19.000000000 -0700
-+++ b/drivers/net/wireless/ath5k/hw.c	2008-04-26 14:14:21.000000000 -0700
-@@ -349,7 +349,11 @@
- 	 * I guess these point to ClockReq but
- 	 * i'm not sure.)
- 	 */
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
-+	if ((ah->ah_version == AR5K_AR5212) && compat_is_pcie(pdev)) {
-+#else
- 	if ((ah->ah_version == AR5K_AR5212) && (pdev->is_pcie)) {
-+#endif
- 		ath5k_hw_reg_write(ah, 0x9248fc00, 0x4080);
- 		ath5k_hw_reg_write(ah, 0x24924924, 0x4080);
- 		ath5k_hw_reg_write(ah, 0x28000039, 0x4080);
-@@ -496,7 +500,11 @@
- 	/* reseting PCI on PCI-E cards results card to hang
- 	 * and always return 0xffff... so we ingore that flag
- 	 * for PCI-E cards */
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
-+	bus_flags = (compat_is_pcie(pdev)) ? 0 : AR5K_RESET_CTL_PCI;
-+#else
- 	bus_flags = (pdev->is_pcie) ? 0 : AR5K_RESET_CTL_PCI;
-+#endif
- 
- 	/* Reset chipset */
- 	ret = ath5k_hw_nic_reset(ah, AR5K_RESET_CTL_PCU |
-@@ -1049,7 +1057,11 @@
- 	 * TODO: Check out tx triger level, it's always 64 on dumps but I
- 	 * guess we can tweak it and see how it goes ;-)
- 	 */
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
-+	dma_size = (compat_is_pcie(pdev)) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
-+#else
- 	dma_size = (pdev->is_pcie) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
-+#endif
- 	if (ah->ah_version != AR5K_AR5210) {
- 		AR5K_REG_WRITE_BITS(ah, AR5K_TXCFG,
- 			AR5K_TXCFG_SDMAMR, dma_size);
---- a/drivers/net/usb/Makefile	2008-04-27 03:18:48.000000000 -0700
-+++ b/drivers/net/usb/Makefile	2008-04-27 03:12:39.000000000 -0700
-@@ -2,20 +2,8 @@
- # Makefile for USB Network drivers
- #
- 
--obj-$(CONFIG_USB_CATC)		+= catc.o
--obj-$(CONFIG_USB_KAWETH)	+= kaweth.o
--obj-$(CONFIG_USB_PEGASUS)	+= pegasus.o
--obj-$(CONFIG_USB_RTL8150)	+= rtl8150.o
--obj-$(CONFIG_USB_NET_AX8817X)	+= asix.o
- obj-$(CONFIG_USB_NET_CDCETHER)	+= cdc_ether.o
--obj-$(CONFIG_USB_NET_DM9601)	+= dm9601.o
--obj-$(CONFIG_USB_NET_GL620A)	+= gl620a.o
--obj-$(CONFIG_USB_NET_NET1080)	+= net1080.o
--obj-$(CONFIG_USB_NET_PLUSB)	+= plusb.o
- obj-$(CONFIG_USB_NET_RNDIS_HOST)	+= rndis_host.o
--obj-$(CONFIG_USB_NET_CDC_SUBSET)	+= cdc_subset.o
--obj-$(CONFIG_USB_NET_ZAURUS)	+= zaurus.o
--obj-$(CONFIG_USB_NET_MCS7830)	+= mcs7830.o
- obj-$(CONFIG_USB_USBNET)	+= usbnet.o
- 
- ifeq ($(CONFIG_USB_DEBUG),y)

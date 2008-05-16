@@ -135,8 +135,14 @@ DIR="drivers/net/wireless"
 for i in $DRIVER_FILES; do
 	cp $GIT_TREE/$DIR/$i $DIR/
 done
+
 # Top level wireless driver Makefile
 cp $GIT_TREE/$DIR/Makefile $DIR
+
+DIR="include/linux/unaligned"
+echo "Copying $GIT_TREE/$DIR/*"
+cp -a $GIT_TREE/$DIR $DIR
+
 
 # Compat stuff
 cp compat/compat.c net/wireless/
