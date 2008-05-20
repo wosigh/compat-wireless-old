@@ -12,9 +12,9 @@ MADWIFI=$(shell $(MODPROBE) -l ath_pci)
 
 ifneq ($(KERNELRELEASE),)
 
-include $(src)/$(COMPAT_CONFIG)
+include $(M)/$(COMPAT_CONFIG)
 
-NOSTDINC_FLAGS := -I$(src)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
+NOSTDINC_FLAGS := -I$(M)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
 
 obj-y := net/wireless/ net/mac80211/ net/ieee80211/ \
 	drivers/ssb/ \
