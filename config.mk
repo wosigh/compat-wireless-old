@@ -30,6 +30,10 @@ ifneq ($(CONFIG_PCI),)
 
 CONFIG_ATH5K=m
 CONFIG_ATH5K_DEBUG=n
+
+# Required for older kernels which still use this flag.
+CONFIG_IWLWIFI=m
+
 CONFIG_IWLCORE=m
 CONFIG_IWL3945=m
 CONFIG_IWL4965=m
