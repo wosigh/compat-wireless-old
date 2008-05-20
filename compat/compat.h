@@ -403,14 +403,18 @@ static inline void led_classdev_unregister_suspended(struct led_classdev *lcd)
 	led_classdev_unregister(lcd);
 }
 
-/* This is from include/linux/device.h, which was added as of 2.6.25 */
+#endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)) */
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26))
+
+/* This is from include/linux/device.h, which was added as of 2.6.26 */
 static inline const char *dev_name(struct device *dev)
 {
 	/* will be changed into kobject_name(&dev->kobj) in the near future */
 	return dev->bus_id;
 }
 
-/* Added as of 2.6.25 */ 
+/* This is from include/linux/kernel.h, which was added as of 2.6.26 */ 
 
 /**
  * clamp_val - return a value clamped to a given range using val's type
@@ -431,10 +435,6 @@ static inline const char *dev_name(struct device *dev)
 	__val = __val < __min ? __min: __val;   \
 	__val > __max ? __max: __val; })
 
-
-#endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)) */
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26))
 
 /* 2.6.26 added its own unaligned API which the 
  * new drivers can use. Lets port it here by including it in older
