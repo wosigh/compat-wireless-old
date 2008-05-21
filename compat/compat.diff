@@ -235,34 +235,6 @@
  	LED_SCANNING = 1,
  	LED_ASSOCIATED = 2,
  };
---- a/drivers/net/wireless/libertas/ethtool.c	2008-04-03 21:51:48.000000000 -0400
-+++ b/drivers/net/wireless/libertas/ethtool.c	2008-04-03 21:51:49.000000000 -0400
-@@ -111,6 +111,7 @@
- 	lbs_deb_enter(LBS_DEB_ETHTOOL);
- }
- 
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- static int lbs_ethtool_get_sset_count(struct net_device * dev, int sset)
- {
- 	switch (sset) {
-@@ -120,6 +121,7 @@
- 		return -EOPNOTSUPP;
- 	}
- }
-+#endif
- 
- static void lbs_ethtool_get_strings(struct net_device *dev,
- 					  u32 stringset,
-@@ -188,7 +190,9 @@
- 	.get_drvinfo = lbs_ethtool_get_drvinfo,
- 	.get_eeprom =  lbs_ethtool_get_eeprom,
- 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	.get_sset_count = lbs_ethtool_get_sset_count,
-+#endif
- 	.get_ethtool_stats = lbs_ethtool_get_stats,
- 	.get_strings = lbs_ethtool_get_strings,
- 	.get_wol = lbs_ethtool_get_wol,
 --- a/net/mac80211/util.c	2008-04-15 19:25:05.000000000 -0700
 +++ b/net/mac80211/util.c	2008-04-15 19:25:05.000000000 -0700
 @@ -20,9 +20,15 @@
@@ -890,3 +862,31 @@
  	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
  
  	sdata->vif.type = IEEE80211_IF_TYPE_AP;
+--- a/drivers/net/wireless/libertas/ethtool.c	2008-05-20 22:04:10.000000000 -0700
++++ b/drivers/net/wireless/libertas/ethtool.c	2008-05-20 22:06:48.000000000 -0700
+@@ -111,6 +111,7 @@
+ 	lbs_deb_enter(LBS_DEB_ETHTOOL);
+ }
+ 
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ static int lbs_ethtool_get_sset_count(struct net_device *dev, int sset)
+ {
+ 	struct lbs_private *priv = dev->priv;
+@@ -120,6 +121,7 @@
+ 
+ 	return -EOPNOTSUPP;
+ }
++#endif
+ 
+ static void lbs_ethtool_get_strings(struct net_device *dev,
+ 				    uint32_t stringset, uint8_t *s)
+@@ -187,7 +189,9 @@
+ 	.get_drvinfo = lbs_ethtool_get_drvinfo,
+ 	.get_eeprom =  lbs_ethtool_get_eeprom,
+ 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	.get_sset_count = lbs_ethtool_get_sset_count,
++#endif
+ 	.get_ethtool_stats = lbs_ethtool_get_stats,
+ 	.get_strings = lbs_ethtool_get_strings,
+ 	.get_wol = lbs_ethtool_get_wol,
