@@ -561,7 +561,7 @@
  			struct ieee80211_rx_status rx_status = {0};
  
 +#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
-+			if (priv->revid < < ADM8211_REV_CA)
++			if (priv->revid < ADM8211_REV_CA)
 +#else
  			if (priv->pdev->revision < ADM8211_REV_CA)
 +#endif
