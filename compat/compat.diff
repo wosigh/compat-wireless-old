@@ -92,32 +92,6 @@
  						continue;
  				}
  			}
---- a/drivers/net/wireless/adm8211.h	2008-02-28 19:54:52.000000000 +0100
-+++ b/drivers/net/wireless/adm8211.h	2008-02-28 19:54:53.000000000 +0100
-@@ -416,8 +416,13 @@ struct adm8211_desc {
- #define TDES1_CONTROL_RBS1	(0x00000fff)
- 
- /* SRAM offsets */
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
-+#define ADM8211_SRAM(x) (priv->revid < ADM8211_REV_BA ? \
-+        ADM8211_SRAM_A_ ## x : ADM8211_SRAM_B_ ## x)
-+#else
- #define ADM8211_SRAM(x) (priv->pdev->revision < ADM8211_REV_BA ? \
-         ADM8211_SRAM_A_ ## x : ADM8211_SRAM_B_ ## x)
-+#endif
- 
- #define ADM8211_SRAM_INDIV_KEY   0x0000
- #define ADM8211_SRAM_A_SHARE_KEY 0x0160
-@@ -566,6 +571,9 @@ struct adm8211_priv {
- 	u8 lnags_threshold;
- 	struct adm8211_eeprom *eeprom;
- 	size_t eeprom_len;
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
-+	u8 revid;
-+#endif
- 
- 	u32 nar;
- 
 --- a/net/wireless/Makefile	2008-02-28 19:54:52.000000000 +0100
 +++ b/net/wireless/Makefile	2008-02-28 19:54:53.000000000 +0100
 @@ -1,5 +1,4 @@
@@ -301,28 +275,6 @@
  
  static struct bus_type ssb_bustype = {
  	.name		= "ssb",
---- a/net/mac80211/ieee80211_i.h	2008-04-15 19:38:02.000000000 -0700
-+++ b/net/mac80211/ieee80211_i.h	2008-04-15 19:38:03.000000000 -0700
-@@ -421,6 +421,10 @@
- 
- 	struct wireless_dev wdev;
- 
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
-+	struct net_device_stats stats;
-+#endif
-+
- 	/* keys */
- 	struct list_head key_list;
- 
-@@ -553,7 +557,7 @@
- 	return container_of(p, struct ieee80211_sub_if_data, vif);
- }
- 
--#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
-+#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
- 
- enum {
- 	IEEE80211_RX_MSG	= 1,
 --- a/drivers/net/wireless/ath5k/hw.c	2008-04-24 12:20:11.000000000 -0700
 +++ b/drivers/net/wireless/ath5k/hw.c	2008-04-24 12:20:12.000000000 -0700
 @@ -349,7 +349,11 @@
@@ -470,8 +422,84 @@
  		}
  		mutex_unlock(&rdev->devlist_mtx);
  		break;
---- a/drivers/net/wireless/adm8211.c.orig	2008-05-15 07:20:29.000000000 -0700
-+++ b/drivers/net/wireless/adm8211.c	2008-05-15 07:24:01.000000000 -0700
+--- a/drivers/net/wireless/libertas/ethtool.c	2008-05-20 22:04:10.000000000 -0700
++++ b/drivers/net/wireless/libertas/ethtool.c	2008-05-20 22:06:48.000000000 -0700
+@@ -111,6 +111,7 @@
+ 	lbs_deb_enter(LBS_DEB_ETHTOOL);
+ }
+ 
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ static int lbs_ethtool_get_sset_count(struct net_device *dev, int sset)
+ {
+ 	struct lbs_private *priv = dev->priv;
+@@ -120,6 +121,7 @@
+ 
+ 	return -EOPNOTSUPP;
+ }
++#endif
+ 
+ static void lbs_ethtool_get_strings(struct net_device *dev,
+ 				    uint32_t stringset, uint8_t *s)
+@@ -187,7 +189,9 @@
+ 	.get_drvinfo = lbs_ethtool_get_drvinfo,
+ 	.get_eeprom =  lbs_ethtool_get_eeprom,
+ 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
+ 	.get_sset_count = lbs_ethtool_get_sset_count,
++#endif
+ 	.get_ethtool_stats = lbs_ethtool_get_stats,
+ 	.get_strings = lbs_ethtool_get_strings,
+ 	.get_wol = lbs_ethtool_get_wol,
+--- a/drivers/net/wireless/adm8211.h	2008-05-23 11:55:04.000000000 +0530
++++ b/drivers/net/wireless/adm8211.h	2008-05-23 11:55:05.000000000 +0530
+@@ -416,8 +416,13 @@
+ #define TDES1_CONTROL_RBS1	(0x00000fff)
+ 
+ /* SRAM offsets */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
++#define ADM8211_SRAM(x) (priv->revid < ADM8211_REV_BA ? \
++        ADM8211_SRAM_A_ ## x : ADM8211_SRAM_B_ ## x)
++#else
+ #define ADM8211_SRAM(x) (priv->pdev->revision < ADM8211_REV_BA ? \
+         ADM8211_SRAM_A_ ## x : ADM8211_SRAM_B_ ## x)
++#endif
+ 
+ #define ADM8211_SRAM_INDIV_KEY   0x0000
+ #define ADM8211_SRAM_A_SHARE_KEY 0x0160
+@@ -565,6 +570,9 @@
+ 	u8 lnags_threshold;
+ 	struct adm8211_eeprom *eeprom;
+ 	size_t eeprom_len;
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
++	u8 revid;
++#endif
+ 
+ 	u32 nar;
+ 
+--- a/net/mac80211/ieee80211_i.h	2008-05-23 11:55:04.000000000 +0530
++++ b/net/mac80211/ieee80211_i.h	2008-05-23 11:55:05.000000000 +0530
+@@ -404,6 +404,10 @@
+ 
+ 	struct wireless_dev wdev;
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
++	struct net_device_stats stats;
++#endif
++
+ 	/* keys */
+ 	struct list_head key_list;
+ 
+@@ -530,7 +534,7 @@
+ 	return container_of(p, struct ieee80211_sub_if_data, vif);
+ }
+ 
+-#define IEEE80211_DEV_TO_SUB_IF(dev) netdev_priv(dev)
++#define IEEE80211_DEV_TO_SUB_IF(dev) ((struct ieee80211_sub_if_data *)netdev_priv(dev))
+ 
+ enum {
+ 	IEEE80211_RX_MSG	= 1,
+--- a/drivers/net/wireless/adm8211.c	2008-05-23 11:55:04.000000000 +0530
++++ b/drivers/net/wireless/adm8211.c	2008-05-23 11:55:05.000000000 +0530
 @@ -143,7 +143,11 @@
  		break;
  
@@ -556,7 +584,7 @@
  		for (i = 0; i < len; i += 2) {
  			u16 val = buf[i] | (buf[i + 1] << 8);
  			adm8211_write_sram(dev, addr + i / 2, val);
-@@ -444,7 +476,11 @@
+@@ -443,7 +475,11 @@
  		if (skb) {
  			struct ieee80211_rx_status rx_status = {0};
  
@@ -568,7 +596,7 @@
  				rx_status.signal = rssi;
  			else
  				rx_status.signal = 100 - rssi;
-@@ -717,7 +753,11 @@
+@@ -716,7 +752,11 @@
  		adm8211_rf_write_syn_rfmd2958(dev, 0x0A, reg);
  		/* set TXRX TX_GAIN */
  		adm8211_rf_write_syn_rfmd2958(dev, 0x09, 0x00050 |
@@ -580,7 +608,7 @@
  	} else {
  		reg = ADM8211_CSR_READ(PLCPHD);
  		reg &= 0xff00ffff;
-@@ -736,7 +776,11 @@
+@@ -735,7 +775,11 @@
  				  tx_power<<2);
  	adm8211_write_bbp(dev, RF3000_LOW_GAIN_CALIB, lpf_cutoff);
  	adm8211_write_bbp(dev, RF3000_HIGH_GAIN_CALIB, lnags_thresh);
@@ -592,7 +620,7 @@
  				     priv->eeprom->cr28 : 0);
  	adm8211_write_bbp(dev, 0x1d, priv->eeprom->cr29);
  
-@@ -775,7 +819,11 @@
+@@ -774,7 +818,11 @@
  		priv->nar |= ADM8211_NAR_EA | ADM8211_NAR_ST | ADM8211_NAR_SR;
  
  		/* don't trust the error bits on rev 0x20 and up in adhoc */
@@ -604,7 +632,7 @@
  			priv->soft_rx_crc = 1;
  		break;
  	case IEEE80211_IF_TYPE_MNTR:
-@@ -876,7 +924,11 @@
+@@ -875,7 +923,11 @@
  			break;
  		}
  
@@ -616,7 +644,7 @@
  		case ADM8211_REV_CA:
  			if (priv->transceiver_type == ADM8211_RFMD2958 ||
  			    priv->transceiver_type == ADM8211_RFMD2958_RF3000_CONTROL_POWER ||
-@@ -934,7 +986,11 @@
+@@ -933,7 +985,11 @@
  			adm8211_write_bbp(dev, 0x1c, 0x00);
  			adm8211_write_bbp(dev, 0x1d, 0x80);
  		} else {
@@ -628,7 +656,7 @@
  				adm8211_write_bbp(dev, 0x1c, priv->eeprom->cr28);
  			else
  				adm8211_write_bbp(dev, 0x1c, 0x00);
-@@ -1066,7 +1122,11 @@
+@@ -1065,7 +1121,11 @@
  	u8 rate_buf[12] = {0};
  
  	/* write supported rates */
@@ -640,7 +668,7 @@
  		rate_buf[0] = ARRAY_SIZE(adm8211_rates);
  		for (i = 0; i < ARRAY_SIZE(adm8211_rates); i++)
  			rate_buf[i + 1] = (adm8211_rates[i].bitrate / 5) | 0x80;
-@@ -1150,7 +1210,11 @@
+@@ -1149,7 +1209,11 @@
  	 * PWR0PE2  = 13 us
  	 * PWR1PE2  = 1 us
  	 * PWR0TXPE = 8 or 6 */
@@ -652,7 +680,7 @@
  		ADM8211_CSR_WRITE(TOFS2, 0x8815cd18);
  	else
  		ADM8211_CSR_WRITE(TOFS2, 0x8535cd16);
-@@ -1179,7 +1243,11 @@
+@@ -1178,7 +1242,11 @@
  
  	/* SLOT=20 us, SIFS=110 cycles of 22 MHz (5 us),
  	 * DIFS=50 us, EIFS=100 us */
@@ -664,7 +692,7 @@
  		ADM8211_CSR_WRITE(IFST, (20 << 23) | (110 << 15) |
  					(50 << 9)  | 100);
  	else
-@@ -1238,13 +1306,21 @@
+@@ -1237,13 +1305,21 @@
  
  	ADM8211_CSR_WRITE(PAR, tmp);
  
@@ -686,7 +714,7 @@
  		reg = ADM8211_CSR_READ(CSR_TEST1);
  		reg &= ~((1 << 4) | (1 << 5));
  		ADM8211_CSR_WRITE(CSR_TEST1, reg);
-@@ -1879,6 +1955,9 @@
+@@ -1876,6 +1952,9 @@
  		       pci_name(pdev));
  		goto err_iounmap;
  	}
@@ -696,7 +724,7 @@
  
  	*(__le32 *)perm_addr = cpu_to_le32(ADM8211_CSR_READ(PAR0));
  	*(__le16 *)&perm_addr[4] =
-@@ -1908,7 +1987,11 @@
+@@ -1905,7 +1984,11 @@
  	priv->mode = IEEE80211_IF_TYPE_INVALID;
  
  	/* Power-on issue. EEPROM won't read correctly without */
@@ -708,7 +736,7 @@
  		ADM8211_CSR_WRITE(FRCTL, 0);
  		ADM8211_CSR_READ(FRCTL);
  		ADM8211_CSR_WRITE(FRCTL, 1);
-@@ -1936,7 +2019,11 @@
+@@ -1933,7 +2016,11 @@
  
  	printk(KERN_INFO "%s: hwaddr %s, Rev 0x%02x\n",
  	       wiphy_name(dev->wiphy), print_mac(mac, dev->wiphy->perm_addr),
@@ -720,17 +748,17 @@
  
  	return 0;
  
---- a/drivers/net/wireless/zd1211rw/zd_mac.c	2008-05-16 08:25:57.000000000 -0700
-+++ b/drivers/net/wireless/zd1211rw/zd_mac.c	2008-05-16 08:26:01.000000000 -0700
-@@ -1057,5 +1057,5 @@
+--- a/drivers/net/wireless/zd1211rw/zd_mac.c	2008-05-23 11:55:04.000000000 +0530
++++ b/drivers/net/wireless/zd1211rw/zd_mac.c	2008-05-23 11:55:05.000000000 +0530
+@@ -984,5 +984,5 @@
  	dev_dbg_f(zd_mac_dev(mac), "\n");
  	cancel_rearming_delayed_workqueue(zd_workqueue,
  		&mac->housekeeping.link_led_work);
 -	zd_chip_control_leds(&mac->chip, LED_OFF);
 +	zd_chip_control_leds(&mac->chip, LED_OFF_ZD);
  }
---- a/net/mac80211/tx.c	2008-05-16 08:25:57.000000000 -0700
-+++ b/net/mac80211/tx.c	2008-05-16 08:26:01.000000000 -0700
+--- a/net/mac80211/tx.c	2008-05-23 11:55:04.000000000 +0530
++++ b/net/mac80211/tx.c	2008-05-23 11:55:05.000000000 +0530
 @@ -18,7 +18,9 @@
  #include <linux/etherdevice.h>
  #include <linux/bitmap.h>
@@ -741,8 +769,8 @@
  #include <net/ieee80211_radiotap.h>
  #include <net/cfg80211.h>
  #include <net/mac80211.h>
-@@ -1624,8 +1626,13 @@
- 	pkt_data->flags |= IEEE80211_TXPD_REQ_TX_STATUS;
+@@ -1575,8 +1577,13 @@
+ 	info->flags |= IEEE80211_TX_CTL_REQ_TX_STATUS;
  
  	skb->dev = local->mdev;
 +#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22))
@@ -755,8 +783,8 @@
  
  	/* Update skb pointers to various headers since this modified frame
  	 * is going to go through Linux networking code that may potentially
---- a/net/mac80211/rx.c	2008-05-16 08:25:57.000000000 -0700
-+++ b/net/mac80211/rx.c	2008-05-16 08:26:01.000000000 -0700
+--- a/net/mac80211/rx.c	2008-05-23 11:55:04.000000000 +0530
++++ b/net/mac80211/rx.c	2008-05-23 11:55:05.000000000 +0530
 @@ -308,8 +308,13 @@
  		}
  
@@ -771,7 +799,7 @@
  	}
  
  	if (prev_dev) {
-@@ -1442,8 +1447,13 @@
+@@ -1400,8 +1405,13 @@
  
  	skb->dev = dev;
  
@@ -785,7 +813,7 @@
  
  	/* skip the wrapping header */
  	eth = (struct ethhdr *) skb_pull(skb, sizeof(struct ethhdr));
-@@ -1552,8 +1562,13 @@
+@@ -1510,8 +1520,13 @@
  
  	rx->skb->dev = dev;
  
@@ -799,7 +827,7 @@
  
  	ieee80211_deliver_skb(rx);
  
-@@ -1759,8 +1774,13 @@
+@@ -1717,8 +1732,13 @@
  		}
  
  		prev_dev = sdata->dev;
@@ -813,8 +841,8 @@
  	}
  
  	if (prev_dev) {
---- a/net/mac80211/main.c	2008-05-16 08:25:57.000000000 -0700
-+++ b/net/mac80211/main.c	2008-05-16 08:26:01.000000000 -0700
+--- a/net/mac80211/main.c	2008-05-23 11:55:04.000000000 +0530
++++ b/net/mac80211/main.c	2008-05-23 11:55:05.000000000 +0530
 @@ -21,7 +21,9 @@
  #include <linux/wireless.h>
  #include <linux/rtnetlink.h>
@@ -825,7 +853,7 @@
  #include <net/cfg80211.h>
  
  #include "ieee80211_i.h"
-@@ -951,6 +953,13 @@
+@@ -955,6 +957,13 @@
  	.cache_update	= eth_header_cache_update,
  };
  
@@ -839,7 +867,7 @@
  /* Must not be called for mdev */
  void ieee80211_if_setup(struct net_device *dev)
  {
-@@ -962,6 +971,9 @@
+@@ -966,6 +975,9 @@
  	dev->open = ieee80211_open;
  	dev->stop = ieee80211_stop;
  	dev->destructor = ieee80211_if_free;
@@ -849,7 +877,7 @@
  }
  
  /* everything else */
-@@ -1670,7 +1682,12 @@
+@@ -1672,7 +1684,12 @@
  	mdev->open = ieee80211_master_open;
  	mdev->stop = ieee80211_master_stop;
  	mdev->type = ARPHRD_IEEE80211;
@@ -862,31 +890,3 @@
  	mdev->set_multicast_list = ieee80211_master_set_multicast_list;
  
  	sdata->vif.type = IEEE80211_IF_TYPE_AP;
---- a/drivers/net/wireless/libertas/ethtool.c	2008-05-20 22:04:10.000000000 -0700
-+++ b/drivers/net/wireless/libertas/ethtool.c	2008-05-20 22:06:48.000000000 -0700
-@@ -111,6 +111,7 @@
- 	lbs_deb_enter(LBS_DEB_ETHTOOL);
- }
- 
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- static int lbs_ethtool_get_sset_count(struct net_device *dev, int sset)
- {
- 	struct lbs_private *priv = dev->priv;
-@@ -120,6 +121,7 @@
- 
- 	return -EOPNOTSUPP;
- }
-+#endif
- 
- static void lbs_ethtool_get_strings(struct net_device *dev,
- 				    uint32_t stringset, uint8_t *s)
-@@ -187,7 +189,9 @@
- 	.get_drvinfo = lbs_ethtool_get_drvinfo,
- 	.get_eeprom =  lbs_ethtool_get_eeprom,
- 	.get_eeprom_len = lbs_ethtool_get_eeprom_len,
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24))
- 	.get_sset_count = lbs_ethtool_get_sset_count,
-+#endif
- 	.get_ethtool_stats = lbs_ethtool_get_stats,
- 	.get_strings = lbs_ethtool_get_strings,
- 	.get_wol = lbs_ethtool_get_wol,
