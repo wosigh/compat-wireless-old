@@ -135,6 +135,25 @@ static inline void pci_clear_mwi(struct pci_dev *dev)
 /* Compat work for 2.6.21, 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
 
+/* Added as of 2.6.24 in include/linux/skbuff.h.
+ *
+ * Although 2.6.23 does support for CONFIG_NETDEVICES_MULTIQUEUE
+ * this helper was not added until 2.6.24. This implementation
+ * is exactly as it is on newer kernels.
+ *
+ * Older kernels just use queue 0 as it didn't support
+ * CONFIG_NETDEVICES_MULTIQUEUE. This added support on
+ * the network stack to use multiple hardware TX queues */
+static inline u16 skb_get_queue_mapping(struct sk_buff *skb)
+{
+#ifdef CONFIG_NETDEVICES_MULTIQUEUE
+	return skb->queue_mapping;
+#else
+	return 0;
+#endif
+}
+
+
 /*
  * Force link bug if constructor is used, can't be done compatibly
  * because constructor arguments were swapped since then!
