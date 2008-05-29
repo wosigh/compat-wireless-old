@@ -132,6 +132,16 @@ static inline void pci_clear_mwi(struct pci_dev *dev)
 
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)) */
 
+/* Compat work for < 2.6.23 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23))
+
+/* Added as of 2.6.23 in include/linux/netdevice.h */
+#define alloc_netdev_mq(sizeof_priv, name, setup, queue) \
+	alloc_netdev(sizeof_priv, name, setup)
+#define NETIF_F_MULTI_QUEUE 0
+
+#endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)) */
+
 /* Compat work for 2.6.21, 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
 
