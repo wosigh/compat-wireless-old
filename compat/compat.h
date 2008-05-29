@@ -145,6 +145,27 @@ static inline void pci_clear_mwi(struct pci_dev *dev)
 /* Compat work for 2.6.21, 2.6.22 and 2.6.23 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
 
+/* Added as of 2.6.24 in include/linux/netdevice.h */
+
+/**
+ * netif_subqueue_stopped - test status of subqueue
+ * @dev: network device
+ * @queue_index: sub queue index
+ *
+ * Check individual transmit queue of a device with multiple transmit queues.
+ */
+static inline int __netif_subqueue_stopped(const struct net_device *dev,
+					u16 queue_index)
+{
+#ifdef CONFIG_NETDEVICES_MULTIQUEUE
+	return test_bit(__LINK_STATE_XOFF,
+	&dev->egress_subqueue[queue_index].state);
+#else
+	return 0;
+#endif
+}
+
+
 /* Added as of 2.6.24 in include/linux/skbuff.h.
  *
  * Although 2.6.23 does support for CONFIG_NETDEVICES_MULTIQUEUE
