@@ -16,6 +16,22 @@ endif
 # Wireless subsystem stuff
 CONFIG_MAC80211=m
 
+# Enable QOS for 2.6.22, we'll do some hacks here to enable it.
+# You will need this for HT support (802.11n).
+# If you are >= 2.6.23 we'll only warn when you don't have MQ support
+# enabled, but maybe we should just exit, as I suspect everyone using
+# this package may want it enabled... hmm
+ifeq ($(shell test -e $(KLIB_BUILD)/Makefile && echo yes),yes)
+KERNEL_SUBLEVEL = $(shell $(MAKE) -C $(KLIB_BUILD) kernelversion | sed -n 's/^2\.6\.\([0-9]\+\).*/\1/p')
+ifeq ($(shell test $(KERNEL_SUBLEVEL) -lt 23 && echo yes),yes)
+MAC80211_QOS=m
+else
+ifneq ($(CONFIG_NETDEVICES_MULTIQUEUE),)
+$(warning "WARNING: You are running a kernel >= 2.6.23, you should enable CONFIG_NETDEVICES_MULTIQUEUE for 802.11n support")
+endif
+endif
+endif
+
 CONFIG_MAC80211_RC_DEFAULT=pid
 CONFIG_MAC80211_RC_PID=y
 
