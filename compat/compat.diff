@@ -1098,3 +1098,14 @@
  
  /**
   * enum mac80211_rx_flags - receive flags
+--- a/drivers/net/wireless/iwlwifi/iwl-rfkill.h	2008-06-08 07:33:03.000000000 -0700
++++ b/drivers/net/wireless/iwlwifi/iwl-rfkill.h	2008-06-08 07:33:42.000000000 -0700
+@@ -31,8 +31,6 @@
+ struct iwl_priv;
+ 
+ #include <linux/rfkill.h>
+-#include <linux/input.h>
+-
+ 
+ #ifdef CONFIG_IWLWIFI_RFKILL
+ struct iwl_rfkill_mngr {
