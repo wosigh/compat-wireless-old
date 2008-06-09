@@ -31,7 +31,7 @@ enum ieee80211_link_state_t {
 	IEEE80211_LINK_STATE_PENDING,
 };
 
-/* Note: skb_get_queue_mapping() was added as of 2.6.24 in
+/* Note: skb_[get|set]_queue_mapping() was added as of 2.6.24 in
  * include/linux/skbuff.h. We port this and add it into
  * include/net/mac80211.h through compat.diff as this could
  * be used by mac80211 drivers as well. We don't add it to

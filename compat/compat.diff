@@ -1069,7 +1069,7 @@
  
  	sdata->vif.type = IEEE80211_IF_TYPE_AP;
 --- a/include/net/mac80211.h	2008-06-04 00:38:13.000000000 -0700
-+++ b/include/net/mac80211.h	2008-06-08 05:08:41.000000000 -0700
++++ b/include/net/mac80211.h	2008-06-09 01:25:08.000000000 -0700
 @@ -293,7 +293,11 @@
  	s8 tx_rate_idx;
  	u8 antenna_sel_tx;
@@ -1082,7 +1082,7 @@
  
  	union {
  		struct {
-@@ -323,6 +327,15 @@
+@@ -323,6 +327,20 @@
  	return (struct ieee80211_tx_info *)skb->cb;
  }
  
@@ -1094,18 +1094,71 @@
 +{
 +	return IEEE80211_SKB_CB(skb)->queue;
 +}
++
++static inline void skb_set_queue_mapping(struct sk_buff *skb, u16 queue_mapping)
++{
++	IEEE80211_SKB_CB(skb)->queue = queue_mapping;
++}
 +#endif
  
  /**
   * enum mac80211_rx_flags - receive flags
---- a/drivers/net/wireless/iwlwifi/iwl-rfkill.h	2008-06-08 07:33:03.000000000 -0700
-+++ b/drivers/net/wireless/iwlwifi/iwl-rfkill.h	2008-06-08 07:33:42.000000000 -0700
-@@ -31,8 +31,6 @@
- struct iwl_priv;
+--- a/net/mac80211/wme.c	2008-06-09 02:06:22.000000000 -0700
++++ b/net/mac80211/wme.c	2008-06-09 02:09:30.000000000 -0700
+@@ -17,6 +17,9 @@
+ #include <net/mac80211.h>
+ #include "ieee80211_i.h"
+ #include "wme.h"
++#if (LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,22))
++#include "mq_compat.h"
++#endif
  
- #include <linux/rfkill.h>
--#include <linux/input.h>
--
+ /* maximum number of hardware queues we support. */
+ #define QD_MAX_QUEUES (IEEE80211_MAX_AMPDU_QUEUES + IEEE80211_MAX_QUEUES)
+@@ -328,14 +331,22 @@
  
- #ifdef CONFIG_IWLWIFI_RFKILL
- struct iwl_rfkill_mngr {
+ 
+ /* called whenever parameters are updated on existing qdisc */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25))
++static int wme_qdiscop_tune(struct Qdisc *qd, struct rtattr *opt)
++#else
+ static int wme_qdiscop_tune(struct Qdisc *qd, struct nlattr *opt)
++#endif
+ {
+ 	return 0;
+ }
+ 
+ 
+ /* called during initial creation of qdisc on device */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25))
++static int wme_qdiscop_init(struct Qdisc *qd, struct rtattr *opt)
++#else
+ static int wme_qdiscop_init(struct Qdisc *qd, struct nlattr *opt)
++#endif
+ {
+ 	struct ieee80211_sched_data *q = qdisc_priv(qd);
+ 	struct net_device *dev = qd->dev;
+@@ -456,7 +467,11 @@
+ 
+ 
+ static int wme_classop_change(struct Qdisc *qd, u32 handle, u32 parent,
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25))
++				struct rtattr **tca, unsigned long *arg)
++#else
+ 			      struct nlattr **tca, unsigned long *arg)
++#endif
+ {
+ 	unsigned long cl = *arg;
+ 	struct ieee80211_local *local = wdev_priv(qd->dev->ieee80211_ptr);
+@@ -540,7 +555,11 @@
+ 
+ /* this qdisc is classful (i.e. has classes, some of which may have leaf qdiscs attached)
+  * - these are the operations on the classes */
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25))
++static struct Qdisc_class_ops class_ops =
++#else
+ static const struct Qdisc_class_ops class_ops =
++#endif
+ {
+ 	.graft = wme_classop_graft,
+ 	.leaf = wme_classop_leaf,
