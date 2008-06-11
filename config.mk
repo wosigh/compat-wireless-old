@@ -28,6 +28,8 @@ CONFIG_MAC80211_QOS=y
 else
 ifeq ($(CONFIG_NETDEVICES_MULTIQUEUE),)
 $(warning "WARNING: You are running a kernel >= 2.6.23, you should enable CONFIG_NETDEVICES_MULTIQUEUE for 802.11n support")
+else
+CONFIG_MAC80211_QOS=y
 endif
 endif
 endif

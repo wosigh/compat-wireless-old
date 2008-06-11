@@ -2,7 +2,8 @@
 
 # The old stack drivers and the mac80211 rc80211_simple modules 
 # which is no longer on recent kernels (its internal)
-OLD_MODULES="rc80211_simple zd1211rw zd1211rw-mac80211 bcm43xx rndis_wext"
+OLD_MODULES="iwlwifi_mac80211 rc80211_simple zd1211rw zd1211rw-mac80211"
+OLD_MODULES="$OLD_MODULES bcm43xx rndis_wext"
 MODULES="$OLD_MODULES"
 MODULES="$MODULES ipw2100 ipw2200"
 MODULES="$MODULES libertas_cs usb8xxx libertas"
