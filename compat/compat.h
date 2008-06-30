@@ -476,6 +476,12 @@ static inline void led_classdev_unregister_suspended(struct led_classdev *lcd)
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26))
 
+/* This is from include/linux/rfkill.h */
+#define RFKILL_STATE_SOFT_BLOCKED	RFKILL_STATE_OFF
+#define RFKILL_STATE_UNBLOCKED		RFKILL_STATE_ON
+/* This one is new */
+#define RFKILL_STATE_HARD_BLOCKED	2
+
 /* This is from include/linux/device.h, which was added as of 2.6.26 */
 static inline const char *dev_name(struct device *dev)
 {
