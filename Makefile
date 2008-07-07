@@ -17,7 +17,7 @@ include $(M)/$(COMPAT_CONFIG)
 NOSTDINC_FLAGS := -I$(M)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
 
 obj-y := net/wireless/ net/mac80211/
-ifeq ($(ONLY_WIRELESS),)
+ifeq ($(ONLY_CORE),)
 obj-y += net/ieee80211/ \
 	drivers/ssb/ \
 	drivers/misc/ \
