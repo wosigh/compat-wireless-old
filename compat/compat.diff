@@ -1160,3 +1160,15 @@
  {
  	.graft = wme_classop_graft,
  	.leaf = wme_classop_leaf,
+--- a/drivers/net/wireless/rt2x00/rt2x00rfkill.c	2008-07-09 05:07:17.000000000 -0700
++++ b/drivers/net/wireless/rt2x00/rt2x00rfkill.c	2008-07-09 05:02:12.000000000 -0700
+@@ -141,7 +141,9 @@
+ 	rt2x00dev->rfkill->data = rt2x00dev;
+ 	rt2x00dev->rfkill->state = -1;
+ 	rt2x00dev->rfkill->toggle_radio = rt2x00rfkill_toggle_radio;
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27))
+ 	rt2x00dev->rfkill->get_state = rt2x00rfkill_get_state;
++#endif
+ 
+ 	INIT_DELAYED_WORK(&rt2x00dev->rfkill_work, rt2x00rfkill_poll);
+ 
