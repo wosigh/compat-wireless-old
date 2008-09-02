@@ -33,6 +33,11 @@ else
 
 # we're in a kernel >= 2.6.23
 
+# we're in kernel >= 2.6.27
+ifeq ($(shell test $(KERNEL_SUBLEVEL) -gt 26 && echo yes),yes)
+$(error "ERROR: You should use another tree/tarball for newer kernels, this one is for kenrels <= 2.6.26")
+endif
+
 ifneq ($(KERNELRELEASE),) # This prevents a warning
 
 ifeq ($(CONFIG_NETDEVICES_MULTIQUEUE),) # checks MQ first
