@@ -77,6 +77,14 @@ ifneq ($(CONFIG_PCI),)
 CONFIG_ATH5K=m
 CONFIG_ATH5K_DEBUG=n
 
+# For now we build ath9k only on kernel 2.6.26
+ifeq ($(shell test -e $(KLIB_BUILD)/Makefile && echo yes),yes)
+KERNEL_SUBLEVEL = $(shell $(MAKE) -C $(KLIB_BUILD) kernelversion | sed -n 's/^2\.6\.\([0-9]\+\).*/\1/p')
+ifeq ($(shell test $(KERNEL_SUBLEVEL) -gt 25 && echo yes),yes)
+endif
+CONFIG_ATH9K=m
+endif
+
 # Required for older kernels which still use this flag.
 CONFIG_IWLWIFI=m
 
