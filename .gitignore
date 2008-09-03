@@ -1,6 +1,3 @@
-drivers
-include
-net
 *~
 git-describe
 compat-release
