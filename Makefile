@@ -34,7 +34,7 @@ export PWD :=	$(shell pwd)
 export COMPAT_CONFIG=config.mk
 export CONFIG_CHECK=.$(COMPAT_CONFIG)_md5sum.txt
 export COMPAT_AUTOCONF=include/linux/compat_autoconf.h
-export CREL=$(shell cat $(PWD)/compat-release)
+-export CREL=$(shell cat $(PWD)/compat-release)
 export CREL_PRE:=.compat_autoconf_
 export CREL_CHECK:=$(CREL_PRE)$(CREL)
 
@@ -184,6 +184,7 @@ uninstall:
 	@echo 
 
 clean:
+	@rm -f compat-release
 	@if [ -d net -a -d $(KLIB_BUILD) ]; then \
 		$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean ;\
 	fi
