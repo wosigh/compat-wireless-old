@@ -24,8 +24,8 @@
  *
  *****************************************************************************/
 
-#ifndef __iwl_4965_rs_h__
-#define __iwl_4965_rs_h__
+#ifndef __iwl_agn_rs_h__
+#define __iwl_agn_rs_h__
 
 #include "iwl-dev.h"
 
@@ -88,7 +88,7 @@ enum {
 #define	IWL_RATE_5M_MASK   (1 << IWL_RATE_5M_INDEX)
 #define	IWL_RATE_11M_MASK  (1 << IWL_RATE_11M_INDEX)
 
-/* 4965 uCode API values for legacy bit rates, both OFDM and CCK */
+/* uCode API values for legacy bit rates, both OFDM and CCK */
 enum {
 	IWL_RATE_6M_PLCP  = 13,
 	IWL_RATE_9M_PLCP  = 15,
@@ -107,7 +107,7 @@ enum {
 	/*FIXME:RS:add IWL_RATE_LEGACY_INVM_PLCP = 0,*/
 };
 
-/* 4965 uCode API values for OFDM high-throughput (HT) bit rates */
+/* uCode API values for OFDM high-throughput (HT) bit rates */
 enum {
 	IWL_RATE_SISO_6M_PLCP = 0,
 	IWL_RATE_SISO_12M_PLCP = 1,
@@ -206,21 +206,28 @@ enum {
 #define IWL_RATE_DECREASE_TH		1920	/*  15% */
 
 /* possible actions when in legacy mode */
-#define IWL_LEGACY_SWITCH_ANTENNA	0
-#define IWL_LEGACY_SWITCH_SISO		1
-#define IWL_LEGACY_SWITCH_MIMO2		2
+#define IWL_LEGACY_SWITCH_ANTENNA1      0
+#define IWL_LEGACY_SWITCH_ANTENNA2      1
+#define IWL_LEGACY_SWITCH_SISO          2
+#define IWL_LEGACY_SWITCH_MIMO2_AB      3
+#define IWL_LEGACY_SWITCH_MIMO2_AC      4
+#define IWL_LEGACY_SWITCH_MIMO2_BC      5
 
 /* possible actions when in siso mode */
-#define IWL_SISO_SWITCH_ANTENNA		0
-#define IWL_SISO_SWITCH_MIMO2		1
-#define IWL_SISO_SWITCH_GI		2
+#define IWL_SISO_SWITCH_ANTENNA1        0
+#define IWL_SISO_SWITCH_ANTENNA2        1
+#define IWL_SISO_SWITCH_MIMO2_AB        2
+#define IWL_SISO_SWITCH_MIMO2_AC        3
+#define IWL_SISO_SWITCH_MIMO2_BC        4
+#define IWL_SISO_SWITCH_GI              5
 
 /* possible actions when in mimo mode */
-#define IWL_MIMO_SWITCH_ANTENNA_A	0
-#define IWL_MIMO_SWITCH_ANTENNA_B	1
-#define IWL_MIMO_SWITCH_GI		2
-
-/*FIXME:RS:separate MIMO2/3 transitions*/
+#define IWL_MIMO2_SWITCH_ANTENNA1       0
+#define IWL_MIMO2_SWITCH_ANTENNA2       1
+#define IWL_MIMO2_SWITCH_SISO_A         2
+#define IWL_MIMO2_SWITCH_SISO_B         3
+#define IWL_MIMO2_SWITCH_SISO_C         4
+#define IWL_MIMO2_SWITCH_GI             5
 
 /*FIXME:RS:add posible acctions for MIMO3*/
 
@@ -287,15 +294,6 @@ static inline u8 iwl4965_get_prev_ieee_rate(u8 rate_index)
 }
 
 /**
- * iwl4965_fill_rs_info - Fill an output text buffer with the rate representation
- *
- * NOTE:  This is provided as a quick mechanism for a user to visualize
- * the performance of the rate control algorithm and is not meant to be
- * parsed software.
- */
-extern int iwl4965_fill_rs_info(struct ieee80211_hw *, char *buf, u8 sta_id);
-
-/**
  * iwl4965_rate_control_register - Register the rate control algorithm callbacks
  *
  * Since the rate control algorithm is hardware specific, there is no need
@@ -305,7 +303,7 @@ extern int iwl4965_fill_rs_info(struct ieee80211_hw *, char *buf, u8 sta_id);
  * ieee80211_register_hw
  *
  */
-extern int iwl4965_rate_control_register(void);
+extern int iwlagn_rate_control_register(void);
 
 /**
  * iwl4965_rate_control_unregister - Unregister the rate control callbacks
@@ -313,6 +311,6 @@ extern int iwl4965_rate_control_register(void);
  * This should be called after calling ieee80211_unregister_hw, but before
  * the driver is unloaded.
  */
-extern void iwl4965_rate_control_unregister(void);
+extern void iwlagn_rate_control_unregister(void);
 
-#endif
+#endif /* __iwl_agn__rs__ */
