@@ -388,7 +388,7 @@ ieee80211_tx_h_unicast_ps_buf(struct ieee80211_tx_data *tx)
 #ifdef CONFIG_MAC80211_VERBOSE_PS_DEBUG
 		printk(KERN_DEBUG "STA %s aid %d: PS buffer (entries "
 		       "before %d)\n",
-		       print_mac(mac, sta->addr), sta->aid,
+		       print_mac(mac, sta->sta.addr), sta->sta.aid,
 		       skb_queue_len(&sta->ps_tx_buf));
 #endif /* CONFIG_MAC80211_VERBOSE_PS_DEBUG */
 		if (tx->local->total_ps_buffered >= TOTAL_MAX_TX_BUFFER)
@@ -399,7 +399,7 @@ ieee80211_tx_h_unicast_ps_buf(struct ieee80211_tx_data *tx)
 			if (net_ratelimit()) {
 				printk(KERN_DEBUG "%s: STA %s TX "
 				       "buffer full - dropping oldest frame\n",
-				       tx->dev->name, print_mac(mac, sta->addr));
+				       tx->dev->name, print_mac(mac, sta->sta.addr));
 			}
 #endif
 			dev_kfree_skb(old);
@@ -418,7 +418,7 @@ ieee80211_tx_h_unicast_ps_buf(struct ieee80211_tx_data *tx)
 	else if (unlikely(test_sta_flags(sta, WLAN_STA_PS))) {
 		printk(KERN_DEBUG "%s: STA %s in PS mode, but pspoll "
 		       "set -> send frame\n", tx->dev->name,
-		       print_mac(mac, sta->addr));
+		       print_mac(mac, sta->sta.addr));
 	}
 #endif /* CONFIG_MAC80211_VERBOSE_PS_DEBUG */
 	clear_sta_flags(sta, WLAN_STA_PSPOLL);
@@ -541,7 +541,7 @@ ieee80211_tx_h_misc(struct ieee80211_tx_data *tx)
 	sband = tx->local->hw.wiphy->bands[tx->channel->band];
 
 	if (tx->sta)
-		info->control.aid = tx->sta->aid;
+		info->control.sta = &tx->sta->sta;
 
 	if (!info->control.retry_limit) {
 		if (!is_multicast_ether_addr(hdr->addr1)) {
@@ -621,7 +621,7 @@ ieee80211_tx_h_misc(struct ieee80211_tx_data *tx)
 	}
 
 	if (tx->sta)
-		info->control.aid = tx->sta->aid;
+		info->control.sta = &tx->sta->sta;
 
 	return TX_CONTINUE;
 }

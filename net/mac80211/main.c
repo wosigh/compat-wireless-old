@@ -410,7 +410,7 @@ static int ieee80211_stop(struct net_device *dev)
 
 	list_for_each_entry_rcu(sta, &local->sta_list, list) {
 		if (sta->sdata == sdata)
-			ieee80211_sta_tear_down_BA_sessions(dev, sta->addr);
+			ieee80211_sta_tear_down_BA_sessions(dev, sta->sta.addr);
 	}
 
 	rcu_read_unlock();
@@ -643,7 +643,7 @@ int ieee80211_start_tx_ba_session(struct ieee80211_hw *hw, u8 *ra, u16 tid)
 
 	if (local->ops->ampdu_action)
 		ret = local->ops->ampdu_action(hw, IEEE80211_AMPDU_TX_START,
-						ra, tid, &start_seq_num);
+						 &sta->sta, tid, &start_seq_num);
 
 	if (ret) {
 		/* No need to requeue the packets in the agg queue, since we
@@ -737,7 +737,7 @@ int ieee80211_stop_tx_ba_session(struct ieee80211_hw *hw,
 
 	if (local->ops->ampdu_action)
 		ret = local->ops->ampdu_action(hw, IEEE80211_AMPDU_TX_STOP,
-						ra, tid, NULL);
+						 &sta->sta, tid, NULL);
 
 	/* case HW denied going back to legacy */
 	if (ret) {
@@ -1869,7 +1869,6 @@ static int __init ieee80211_init(void)
 	struct sk_buff *skb;
 	int ret;
 
-	BUILD_BUG_ON(sizeof(struct ieee80211_tx_info) > sizeof(skb->cb));
 	BUILD_BUG_ON(offsetof(struct ieee80211_tx_info, driver_data) +
 	             IEEE80211_TX_INFO_DRIVER_DATA_SIZE > sizeof(skb->cb));
 
