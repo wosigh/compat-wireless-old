@@ -541,7 +541,7 @@ static void ieee80211_set_associated(struct net_device *dev,
 
 		ifsta->flags |= IEEE80211_STA_ASSOCIATED;
 
-		if (sdata->vif.type != IEEE80211_IF_TYPE_STA)
+		if (sdata->vif.type != NL80211_IFTYPE_STATION)
 			return;
 
 		bss = ieee80211_rx_bss_get(dev, ifsta->bssid,
@@ -1216,7 +1216,7 @@ static void ieee80211_send_addba_resp(struct net_device *dev, u8 *da, u16 tid,
 	memset(mgmt, 0, 24);
 	memcpy(mgmt->da, da, ETH_ALEN);
 	memcpy(mgmt->sa, dev->dev_addr, ETH_ALEN);
-	if (sdata->vif.type == IEEE80211_IF_TYPE_AP)
+	if (sdata->vif.type == NL80211_IFTYPE_AP)
 		memcpy(mgmt->bssid, dev->dev_addr, ETH_ALEN);
 	else
 		memcpy(mgmt->bssid, ifsta->bssid, ETH_ALEN);
@@ -1264,7 +1264,7 @@ void ieee80211_send_addba_request(struct net_device *dev, const u8 *da,
 	memset(mgmt, 0, 24);
 	memcpy(mgmt->da, da, ETH_ALEN);
 	memcpy(mgmt->sa, dev->dev_addr, ETH_ALEN);
-	if (sdata->vif.type == IEEE80211_IF_TYPE_AP)
+	if (sdata->vif.type == NL80211_IFTYPE_AP)
 		memcpy(mgmt->bssid, dev->dev_addr, ETH_ALEN);
 	else
 		memcpy(mgmt->bssid, ifsta->bssid, ETH_ALEN);
@@ -1521,7 +1521,7 @@ void ieee80211_send_delba(struct net_device *dev, const u8 *da, u16 tid,
 	memset(mgmt, 0, 24);
 	memcpy(mgmt->da, da, ETH_ALEN);
 	memcpy(mgmt->sa, dev->dev_addr, ETH_ALEN);
-	if (sdata->vif.type == IEEE80211_IF_TYPE_AP)
+	if (sdata->vif.type == NL80211_IFTYPE_AP)
 		memcpy(mgmt->bssid, dev->dev_addr, ETH_ALEN);
 	else
 		memcpy(mgmt->bssid, ifsta->bssid, ETH_ALEN);
@@ -1853,17 +1853,17 @@ static void ieee80211_rx_mgmt_auth(struct net_device *dev,
 	DECLARE_MAC_BUF(mac);
 
 	if (ifsta->state != IEEE80211_AUTHENTICATE &&
-	    sdata->vif.type != IEEE80211_IF_TYPE_IBSS)
+	    sdata->vif.type != NL80211_IFTYPE_ADHOC)
 		return;
 
 	if (len < 24 + 6)
 		return;
 
-	if (sdata->vif.type != IEEE80211_IF_TYPE_IBSS &&
+	if (sdata->vif.type != NL80211_IFTYPE_ADHOC &&
 	    memcmp(ifsta->bssid, mgmt->sa, ETH_ALEN) != 0)
 		return;
 
-	if (sdata->vif.type != IEEE80211_IF_TYPE_IBSS &&
+	if (sdata->vif.type != NL80211_IFTYPE_ADHOC &&
 	    memcmp(ifsta->bssid, mgmt->bssid, ETH_ALEN) != 0)
 		return;
 
@@ -1871,7 +1871,7 @@ static void ieee80211_rx_mgmt_auth(struct net_device *dev,
 	auth_transaction = le16_to_cpu(mgmt->u.auth.auth_transaction);
 	status_code = le16_to_cpu(mgmt->u.auth.status_code);
 
-	if (sdata->vif.type == IEEE80211_IF_TYPE_IBSS) {
+	if (sdata->vif.type == NL80211_IFTYPE_ADHOC) {
 		/*
 		 * IEEE 802.11 standard does not require authentication in IBSS
 		 * networks and most implementations do not seem to use it.
@@ -2587,7 +2587,7 @@ static void ieee80211_rx_bss_info(struct net_device *dev,
 
 	rcu_read_lock();
 
-	if (sdata->vif.type == IEEE80211_IF_TYPE_IBSS && elems->supp_rates &&
+	if (sdata->vif.type == NL80211_IFTYPE_ADHOC && elems->supp_rates &&
 	    memcmp(mgmt->bssid, sdata->u.sta.bssid, ETH_ALEN) == 0 &&
 	    (sta = sta_info_get(local, mgmt->sa))) {
 		u64 prev_rates;
@@ -2724,7 +2724,7 @@ static void ieee80211_rx_bss_info(struct net_device *dev,
 	 * In STA mode, the remaining parameters should not be overridden
 	 * by beacons because they're not necessarily accurate there.
 	 */
-	if (sdata->vif.type != IEEE80211_IF_TYPE_IBSS &&
+	if (sdata->vif.type != NL80211_IFTYPE_ADHOC &&
 	    bss->probe_resp && beacon) {
 		ieee80211_rx_bss_put(local, bss);
 		return;
@@ -2814,7 +2814,7 @@ static void ieee80211_rx_bss_info(struct net_device *dev,
 	}
 
 	/* check if we need to merge IBSS */
-	if (sdata->vif.type == IEEE80211_IF_TYPE_IBSS && beacon &&
+	if (sdata->vif.type == NL80211_IFTYPE_ADHOC && beacon &&
 	    !local->sta_sw_scanning && !local->sta_hw_scanning &&
 	    bss->capability & WLAN_CAPABILITY_IBSS &&
 	    bss->freq == local->oper_channel->center_freq &&
@@ -2915,7 +2915,7 @@ static void ieee80211_rx_mgmt_beacon(struct net_device *dev,
 	ieee80211_rx_bss_info(dev, mgmt, len, rx_status, &elems, 1);
 
 	sdata = IEEE80211_DEV_TO_SUB_IF(dev);
-	if (sdata->vif.type != IEEE80211_IF_TYPE_STA)
+	if (sdata->vif.type != NL80211_IFTYPE_STATION)
 		return;
 	ifsta = &sdata->u.sta;
 
@@ -2973,7 +2973,7 @@ static void ieee80211_rx_mgmt_probe_req(struct net_device *dev,
 	DECLARE_MAC_BUF(mac3);
 #endif
 
-	if (sdata->vif.type != IEEE80211_IF_TYPE_IBSS ||
+	if (sdata->vif.type != NL80211_IFTYPE_ADHOC ||
 	    ifsta->state != IEEE80211_IBSS_JOINED ||
 	    len < 24 + 2 || !ifsta->probe_resp)
 		return;
@@ -3333,9 +3333,9 @@ void ieee80211_sta_work(struct work_struct *work)
 	if (local->sta_sw_scanning || local->sta_hw_scanning)
 		return;
 
-	if (WARN_ON(sdata->vif.type != IEEE80211_IF_TYPE_STA &&
-		    sdata->vif.type != IEEE80211_IF_TYPE_IBSS &&
-		    sdata->vif.type != IEEE80211_IF_TYPE_MESH_POINT))
+	if (WARN_ON(sdata->vif.type != NL80211_IFTYPE_STATION &&
+		    sdata->vif.type != NL80211_IFTYPE_ADHOC &&
+		    sdata->vif.type != NL80211_IFTYPE_MESH_POINT))
 		return;
 	ifsta = &sdata->u.sta;
 
@@ -3438,7 +3438,7 @@ void ieee80211_sta_req_auth(struct net_device *dev,
 	struct ieee80211_local *local = wdev_priv(dev->ieee80211_ptr);
 	struct ieee80211_sub_if_data *sdata = IEEE80211_DEV_TO_SUB_IF(dev);
 
-	if (sdata->vif.type != IEEE80211_IF_TYPE_STA)
+	if (sdata->vif.type != NL80211_IFTYPE_STATION)
 		return;
 
 	if ((ifsta->flags & (IEEE80211_STA_BSSID_SET |
@@ -3745,7 +3745,7 @@ int ieee80211_sta_set_ssid(struct net_device *dev, char *ssid, size_t len)
 	else
 		ifsta->flags &= ~IEEE80211_STA_SSID_SET;
 
-	if (sdata->vif.type == IEEE80211_IF_TYPE_IBSS &&
+	if (sdata->vif.type == NL80211_IFTYPE_ADHOC &&
 	    !(ifsta->flags & IEEE80211_STA_BSSID_SET)) {
 		ifsta->ibss_join_req = jiffies;
 		ifsta->state = IEEE80211_IBSS_SEARCH;
@@ -3832,7 +3832,7 @@ static void ieee80211_send_nullfunc(struct ieee80211_local *local,
 
 static void ieee80211_restart_sta_timer(struct ieee80211_sub_if_data *sdata)
 {
-	if (sdata->vif.type == IEEE80211_IF_TYPE_STA ||
+	if (sdata->vif.type == NL80211_IFTYPE_STATION ||
 	    ieee80211_vif_is_mesh(&sdata->vif))
 		ieee80211_sta_timer((unsigned long)sdata);
 }
@@ -3881,7 +3881,7 @@ void ieee80211_scan_completed(struct ieee80211_hw *hw)
 	rcu_read_lock();
 	list_for_each_entry_rcu(sdata, &local->interfaces, list) {
 		/* Tell AP we're back */
-		if (sdata->vif.type == IEEE80211_IF_TYPE_STA &&
+		if (sdata->vif.type == NL80211_IFTYPE_STATION &&
 		    sdata->u.sta.flags & IEEE80211_STA_ASSOCIATED)
 			ieee80211_send_nullfunc(local, sdata, 0);
 
@@ -3893,7 +3893,7 @@ void ieee80211_scan_completed(struct ieee80211_hw *hw)
 
 done:
 	sdata = IEEE80211_DEV_TO_SUB_IF(dev);
-	if (sdata->vif.type == IEEE80211_IF_TYPE_IBSS) {
+	if (sdata->vif.type == NL80211_IFTYPE_ADHOC) {
 		struct ieee80211_if_sta *ifsta = &sdata->u.sta;
 		if (!(ifsta->flags & IEEE80211_STA_BSSID_SET) ||
 		    (!ifsta->state == IEEE80211_IBSS_JOINED &&
@@ -3948,7 +3948,7 @@ void ieee80211_sta_scan_work(struct work_struct *work)
 		chan = &sband->channels[local->scan_channel_idx];
 
 		if (chan->flags & IEEE80211_CHAN_DISABLED ||
-		    (sdata->vif.type == IEEE80211_IF_TYPE_IBSS &&
+		    (sdata->vif.type == NL80211_IFTYPE_ADHOC &&
 		     chan->flags & IEEE80211_CHAN_NO_IBSS))
 			skip = 1;
 
@@ -4046,7 +4046,7 @@ static int ieee80211_sta_start_scan(struct net_device *dev,
 	rcu_read_lock();
 	list_for_each_entry_rcu(sdata, &local->interfaces, list) {
 		netif_stop_queue(sdata->dev);
-		if (sdata->vif.type == IEEE80211_IF_TYPE_STA &&
+		if (sdata->vif.type == NL80211_IFTYPE_STATION &&
 		    (sdata->u.sta.flags & IEEE80211_STA_ASSOCIATED))
 			ieee80211_send_nullfunc(local, sdata, 1);
 	}
@@ -4085,7 +4085,7 @@ int ieee80211_sta_req_scan(struct net_device *dev, u8 *ssid, size_t ssid_len)
 	struct ieee80211_if_sta *ifsta = &sdata->u.sta;
 	struct ieee80211_local *local = wdev_priv(dev->ieee80211_ptr);
 
-	if (sdata->vif.type != IEEE80211_IF_TYPE_STA)
+	if (sdata->vif.type != NL80211_IFTYPE_STATION)
 		return ieee80211_sta_start_scan(dev, ssid, ssid_len);
 
 	if (local->sta_sw_scanning || local->sta_hw_scanning) {
@@ -4396,8 +4396,8 @@ int ieee80211_sta_deauthenticate(struct net_device *dev, u16 reason)
 	printk(KERN_DEBUG "%s: deauthenticating by local choice (reason=%d)\n",
 	       dev->name, reason);
 
-	if (sdata->vif.type != IEEE80211_IF_TYPE_STA &&
-	    sdata->vif.type != IEEE80211_IF_TYPE_IBSS)
+	if (sdata->vif.type != NL80211_IFTYPE_STATION &&
+	    sdata->vif.type != NL80211_IFTYPE_ADHOC)
 		return -EINVAL;
 
 	ieee80211_send_deauth(dev, ifsta, reason);
@@ -4414,7 +4414,7 @@ int ieee80211_sta_disassociate(struct net_device *dev, u16 reason)
 	printk(KERN_DEBUG "%s: disassociating by local choice (reason=%d)\n",
 	       dev->name, reason);
 
-	if (sdata->vif.type != IEEE80211_IF_TYPE_STA)
+	if (sdata->vif.type != NL80211_IFTYPE_STATION)
 		return -EINVAL;
 
 	if (!(ifsta->flags & IEEE80211_STA_ASSOCIATED))
@@ -4435,7 +4435,7 @@ void ieee80211_notify_mac(struct ieee80211_hw *hw,
 	case IEEE80211_NOTIFY_RE_ASSOC:
 		rcu_read_lock();
 		list_for_each_entry_rcu(sdata, &local->interfaces, list) {
-			if (sdata->vif.type != IEEE80211_IF_TYPE_STA)
+			if (sdata->vif.type != NL80211_IFTYPE_STATION)
 				continue;
 
 			ieee80211_sta_req_auth(sdata->dev, &sdata->u.sta);
