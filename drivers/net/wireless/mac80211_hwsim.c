@@ -448,6 +448,9 @@ static int __init init_mac80211_hwsim(void)
 
 		hw->channel_change_time = 1;
 		hw->queues = 1;
+		hw->wiphy->interface_modes =
+			BIT(NL80211_IFTYPE_STATION) |
+			BIT(NL80211_IFTYPE_AP);
 
 		memcpy(data->channels, hwsim_channels, sizeof(hwsim_channels));
 		memcpy(data->rates, hwsim_rates, sizeof(hwsim_rates));
