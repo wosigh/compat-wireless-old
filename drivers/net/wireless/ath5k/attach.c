@@ -230,7 +230,11 @@ struct ath5k_hw *ath5k_hw_attach(struct ath5k_softc *sc, u8 mac_version)
 	/*
 	 * Write PCI-E power save settings
 	 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
+	if ((ah->ah_version == AR5K_AR5212) && compat_is_pcie(pdev)) {
+#else
 	if ((ah->ah_version == AR5K_AR5212) && (pdev->is_pcie)) {
+#endif
 		ath5k_hw_reg_write(ah, 0x9248fc00, 0x4080);
 		ath5k_hw_reg_write(ah, 0x24924924, 0x4080);
 		ath5k_hw_reg_write(ah, 0x28000039, 0x4080);

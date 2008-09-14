@@ -358,7 +358,11 @@ int ath5k_hw_nic_wakeup(struct ath5k_hw *ah, int flags, bool initial)
 	/* reseting PCI on PCI-E cards results card to hang
 	 * and always return 0xffff... so we ingore that flag
 	 * for PCI-E cards */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
+	bus_flags = compat_is_pcie(pdev) ? 0 : AR5K_RESET_CTL_PCI;
+#else
 	bus_flags = (pdev->is_pcie) ? 0 : AR5K_RESET_CTL_PCI;
+#endif
 
 	/* Reset chipset */
 	ret = ath5k_hw_nic_reset(ah, AR5K_RESET_CTL_PCU |
@@ -754,7 +758,11 @@ int ath5k_hw_reset(struct ath5k_hw *ah, enum nl80211_iftype op_mode,
 	 * TODO: Check out tx triger level, it's always 64 on dumps but I
 	 * guess we can tweak it and see how it goes ;-)
 	 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
+	dma_size = compat_is_pcie(pdev) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
+#else
 	dma_size = (pdev->is_pcie) ? AR5K_DMASIZE_128B : AR5K_DMASIZE_512B;
+#endif
 	if (ah->ah_version != AR5K_AR5210) {
 		AR5K_REG_WRITE_BITS(ah, AR5K_TXCFG,
 			AR5K_TXCFG_SDMAMR, dma_size);

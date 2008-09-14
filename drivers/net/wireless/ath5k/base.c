@@ -1117,7 +1117,11 @@ ath5k_rxbuf_setup(struct ath5k_softc *sc, struct ath5k_buf *bf)
 		bf->skb = skb;
 		bf->skbaddr = pci_map_single(sc->pdev,
 			skb->data, sc->rxbufsize, PCI_DMA_FROMDEVICE);
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27))
+		if (unlikely(pci_dma_mapping_error(bf->skbaddr))) {
+#else
 		if (unlikely(pci_dma_mapping_error(sc->pdev, bf->skbaddr))) {
+#endif
 			ATH5K_ERR(sc, "%s: DMA mapping failed\n", __func__);
 			dev_kfree_skb(skb);
 			bf->skb = NULL;
@@ -1884,7 +1888,11 @@ ath5k_beacon_setup(struct ath5k_softc *sc, struct ath5k_buf *bf)
 	ATH5K_DBG(sc, ATH5K_DEBUG_BEACON, "skb %p [data %p len %u] "
 			"skbaddr %llx\n", skb, skb->data, skb->len,
 			(unsigned long long)bf->skbaddr);
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27))
+	if (pci_dma_mapping_error(bf->skbaddr)) {
+#else
 	if (pci_dma_mapping_error(sc->pdev, bf->skbaddr)) {
+#endif
 		ATH5K_ERR(sc, "beacon DMA mapping failed\n");
 		return -EIO;
 	}
