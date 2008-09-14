@@ -2151,7 +2151,7 @@ static void ieee80211_rx_mgmt_assoc_resp(struct ieee80211_sub_if_data *sdata,
 		}
 	}
 
-	sta->supp_rates[local->hw.conf.channel->band] = rates;
+	sta->sta.supp_rates[local->hw.conf.channel->band] = rates;
 	sdata->basic_rates = basic_rates;
 
 	/* cf. IEEE 802.11 9.2.12 */
@@ -2594,13 +2594,13 @@ static void ieee80211_rx_bss_info(struct net_device *dev,
 		u64 supp_rates = ieee80211_sta_get_rates(local, elems,
 							rx_status->band);
 
-		prev_rates = sta->supp_rates[rx_status->band];
-		sta->supp_rates[rx_status->band] &= supp_rates;
-		if (sta->supp_rates[rx_status->band] == 0) {
+		prev_rates = sta->sta.supp_rates[rx_status->band];
+		sta->sta.supp_rates[rx_status->band] &= supp_rates;
+		if (sta->sta.supp_rates[rx_status->band] == 0) {
 			/* No matching rates - this should not really happen.
 			 * Make sure that at least one rate is marked
 			 * supported to avoid issues with TX rate ctrl. */
-			sta->supp_rates[rx_status->band] =
+			sta->sta.supp_rates[rx_status->band] =
 				sdata->u.sta.supp_rates_bits[rx_status->band];
 		}
 	}
@@ -4375,9 +4375,9 @@ struct sta_info *ieee80211_ibss_add_sta(struct net_device *dev,
 	set_sta_flags(sta, WLAN_STA_AUTHORIZED);
 
 	if (supp_rates)
-		sta->supp_rates[band] = supp_rates;
+		sta->sta.supp_rates[band] = supp_rates;
 	else
-		sta->supp_rates[band] = sdata->u.sta.supp_rates_bits[band];
+		sta->sta.supp_rates[band] = sdata->u.sta.supp_rates_bits[band];
 
 	rate_control_rate_init(sta, local);
 

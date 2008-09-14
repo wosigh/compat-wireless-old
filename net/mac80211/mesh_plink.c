@@ -106,7 +106,7 @@ static struct sta_info *mesh_plink_alloc(struct ieee80211_sub_if_data *sdata,
 		return NULL;
 
 	sta->flags = WLAN_STA_AUTHORIZED;
-	sta->supp_rates[local->hw.conf.channel->band] = rates;
+	sta->sta.supp_rates[local->hw.conf.channel->band] = rates;
 
 	return sta;
 }
@@ -244,7 +244,7 @@ void mesh_neighbour_update(u8 *hw_addr, u64 rates, struct net_device *dev,
 	}
 
 	sta->last_rx = jiffies;
-	sta->supp_rates[local->hw.conf.channel->band] = rates;
+	sta->sta.supp_rates[local->hw.conf.channel->band] = rates;
 	if (peer_accepting_plinks && sta->plink_state == PLINK_LISTEN &&
 			sdata->u.sta.accepting_plinks &&
 			sdata->u.sta.mshcfg.auto_open_plinks)
