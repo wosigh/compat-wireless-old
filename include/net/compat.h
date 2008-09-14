@@ -511,6 +511,13 @@ static inline void led_classdev_unregister_suspended(struct led_classdev *lcd)
 	led_classdev_unregister(lcd);
 }
 
+/**
+ * The following things are out of ./include/linux/kernel.h
+ * The new iwlwifi driver is using them.
+ */
+extern int strict_strtoul(const char *, unsigned int, unsigned long *);
+extern int strict_strtol(const char *, unsigned int, long *);
+
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)) */
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26))
