@@ -33,6 +33,7 @@
 
 #include <net/arp.h>
 #include <net/neighbour.h>
+#include <net/pkt_sched.h>
 
 #include <linux/compat_autoconf.h>
 
@@ -173,6 +174,22 @@ static inline int netif_is_multiqueue(const struct net_device *dev)
 	return (!!(NETIF_F_MULTI_QUEUE & dev->features));
 }
 
+/* 2.6.23 fixed a bug in tcf_destroy_chain and the parameter changed */
+static inline void tcf_destroy_chain_compat(struct tcf_proto **fl)
+{
+	struct tcf_proto *tp;
+
+	while ((tp = *fl) != NULL) {
+		*fl = tp->next;
+		tp->ops->destroy(tp);
+		module_put(tp->ops->owner);
+		kfree(tp);
+	}
+}
+
+#else
+
+#define tcf_destroy_chain_compat tcf_destroy_chain
 
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)) */
 
