@@ -1,0 +1,9 @@
+config AR9170
+	tristate "Atheros 11n USB (ar9170)"
+	depends on WLAN_80211 && MAC80211
+	help
+	  This is a mac80211-based driver for the Atheros "otus" 802.11n
+	  (2.4 and 5 GHz) USB devices.
+
+	  Say Y if you have the hardware, or M to build a module called
+	  ar9170.ko.

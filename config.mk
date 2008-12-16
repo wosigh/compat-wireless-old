@@ -220,6 +220,13 @@ CONFIG_RT73USB=m
 NEED_RT2X00_FIRMWARE=y
 endif
 
+# we're in kernel >= 2.6.24, this has been only tested on 2.6.24.
+# If you add/test backport to older kernels please expand reduce this
+# or remove it if its backported down to 2.6.22 or 2.6.21.
+ifeq ($(shell test $(KERNEL_SUBLEVEL) -gt 23 && echo yes),yes)
+CONFIG_AR9170=m
+endif
+
 endif # end of USB driver list
 
 # Common rt2x00 requirements
