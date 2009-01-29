@@ -48,8 +48,22 @@ ifeq ($(CONFIG_NET_SCHED),)
 endif
 
 ifeq ($(QOS_REQS_MISSING),) # if our dependencies match for MAC80211_QOS
+ifneq ($(CONFIG_MAC80211_QOS),) # Your kernel has CONFIG_MAC80211_QOS defined already, too bad
+$(error "ERROR: CONFIG_MAC80211_QOS is somehow enabled in your kernel, how did that happen if it wasn't an option in your kernel? Please report this to the linux-wireless mailing list!")
+endif
 CONFIG_MAC80211_QOS=y
-else # Complain about our missing dependencies
+else
+# Complain about our missing dependencies, at this point we know
+# CONFIG_MAC80211_QOS is not enabled by this kernel so
+# we can move on and compile this package without WME at all.
+# mac80211 WME requires:
+#
+# CONFIG_NETDEVICES_MULTIQUEUE
+# CONFIG_NET_SCHED
+#
+# on kernels 2.6.23..2.6.26. If on older kernels (<= 2.6.22) we
+# provide our own hacked up WME without needing these two kernel
+# configuration options.
 $(warning "WARNING: You are running a kernel >= 2.6.23, you should enable in it $(QOS_REQS_MISSING) for 802.11[ne] support")
 endif
 
