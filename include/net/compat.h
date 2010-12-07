@@ -559,13 +559,6 @@ static inline int list_is_singular(const struct list_head *head)
 	return !list_empty(head) && (head->next == head->prev);
 }
 
-/* This is from include/linux/device.h, which was added as of 2.6.26 */
-static inline const char *dev_name(struct device *dev)
-{
-	/* will be changed into kobject_name(&dev->kobj) in the near future */
-	return dev->bus_id;
-}
-
 /* This is from include/linux/kernel.h, which was added as of 2.6.26 */ 
 
 /**
