@@ -9,3 +9,6 @@ Module.symvers
 module.order
 patches
 .pc
+.o
+.o.cmd
+.tar
