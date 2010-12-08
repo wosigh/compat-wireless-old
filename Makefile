@@ -16,14 +16,8 @@ include $(M)/$(COMPAT_CONFIG)
 
 NOSTDINC_FLAGS := -I$(M)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
 
-obj-y := net/wireless/ net/mac80211/
 ifeq ($(ONLY_CORE),)
-obj-y += net/ieee80211/ \
-	drivers/ssb/ \
-	drivers/misc/ \
-	drivers/net/ \
-	drivers/net/usb/ \
-	drivers/net/wireless/
+obj-y += drivers/net/wireless/libertas/
 endif
 
 else
