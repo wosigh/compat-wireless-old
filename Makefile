@@ -17,7 +17,7 @@ include $(M)/$(COMPAT_CONFIG)
 NOSTDINC_FLAGS := -I$(M)/include/ -include $(M)/include/net/compat.h $(CFLAGS)
 
 ifeq ($(ONLY_CORE),)
-obj-y += drivers/net/wireless/libertas/
+obj-y += kernel/net/wifi/
 endif
 
 else
