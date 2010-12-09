@@ -151,7 +151,7 @@ static struct if_sdio_model if_sdio_models[] = {
 	{
 		/* 8686 */
 		.model = 0x0B,
-		.helper = "sd8686_helper.bin",
+		.helper = "helper_sd.bin",
 		.firmware = "sd8686.bin",
 	},
 };
