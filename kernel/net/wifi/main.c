@@ -1513,7 +1513,7 @@ void lbs_notify_command_response(struct lbs_private *priv, u8 resp_idx)
 }
 EXPORT_SYMBOL_GPL(lbs_notify_command_response);
 
-static int __init lbs_init_module(void)
+static int lbs_init_module(void)
 {
 	lbs_deb_enter(LBS_DEB_MAIN);
 	memset(&confirm_sleep, 0, sizeof(confirm_sleep));
@@ -1525,7 +1525,7 @@ static int __init lbs_init_module(void)
 	return 0;
 }
 
-static void __exit lbs_exit_module(void)
+static void lbs_exit_module(void)
 {
 	lbs_deb_enter(LBS_DEB_MAIN);
 	lbs_debugfs_remove();
@@ -1643,10 +1643,3 @@ const char *escape_essid(const char *essid, u8 essid_len)
 	return escaped;
 }
 #endif
-
-module_init(lbs_init_module);
-module_exit(lbs_exit_module);
-
-MODULE_DESCRIPTION("Libertas WLAN Driver Library");
-MODULE_AUTHOR("Marvell International Ltd.");
-MODULE_LICENSE("GPL");

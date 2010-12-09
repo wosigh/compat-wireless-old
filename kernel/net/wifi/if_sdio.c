@@ -45,6 +45,9 @@
 #include "dev.h"
 #include "if_sdio.h"
 
+extern int lbs_init_module(void);
+extern int lbs_exit_module(void);
+
 static char *lbs_helper_name = NULL;
 module_param_named(helper_name, lbs_helper_name, charp, 0644);
 
@@ -1081,6 +1084,8 @@ static int __init if_sdio_init_module(void)
 
 	sirloin_wifi_sdio_init();
 	
+	lbs_init_module();
+	
 	lbs_deb_enter(LBS_DEB_SDIO);
 
 	printk(KERN_INFO "libertas_sdio: Libertas SDIO driver\n");
@@ -1100,6 +1105,8 @@ static void __exit if_sdio_exit_module(void)
 	sdio_unregister_driver(&if_sdio_driver);
 
 	lbs_deb_leave(LBS_DEB_SDIO);
+	
+	lbs_exit_module();
 	
 	sirloin_wifi_sdio_exit();
 }
