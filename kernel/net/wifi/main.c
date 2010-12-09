@@ -1513,7 +1513,7 @@ void lbs_notify_command_response(struct lbs_private *priv, u8 resp_idx)
 }
 EXPORT_SYMBOL_GPL(lbs_notify_command_response);
 
-static int lbs_init_module(void)
+int lbs_init_module(void)
 {
 	lbs_deb_enter(LBS_DEB_MAIN);
 	memset(&confirm_sleep, 0, sizeof(confirm_sleep));
@@ -1524,13 +1524,15 @@ static int lbs_init_module(void)
 	lbs_deb_leave(LBS_DEB_MAIN);
 	return 0;
 }
+EXPORT_SYMBOL(lbs_init_module);
 
-static void lbs_exit_module(void)
+void lbs_exit_module(void)
 {
 	lbs_deb_enter(LBS_DEB_MAIN);
 	lbs_debugfs_remove();
 	lbs_deb_leave(LBS_DEB_MAIN);
 }
+EXPORT_SYMBOL(lbs_exit_module);
 
 /*
  * rtap interface support fuctions
