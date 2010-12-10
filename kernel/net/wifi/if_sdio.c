@@ -48,6 +48,8 @@
 extern int lbs_init_module(void);
 extern int lbs_exit_module(void);
 
+extern unsigned int sdio_align_size(struct sdio_func *func, unsigned int sz);
+
 static char *lbs_helper_name = NULL;
 module_param_named(helper_name, lbs_helper_name, charp, 0644);
 
