@@ -2188,14 +2188,64 @@ static const iw_handler mesh_wlan_handler[] = {
 	(iw_handler) lbs_get_encodeext,/* SIOCGIWENCODEEXT */
 	(iw_handler) NULL,		/* SIOCSIWPMKSA */
 };
+
+static int priv_dummy(struct net_device *dev,
+			 struct iw_request_info *info,
+			 struct iw_param *dwrq,
+			 char *extra)
+{
+  printk("EG: Private IOCTL dummy\n");
+
+  return 0;
+}
+
+/* Private ioctls 0x8BE0 - 0x8BFF, many used by Palm's PmWiFiService */
+static const iw_handler priv_handler[] = {
+  (iw_handler) priv_dummy, /* 0x8BE0 */
+  (iw_handler) priv_dummy, /* 0x8BE1 */
+  (iw_handler) priv_dummy, /* 0x8BE2 */
+  (iw_handler) priv_dummy, /* 0x8BE3 */
+  (iw_handler) priv_dummy, /* 0x8BE4 */
+  (iw_handler) priv_dummy, /* 0x8BE5 */
+  (iw_handler) priv_dummy, /* 0x8BE6 */
+  (iw_handler) priv_dummy, /* 0x8BE7 */
+  (iw_handler) priv_dummy, /* 0x8BE8 */
+  (iw_handler) priv_dummy, /* 0x8BE9 */
+  (iw_handler) priv_dummy, /* 0x8BEA */
+  (iw_handler) priv_dummy, /* 0x8BEB */
+  (iw_handler) priv_dummy, /* 0x8BEC */
+  (iw_handler) priv_dummy, /* 0x8BED */
+  (iw_handler) priv_dummy, /* 0x8BEE - WLAN_ENGINE_INSTRUCTION */
+  (iw_handler) priv_dummy, /* 0x8BEF */
+  (iw_handler) priv_dummy, /* 0x8BF0 */
+  (iw_handler) priv_dummy, /* 0x8BF1 */
+  (iw_handler) priv_dummy, /* 0x8BF2 */
+  (iw_handler) priv_dummy, /* 0x8BF3 */
+  (iw_handler) priv_dummy, /* 0x8BF4 */
+  (iw_handler) priv_dummy, /* 0x8BF5 */
+  (iw_handler) priv_dummy, /* 0x8BF6 */
+  (iw_handler) priv_dummy, /* 0x8BF7 - WLAN_AUTODEEPSLEEP */
+  (iw_handler) priv_dummy, /* 0x8BF8 */
+  (iw_handler) priv_dummy, /* 0x8BF9 */
+  (iw_handler) priv_dummy, /* 0x8BFA */
+  (iw_handler) priv_dummy, /* 0x8BFB */
+  (iw_handler) priv_dummy, /* 0x8BFC */
+  (iw_handler) priv_dummy, /* 0x8BFD */
+  (iw_handler) priv_dummy, /* 0x8BFE */
+  (iw_handler) priv_dummy, /* 0x8BFF */
+};
 struct iw_handler_def lbs_handler_def = {
 	.num_standard	= ARRAY_SIZE(lbs_handler),
 	.standard	= (iw_handler *) lbs_handler,
+  .num_private = ARRAY_SIZE(priv_handler),
+  .private = (iw_handler *) priv_handler,
 	.get_wireless_stats = lbs_get_wireless_stats,
 };
 
 struct iw_handler_def mesh_handler_def = {
 	.num_standard	= ARRAY_SIZE(mesh_wlan_handler),
 	.standard	= (iw_handler *) mesh_wlan_handler,
+  .num_private = ARRAY_SIZE(priv_handler),
+  .private = (iw_handler *) priv_handler,
 	.get_wireless_stats = lbs_get_wireless_stats,
 };
