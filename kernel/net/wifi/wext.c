@@ -2194,7 +2194,8 @@ static int priv_dummy(struct net_device *dev,
 			 struct iw_param *dwrq,
 			 char *extra)
 {
-  printk("EG: Private IOCTL dummy\n");
+  printk("EG: Private IOCTL dummy [cmd: 0x%04x, flags: 0x%04x] [value: 0x%04x, fixed: 0x%04x, disabled: 0x%04x, flags: 0x%04x]\n",
+  	info->cmd, info->flags, dwrq->value, dwrq->fixed, dwrq->disabled, dwrq->flags);
 
   return 0;
 }
