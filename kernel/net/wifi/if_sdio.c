@@ -933,7 +933,8 @@ static int if_sdio_probe(struct sdio_func *func,
 	card->helper = if_sdio_models[i].helper;
 	card->firmware = if_sdio_models[i].firmware;
 
-	if (lbs_helper_name) {
+	// PTM: Disable fw params because something in this code is broke!
+	/*if (lbs_helper_name) {
 		lbs_deb_sdio("overriding helper firmware: %s\n",
 			lbs_helper_name);
 		card->helper = lbs_helper_name;
@@ -942,7 +943,7 @@ static int if_sdio_probe(struct sdio_func *func,
 	if (lbs_fw_name) {
 		lbs_deb_sdio("overriding firmware: %s\n", lbs_fw_name);
 		card->firmware = lbs_fw_name;
-	}
+	}*/
 
 	sdio_claim_host(func);
 
